@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "*.rs": "rust",
+        "ass3_ex2.h": "c",
+        "stdio2.h": "c",
+        "limits.h": "c",
+        "climits": "c",
+        "stddef.h": "c"
+    }
+}
