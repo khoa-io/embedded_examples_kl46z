@@ -125,11 +125,11 @@ parse_status_t parseData(uint8_t pInput[], parse_data_struct_t *pOutput)
 
         break;
 
-    /*     case 4:
+    case 4:
     case 5:
     case 6:
         status = e_parseStatus_inprogress;
-        break; */
+        break;
 
     case 7:
         addrSize = 4;
