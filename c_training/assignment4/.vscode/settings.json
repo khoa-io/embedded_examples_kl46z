@@ -1,0 +1,13 @@
+{
+    "files.associations": {
+        "*.rs": "rust",
+        "linked_list.h": "c",
+        "stdint.h": "c",
+        "libio.h": "c",
+        "stddef.h": "c",
+        "node.h": "c",
+        "student.h": "c",
+        "string.h": "c",
+        "getopt.h": "c"
+    }
+}
