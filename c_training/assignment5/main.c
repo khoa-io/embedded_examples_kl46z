@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stddef.h>
+#include <string.h>
 
 #include "srec_reader.h"
 
@@ -9,32 +10,34 @@
  * Definitions
  ******************************************************************************/
 
- /*******************************************************************************
-  * Prototypes
-  ******************************************************************************/
+/*******************************************************************************
+ * Prototypes
+ ******************************************************************************/
 
-  /*******************************************************************************
-   * Variables
-   ******************************************************************************/
+/*******************************************************************************
+ * Variables
+ ******************************************************************************/
 
-   /*******************************************************************************
-    * Code
-    ******************************************************************************/
+/*******************************************************************************
+ * Code
+ ******************************************************************************/
 
 int main(int argc, char *argv[])
 {
     /* Indexing variables */
     int32_t i = 0;
+    /* Line number */
     int32_t j = 0;
 
     /* Buffers and temporary variables */
-    int8_t buff[MAX_RECORD_SIZE + 1] = { 0 };
+    int8_t buff[MAX_RECORD_SIZE + 1] = {0};
     int8_t c = 0;
 
     /* Used for reading filehandling.srec */
     FILE *fp;
 
     parse_data_struct_t parsedData;
+    parse_status_t status = e_parseStatus_undefined;
 
     if (argc < 2)
     {
@@ -44,19 +47,31 @@ int main(int argc, char *argv[])
     fp = fopen(argv[1], "r");
 
     /* Read each line and copy to buff */
-    while ((c = fgetc(fp)) != EOF)
+    for (j = 1; (c = fgetc(fp)) != EOF; ++j)
     {
-        for (i = 0; c != '\r' && c != '\n' && i < MAX_RECORD_SIZE; ++i, c = fgetc(fp))
+        /* Set all bytes to 0 */
+        memset(buff, 0, MAX_RECORD_SIZE);
+        memset(&parsedData, 0, sizeof(parse_data_struct_t));
+
+        for (i = 0; c != '\n' && i < MAX_RECORD_SIZE; ++i, c = fgetc(fp))
         {
             buff[i] = c;
         }
 
-        /* Using buff */
-        buff[i] = '\n';
-        printf("%d: %s", ++j, buff);
-        parseData(buff, &parsedData);
+        status = parseData(buff, &parsedData);
 
-        memset(buff, 0, MAX_RECORD_SIZE);
+        if (status == e_parseStatus_error)
+        {
+            continue;
+        }
+
+        printf("Line number: %05d. Converted address: 0x%08x. Converted data: [",
+               j, parsedData.address);
+        for (i = 0; i < parsedData.dataLength; ++i)
+        {
+            printf(" 0x%02x", parsedData.data[i]);
+        }
+        printf("]\n");
     }
 
     fclose(fp);

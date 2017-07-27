@@ -2,8 +2,8 @@
 #define _SREC_READER_H_
 
 /*******************************************************************************
-* Definitions
-******************************************************************************/
+ * Definitions
+ ******************************************************************************/
 /* Each line (in file) is a record. Each record has max size which is defined
 below */
 #define MAX_RECORD_SIZE 516
@@ -30,28 +30,18 @@ typedef struct
     uint8_t dataLength;
 } parse_data_struct_t;
 
-typedef enum
-{
-    e_recordType_header_16 = 0U,
-    e_recordType_data_16 = 1U,
-    e_recordType_data_24 = 2U,
-    e_recordType_data_32 = 3U,
-    e_recordType_reversed = 4U,
-    e_recordType_count_16 = 5U,
-    e_recordType_count_24 = 6U,
-    e_recordType_term_32 = 7U,
-    e_recordType_term_24 = 8U,
-    e_recordType_term_16 = 9U,
-} recordType_t;
-
 /*******************************************************************************
-* API
-******************************************************************************/
+ * API
+ ******************************************************************************/
+
 /*!
  * @brief Parse SREC data and produce parse_data_struct_t.
+ * See more at https://en.wikipedia.org/wiki/SREC_(file_format) and
+ * https://upload.wikimedia.org/wikipedia/commons/f/f1/Motorola_SREC_Chart.png
  *
  * @param pInput [in] srec line.
- * @param pOutput [out] Output of parsed data.
+ * @param pOutput [out] Output of parsed data. Note that when you pass pOutput,
+ * all byte of pOutput must be set to 0.
  *
  * @return Returns one of these code:
  * - e_parseStatus_undefined – when initializing
