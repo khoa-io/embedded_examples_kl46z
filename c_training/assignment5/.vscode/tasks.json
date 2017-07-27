@@ -6,6 +6,7 @@
         "taskName": "Build debug",
         "command": "gcc",
         "args": [
+            "-g",
             "${cwd}/*.c",
             "-o",
             "${workspaceRootFolderName}"
