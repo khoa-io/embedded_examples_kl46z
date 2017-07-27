@@ -1,0 +1,19 @@
+{
+    "version": "0.2.0",
+    "configurations": [{
+        "name": "(Windows) Launch",
+        "type": "cppvsdbg",
+        "request": "launch",
+        "program": "${workspaceRootFolderName}.exe",
+        "windows": {
+            "args": [
+                "D:\\Assigments\\C_Training\\input\\filehandling.srec"
+            ]
+        },
+        "args": [],
+        "stopAtEntry": false,
+        "cwd": "${workspaceRoot}",
+        "environment": [],
+        "externalConsole": true
+    }]
+}
