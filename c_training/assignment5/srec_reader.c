@@ -56,43 +56,40 @@ parse_status_t parseData(uint8_t pInput[], parse_data_struct_t *pOutput)
     int32_t i = 0;
     int32_t j = 0;
 
-    /* Temporary variable */
-    uint32_t tmp = 0;
+    /* Temporary pointer point to a byte array */
+    uint8_t *pByte = NULL;
 
-    /* Temporary pointer */
-    uint8_t *pTmp = NULL;
+    /* Size in bytes of address field of srec record converted from hex char */
+    uint32_t addrSize = 0;
 
     /* Count of srec record converted from hex char */
     /* count = address + data + checksum. All in this expression is size */
     uint8_t count = (hex2val(pInput[2]) << 4) + hex2val(pInput[3]);
 
-    /* Size in bytes of address field of srec record converted from hex char */
-    uint32_t addrSize = 0;
-
     /* Type of srec record converted from hex char */
     uint8_t srecType = hex2val(pInput[1]);
 
+    /* Checksum value which will converted from hex char */
     uint8_t checksum = 0;
 
-    /* Calculated checksum from real value */
-    uint32_t checkValue = 0;
+    /* Calculated checksum from real values */
+    uint32_t checkvalue = count;
+
+    /* Check invalid srec record */
+    if (pInput[0] != 'S')
+    {
+        status = e_parseStatus_error;
+        return status;
+    }
 
     switch (srecType)
     {
     case 0:
         status = e_parseStatus_inprogress;
-
         pOutput->dataLength = count - 3;
 
-        /* i: indexing on pInput */
-        /* j: indexing on pOutput->data */
-        for (i = 8, j = 0; j < pOutput->dataLength; i += 2, ++j)
-        {
-            pOutput->data[j] = (hex2val(pInput[i]) << 4) + hex2val(pInput[i + 1]);
-        }
-
-        checksum = (hex2val(pInput[i]) << 4) + hex2val(pInput[i + 1]);
-
+        /* Jump to data section */
+        i = 8;
         break;
 
     case 1:
@@ -104,75 +101,80 @@ parse_status_t parseData(uint8_t pInput[], parse_data_struct_t *pOutput)
 
         /* Access an uint32_t variable like an uint8_t array using an uint8_t
         pointer. Note that we're on Intel x86_64 (little endian) */
-        pTmp = (uint8_t *)&pOutput->address;
+        pByte = (uint8_t *)&pOutput->address;
 
-        /* Decode and copy address from file to pOutput->address follow little
-        endian order */
-        for (i = 4, j = addrSize - 1; j >= 0; --j)
+        /* Decode and copy address from file to pOutput->address follow */
+        /* little endian order */
+        for (i = 4, j = addrSize - 1; j >= 0; i += 2, --j)
         {
-            pTmp[j] = (hex2val(pInput[i++]) << 4) + hex2val(pInput[i++]);
+            pByte[j] = (hex2val(pInput[i]) << 4) + hex2val(pInput[i + 1]);
         }
 
         pOutput->dataLength = count - addrSize - 1;
 
-        /* Decode and copy data from file to pOutput->data */
-        for (j = 0; j < pOutput->dataLength; ++j)
-        {
-            pOutput->data[j] = (hex2val(pInput[i++]) << 4) + hex2val(pInput[i++]);
-        }
-
-        checksum = (hex2val(pInput[i]) << 4) + hex2val(pInput[i + 1]);
-
+        /* Already jump to data section */
         break;
 
     case 4:
+        status = e_parseStatus_undefined;
+        pOutput->dataLength = 0;
+        break;
+
     case 5:
     case 6:
         status = e_parseStatus_inprogress;
+        pOutput->dataLength = 0;
         break;
 
     case 7:
-        addrSize = 4;
     case 8:
-        addrSize = 3;
     case 9:
-        addrSize = 2;
-
+        addrSize = count - 1;
         status = e_parseStatus_done;
 
-        /* Access an uint32_t variable like an uint8_t array using an uint8_t
-        pointer. Note that we're on Intel x86_64 (little endian) */
-        pTmp = (uint8_t *)&pOutput->address;
+        /* Access an uint32_t variable like an uint8_t array using an uint8_t */
+        /* pointer. Note that we're on Intel x86_64 (little endian) */
+        pByte = (uint8_t *)&pOutput->address;
 
         /* Decode and copy address from file to pOutput->address follow little
         endian order */
         for (i = 4, j = addrSize - 1; j >= 0; i += 2, --j)
         {
-            pTmp[j] = (hex2val(pInput[i]) << 4) + hex2val(pInput[i + 1]);
+            pByte[j] = (hex2val(pInput[i]) << 4) + hex2val(pInput[i + 1]);
         }
 
         pOutput->dataLength = 0;
 
-        checksum = (hex2val(pInput[i]) << 4) + hex2val(pInput[i + 1]);
-
         break;
+
+    default:
+        status = e_parseStatus_error;
     }
 
-    /* Do check valid checksum */
+    if (status == e_parseStatus_error)
+    {
+        return status;
+    }
 
-    checkValue = count;
+    /* Decode and copy data from file to pOutput->data */
+    for (j = 0; j < pOutput->dataLength; ++j, i += 2)
+    {
+        pOutput->data[j] = (hex2val(pInput[i]) << 4) + hex2val(pInput[i + 1]);
+    }
 
+    checksum = (hex2val(pInput[i]) << 4) + hex2val(pInput[i + 1]);
+
+    /* Check valid checksum */
     /* Access pOutput like an array of uint8_t. Bit order is not important */
-    pTmp = (uint8_t *)pOutput;
-    /* Ignore last byte because it is dataLength */
+    pByte = (uint8_t *)pOutput;
+    /* Calculate checksum from parse_data_struct_t::address and */
+    /* parse_data_struct_t::data */
     for (i = 0; i < pOutput->dataLength + 4; ++i)
     {
-        checkValue += pTmp[i];
+        checkvalue += pByte[i];
     }
-
-    checkValue = ~checkValue & 0xFF;
-
-    if (checkValue != checksum)
+    checkvalue = ~checkvalue & 0xFF;
+    if (checkvalue != checksum)
     {
         status = e_parseStatus_error;
     }
