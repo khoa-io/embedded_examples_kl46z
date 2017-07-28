@@ -89,7 +89,8 @@ static void displayData(parse_status_t status, parse_data_struct_t *pParsedData,
 
     printf("Line number: %05d. Converted address: 0x%08x. Converted data: [",
            line, pParsedData->address);
-    for (i = 0; i < pParsedData->dataLength; ++i)
+    printf("0x%02x", pParsedData->data[0]);
+    for (i = 1; i < pParsedData->dataLength; ++i)
     {
         printf(" 0x%02x", pParsedData->data[i]);
     }
