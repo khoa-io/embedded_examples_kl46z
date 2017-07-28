@@ -1,0 +1,36 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [{
+        "taskName": "Build debug",
+        "command": "gcc",
+        "args": [
+            "-g",
+            "${cwd}/*.c",
+            "-o",
+            "${workspaceRootFolderName}"
+        ],
+        "windows": {
+            "command": "${workspaceRoot}\\build.bat",
+            "options": {
+                "cwd": "${workspaceRoot}\\Debug"
+            }
+        },
+        "type": "shell",
+        "group": {
+            "kind": "build",
+            "isDefault": true
+        }
+    }, {
+        "taskName": "Clean",
+        "command": "rm",
+        "args": [
+            "${workspaceRootFolderName}"
+        ],
+        "windows": {
+            "command": "clean.bat"
+        },
+        "type": "shell"
+    }]
+}
