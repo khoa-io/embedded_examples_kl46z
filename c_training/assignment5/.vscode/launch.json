@@ -5,7 +5,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceRoot}/${workspaceRootFolderName}",
-            "args": ["filehandling.srec"],
+            "args": ["input/filehandling.srec"],
             "stopAtEntry": false,
             "cwd": "${workspaceRoot}",
             "environment": [],
