@@ -1,9 +1,20 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
+#include <string.h>
+#include <stdio.h>
 
+#include "node.h"
 #include "linked_list.h"
 #include "employee.h"
+
+/*******************************************************************************
+ * Prototypes
+ ******************************************************************************/
+
+/*******************************************************************************
+ * Code
+ ******************************************************************************/
 
 int32_t employee_CompareGpa(employee_t *pEmployee0, employee_t *pEmployee1)
 {
@@ -16,10 +27,14 @@ int32_t employee_CompareGpa(employee_t *pEmployee0, employee_t *pEmployee1)
     val = pEmployee0->class - pEmployee1->class;
     if (val != 0)
     {
-        return val;
+        /* If value(gpa0) == value(gpa1) then we say: */
+        /* The employee who is belong to class A has larger GPA */
+        return -val;
     }
 
-    val = pEmployee0->stamp - pEmployee1->stamp;
+    /* If value(gpa0) == value(gpa1), class0 == class 1, then we say: */
+    /* The employee who was inserted first has larger GPA */
+    val = pEmployee0->isInserted - pEmployee1->isInserted;
 
     return val;
 }
@@ -36,8 +51,8 @@ int8_t employee_IsEqual(employee_t *pEmployee0, employee_t *pEmployee1)
 
     /* Cast employee to an array of int8_t, then compare two array. */
 
-    int8_t *p0 = (int8_t *) pEmployee0;
-    int8_t *p1 = (int8_t *) pEmployee1;
+    int8_t *p0 = (int8_t *)pEmployee0;
+    int8_t *p1 = (int8_t *)pEmployee1;
 
     for (i = 0; i < sizeof(employee_t); ++i)
     {
@@ -50,54 +65,132 @@ int8_t employee_IsEqual(employee_t *pEmployee0, employee_t *pEmployee1)
     return true;
 }
 
-void employee_data(employee_t *pEmployee)
+void employee_DefaultValue(employee_t *pEmployee)
 {
     pEmployee->id = 0xFFFFFFFF;
     pEmployee->class = 0xFF;
     pEmployee->gpa = 0xFF;
-    pEmployee->stamp = 0;
+    pEmployee->isInserted = 0;
 }
 
-uint8_t employee_InsertToList(linked_list_t *pList, employee_t *pEmployee)
+int32_t employee_RemoveFromList(linked_list_t *pList, employee_t *pEmployee)
 {
-    bool isDuplicated = false;
+    return list_Remove(pList, pEmployee);
+}
+
+int32_t employee_InsertToList(linked_list_t *pList, employee_t *pEmployee)
+{
+    int32_t errCode = LIST_ERR_NONE;
+
+    /* If new employee has GPA larger than current employee in loop then */
+    /* isGpaLarger == true */
+    bool isGpaLarger = false;
 
     /* Indexing variable */
     int32_t i = 0;
 
-    employee_t data;
+    /* Point to inserted node.*/
+    node_t *pNode = NULL;
 
-    /* Point to current working node. For iterating. */
+    /* Point to current working node. For iterating purpose. */
     node_t *pCurr = NULL;
 
     /* Point to the node which is located before the node we want to insert. */
     node_t *pPrev = NULL;
 
-    employee_data(&data);
-
-    /* Find an entry of pList->dataArray which is available */
-    for (i = 0; i < pList->arraySize; ++i)
+    if (pList->currentSize >= pList->arraySize)
     {
-        if (employee_IsEqual(*pList->dataArray[i], &data))
-        {
+        errCode = LIST_ERR_FULL;
+        return errCode;
+    }
 
-        }
+    errCode = list_AllocateNode(pList, &pNode);
+    if (errCode != LIST_ERR_NONE)
+    {
+        return errCode;
+    }
+
+    /* Copy data to list's storage. */
+    pNode->pData = pList->dataArray + pNode->id * pList->dataSize;
+    memcpy(pNode->pData, pEmployee, pList->dataSize);
+    ((employee_t *)pNode->pData)->isInserted = false;
+
+    /* Increase size of the list. If it is duplicated then we decrease size */
+    /* latter. */
+    pList->currentSize++;
+
+    if (pList->pHead == NULL)
+    {
+        pList->pHead = pNode;
+        return errCode;
     }
 
     for (pCurr = pList->pHead; pCurr != NULL; pCurr = pCurr->pNext)
     {
-        if (employee_IsDuplicated(pEmployee, (employee_t *)pCurr->pData))
+        if (employee_IsDuplicated(pNode->pData, pCurr->pData))
         {
-            return ERR_DUPLICATED;
+            /* There is an employee has the same ID in list => abort */
+            errCode = LIST_ERR_DUPLICATED;
+            pList->currentSize--;
+            /* Reset node's state to empty so we can insert data latter */
+            pNode->pData = NULL;
+            break;
         }
 
-        if (employee_CompareGpa(pEmployee, (employee_t *)pCurr->pData) >= 0)
-        {
+        /* If new employee has GPA larger than current employee then we */
+        /* insert new employee before current employee. */
+        isGpaLarger = employee_CompareGpa(pNode->pData, pCurr->pData) >= 0;
 
+        if (isGpaLarger && pPrev == NULL)
+        {
+            /* pCurr point to first employee in list */
+            pNode->pNext = pCurr;
+            pList->pHead = pNode;
+            break;
+        }
+
+        if (isGpaLarger && pPrev != NULL)
+        {
+            /* pCurr doesn't point to first employee in list */
+            pNode->pNext = pCurr;
+            pPrev->pNext = pNode;
+            break;
         }
 
         pPrev = pCurr;
     }
 
-    return ERR_SUCCESS;
+    if (errCode != LIST_ERR_NONE)
+    {
+        return errCode;
+    }
+
+    if (!isGpaLarger)
+    {
+        pPrev->pNext = pNode;
+        pNode->pNext = NULL;
+    }
+
+    /* New item was inserted */
+    ((employee_t *)pNode->pData)->isInserted = true;
+    pEmployee->isInserted = true;
+
+    return errCode;
+}
+
+void employee_DisplayList(linked_list_t *pList)
+{
+    node_t *pCurr = pList->pHead;
+
+    printf("List of %d employees:\n", pList->currentSize);
+
+    for (; pCurr != NULL; pCurr = pCurr->pNext)
+    {
+        employee_Display((employee_t *)pCurr->pData);
+    }
+}
+
+void employee_Display(employee_t *p)
+{
+    printf("Employee %d, class %c, GPA %d\n", p->id, p->class, p->gpa);
 }

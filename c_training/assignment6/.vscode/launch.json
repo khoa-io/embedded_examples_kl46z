@@ -1,19 +1,35 @@
 {
     "version": "0.2.0",
     "configurations": [{
-        "name": "(Windows) Launch",
-        "type": "cppvsdbg",
-        "request": "launch",
-        "program": "${workspaceRootFolderName}.exe",
-        "windows": {
-            "args": [
-                "D:\\Assigments\\C_Training\\input\\filehandling.srec"
-            ]
+            "name": "(gdb) Launch",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceRoot}/${workspaceRootFolderName}",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceRoot}",
+            "environment": [],
+            "externalConsole": true,
+            "MIMode": "gdb",
+            "setupCommands": [{
+                "description": "Enable pretty-printing for gdb",
+                "text": "-enable-pretty-printing",
+                "ignoreFailures": true
+            }],
+            "preLaunchTask": "Build debug"
         },
-        "args": [],
-        "stopAtEntry": false,
-        "cwd": "${workspaceRoot}",
-        "environment": [],
-        "externalConsole": true
-    }]
+        {
+            "name": "(Windows) Launch",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "windows": {
+                "program": "${workspaceRootFolderName}.exe",
+                "args": []
+            },
+            "stopAtEntry": false,
+            "cwd": "${workspaceRoot}",
+            "environment": [],
+            "externalConsole": true
+        }
+    ]
 }

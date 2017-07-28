@@ -1,42 +1,163 @@
+/*!
+ * @file linked_list.c Defines functions work on linked_list_t type which is
+ * used in both Assignment 4 and Assignment 6.
+ */
+
+#include <stdio.h>
 #include <stdint.h>
 #include <stddef.h>
-#include <stdbool.h>
 #include <string.h>
 
+#include "node.h"
 #include "linked_list.h"
-
-/*******************************************************************************
- * Definitions
- ******************************************************************************/
 
 /*******************************************************************************
  * Code
  ******************************************************************************/
-void list_Init(linked_list_t * pList, void *pData)
+
+int32_t list_Init(linked_list_t *pList,
+                  node_t *nodeArray, void *dataArray,
+                  int32_t arraySize, int32_t dataSize)
 {
-    /* Indexing variable */
-    int32_t i = 0;
+    int32_t i;
 
-    /* Fill nodeArray with empty nodes. */
-    memset(pList->nodeArray, 0, pList->arraySize * sizeof(node_t));
+    pList->pHead = NULL;
+    pList->nodeArray = nodeArray;
+    pList->dataArray = dataArray;
+    pList->arraySize = arraySize;
+    pList->currentSize = 0;
+    pList->dataSize = dataSize;
 
-    /* Fill dataArray with default value. */
-    for (i = 0; i < pList->arraySize; ++i)
+    memset(nodeArray, 0, sizeof(node_t) * arraySize);
+    memset(dataArray, 0, dataSize * arraySize);
+
+    for (i = 0; i < arraySize; ++i)
     {
-        memcpy((int8_t *)pList->dataArray + i * pList->dataSize, pList->defaultValue, pList->dataSize);
+        pList->nodeArray[i].id = i;
     }
 
-    /* Init first element with the given data */
-    pList->nodeArray[0].pData = pData;
-
-    pList->pHead = &pList->nodeArray[0];
+    return LIST_ERR_NONE;
 }
 
-uint8_t list_Insert(linked_list_t *pList, void *pData)
+int32_t list_AllocateNode(linked_list_t *pList, node_t **pNode)
 {
-    /* Not implement yet */
-    /* Indexing variable */
+    int32_t i = 0;
+    int32_t errCode = LIST_ERR_FULL;
+
+    for (i = 0; i < pList->arraySize; ++i)
+    {
+        if (pList->nodeArray[i].pData == NULL)
+        {
+            errCode = LIST_ERR_NONE;
+            *pNode = &pList->nodeArray[i];
+            break;
+        }
+    }
+
+    /* Reset to default value */
+    if (errCode == LIST_ERR_NONE)
+    {
+        (*pNode)->pNext = NULL;
+    }
+
+    return errCode;
+}
+
+int32_t list_FreeNode(node_t **pNode)
+{
+    (*pNode)->pNext = NULL;
+    (*pNode)->pData = NULL;
+}
+
+int32_t list_Insert(linked_list_t *pList, void *pData)
+{
     int32_t i = 0;
 
-    return ERR_SUCCESS;
+    int32_t errCode = LIST_ERR_NONE;
+
+    /* Point to inserted node. Can be NULL. */
+    node_t *pNode;
+    /* Temporary pointer. */
+    node_t *pTmp;
+
+    /* Check if list is full. */
+    if (pList->currentSize >= pList->arraySize)
+    {
+        return LIST_ERR_FULL;
+    }
+
+    errCode = list_AllocateNode(pList, &pNode);
+
+    if (errCode != LIST_ERR_NONE)
+    {
+        return errCode;
+    }
+
+    /* Copy data to list's storage. */
+    pNode->pData = pList->dataArray + pNode->id * pList->dataSize;
+    memcpy(pNode->pData, pData, pList->dataSize);
+
+    /* Increase size of the list */
+    pList->currentSize++;
+
+    if (pList->pHead == NULL)
+    {
+        pList->pHead = pNode;
+    }
+    else
+    {
+        pTmp = pList->pHead;
+        pNode->pNext = pTmp;
+        pList->pHead = pNode;
+    }
+
+    return errCode;
+}
+
+int32_t list_Remove(linked_list_t *pList, void *pData)
+{
+    int32_t errCode = LIST_ERR_NOT_FOUND;
+
+    /* Point to current working node. */
+    node_t *pCurr = NULL;
+    /* Point to previous working node. */
+    node_t *pPrev = NULL;
+
+    if (pList->pHead == NULL)
+    {
+        errCode = LIST_ERR_EMPTY;
+        return errCode;
+    }
+
+    /* Search for the node which has given data and remove. */
+    for (pCurr = pList->pHead;
+         pCurr != NULL;
+         pPrev = pCurr, pCurr = pCurr->pNext)
+    {
+        if (memcmp(pData, pCurr->pData, pList->dataSize) != 0)
+        {
+            /* Not found yet!*/
+            continue;
+        }
+
+        // Found!
+        if (pPrev == NULL)
+        {
+            /* Found pCurr is pHead. Remove node: */
+            pList->pHead = pCurr->pNext;
+        }
+        else
+        {
+            /* Found pCurr is not pHead. Remove current */
+            pPrev->pNext = pCurr->pNext;
+        }
+
+        /* Decrease list's size */
+        pList->currentSize--;
+        list_FreeNode(&pCurr);
+
+        errCode = LIST_ERR_NONE;
+    }
+
+    return errCode;
 }

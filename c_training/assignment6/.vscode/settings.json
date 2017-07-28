@@ -6,6 +6,9 @@
         "c++config.h": "c",
         "stddef.h": "c",
         "libio.h": "c",
-        "stdint.h": "c"
+        "stdint.h": "c",
+        "node.h": "c",
+        "employee.h": "c",
+        "stdio2.h": "c"
     }
 }

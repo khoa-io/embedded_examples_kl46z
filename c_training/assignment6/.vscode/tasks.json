@@ -6,6 +6,7 @@
         "taskName": "Build debug",
         "command": "gcc",
         "args": [
+            "-g",
             "${cwd}/*.c",
             "-o",
             "${workspaceRootFolderName}"
@@ -25,6 +26,7 @@
         "taskName": "Clean",
         "command": "rm",
         "args": [
+            "-f",
             "${workspaceRootFolderName}"
         ],
         "windows": {
