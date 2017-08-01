@@ -41,9 +41,13 @@ int32_t list_Init(linked_list_t *pList,
 
 int32_t list_AllocateNode(linked_list_t *pList, node_t **pNode)
 {
+    /* Indexing variable. */
     int32_t i = 0;
+
+    /* Error code which this function returns. */
     int32_t errCode = LIST_ERR_FULL;
 
+    /* Iterating and searching for an empty node. */
     for (i = 0; i < pList->arraySize; ++i)
     {
         if (pList->nodeArray[i].pData == NULL)
@@ -65,25 +69,31 @@ int32_t list_AllocateNode(linked_list_t *pList, node_t **pNode)
 
 int32_t list_FreeNode(node_t **pNode)
 {
+    /* Empty node has no next item. */
     (*pNode)->pNext = NULL;
+    /* Empty node has no data. */
     (*pNode)->pData = NULL;
 }
 
 int32_t list_Insert(linked_list_t *pList, void *pData)
 {
+    /* Indexing variable. */
     int32_t i = 0;
 
+    /* Error code which this function returns. */
     int32_t errCode = LIST_ERR_NONE;
 
-    /* Point to inserted node. Can be NULL. */
-    node_t *pNode;
-    /* Temporary pointer. */
-    node_t *pTmp;
+    /* Pointer points to the node which will be inserted. */
+    node_t *pNode = NULL;
 
-    /* Check if list is full. */
+    /* Temporary pointer. */
+    node_t *pTmp = NULL;
+
+    /* Check if this list is full. */
     if (pList->currentSize >= pList->arraySize)
     {
-        return LIST_ERR_FULL;
+        errCode = LIST_ERR_FULL;
+        return errCode;
     }
 
     errCode = list_AllocateNode(pList, &pNode);
@@ -100,12 +110,15 @@ int32_t list_Insert(linked_list_t *pList, void *pData)
     /* Increase size of the list */
     pList->currentSize++;
 
+    /* Check if list is empty. */
     if (pList->pHead == NULL)
     {
+        /* List is empty. */
         pList->pHead = pNode;
     }
     else
     {
+        /* List is not empty. Insert to front. */
         pTmp = pList->pHead;
         pNode->pNext = pTmp;
         pList->pHead = pNode;
@@ -116,44 +129,50 @@ int32_t list_Insert(linked_list_t *pList, void *pData)
 
 int32_t list_Remove(linked_list_t *pList, void *pData)
 {
+    /* Error code which will be returned. */
     int32_t errCode = LIST_ERR_NOT_FOUND;
 
-    /* Point to current working node. */
+    /* Pointer points to current working node. */
     node_t *pCurr = NULL;
-    /* Point to previous working node. */
+
+    /* Pointer points to previous node of working node. */
     node_t *pPrev = NULL;
 
     if (pList->pHead == NULL)
     {
+        /* This list is empty! */
         errCode = LIST_ERR_EMPTY;
         return errCode;
     }
 
-    /* Search for the node which has given data and remove. */
-    for (pCurr = pList->pHead;
-         pCurr != NULL;
-         pPrev = pCurr, pCurr = pCurr->pNext)
+    /* Searching for the node which has given data and remove it.
+    If there are more than one node were found, remove all those nodes. */
+    for (pCurr = pList->pHead; pCurr; pPrev = pCurr, pCurr = pCurr->pNext)
     {
+        /* Compare data and node's data. If they are equal then we found it. */
         if (memcmp(pData, pCurr->pData, pList->dataSize) != 0)
         {
             /* Not found yet!*/
             continue;
         }
 
-        // Found!
+        /* We found an item here and pCurr points to it. Next, check if pCurr
+        is pHead or not. */
         if (pPrev == NULL)
         {
-            /* Found pCurr is pHead. Remove node: */
+            /* pCurr is pHead. */
             pList->pHead = pCurr->pNext;
         }
         else
         {
-            /* Found pCurr is not pHead. Remove current */
+            /* pCurr is not pHead. */
             pPrev->pNext = pCurr->pNext;
         }
 
-        /* Decrease list's size */
+        /* Decrease list's size. */
         pList->currentSize--;
+
+        /* Mark removed as empty node. */
         list_FreeNode(&pCurr);
 
         errCode = LIST_ERR_NONE;

@@ -10,14 +10,16 @@
  */
 typedef struct node_t
 {
-    /* ID of this node. Usages of ID are various. */
-    /* Every node has ID, even empty node. */
+    /* ID of this node. Usages of ID are various (Read linked_list_t
+    documentation for more information).
+    Every node has ID, even empty node. */
     int32_t id;
 
-    /* Point to data. Empty node has pData == NULL. */
+    /* Pointer points to data. Empty node has no data (pData == NULL). */
     void *pData;
 
-    /* Point to next node. Empty node has pNext == NULL. */
+    /* Pointer points to next node. Empty node has no next node (pNext == NULL),
+    but the opposite isn't true. */
     struct node_t *pNext;
 } node_t;
 
