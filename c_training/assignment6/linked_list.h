@@ -66,7 +66,8 @@ typedef struct linked_list_t
  ******************************************************************************/
 
 /*!
- * @brief Initialize pList from info you provided.
+ * @brief Initialize list from info you provided. After initialization, pList
+ * points to an empty list.
  *
  * @param pList [in,out] Non-null pointer points to a linked_list_t struct.
  * @param nodeArray [in] An array stores nodes of the list.
