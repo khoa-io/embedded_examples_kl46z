@@ -19,8 +19,13 @@ int32_t list_Init(linked_list_t *pList,
                   node_t *nodeArray, void *dataArray,
                   int32_t arraySize, int32_t dataSize)
 {
+    /* Indexing variable */
     int32_t i;
 
+    /* Error code which this function returns. */
+    int32_t errCode = LIST_ERR_NONE;
+
+    /* Empty list's values: */
     pList->pHead = NULL;
     pList->nodeArray = nodeArray;
     pList->dataArray = dataArray;
@@ -28,15 +33,15 @@ int32_t list_Init(linked_list_t *pList,
     pList->currentSize = 0;
     pList->dataSize = dataSize;
 
-    memset(nodeArray, 0, sizeof(node_t) * arraySize);
-    /* memset(dataArray, 0, dataSize * arraySize); */
-
+    /* Mark each node of nodeArray as empty node. */
     for (i = 0; i < arraySize; ++i)
     {
         pList->nodeArray[i].id = i;
+        pList->nodeArray[i].pData = NULL;
+        pList->nodeArray[i].pNext = NULL;
     }
 
-    return LIST_ERR_NONE;
+    return errCode;
 }
 
 int32_t list_AllocateNode(linked_list_t *pList, node_t **pNode)
