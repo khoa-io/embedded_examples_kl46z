@@ -83,6 +83,9 @@ int main(int argc, char *argv[])
     printf("\n");
 
     /* Test remove existing item. No error should happen */
+    employee.id = 1;
+    employee.class = CLASS_A;
+    employee.gpa = 2;
     error = employee_RemoveFromList(&list, &employee);
     if (error)
     {
@@ -131,18 +134,21 @@ int main(int argc, char *argv[])
     employee_DisplayList(&list);
     printf("\n");
 
-    /* Test insert number of items more than MAX_SIZE */
-    /* When inserting e-20, the error should be LIST_ERR_FULL (0x01) */
+    /* Test insert number of items more than MAX_SIZE.
+    When inserting some item, the error may be LIST_ERR_DUPLICATED (0x04).
+    When inserting e-20, the error should be LIST_ERR_FULL (0x01) */
     for (i = 0; i < MAX_SIZE + 1; ++i)
     {
         employee.id = i;
 
         if ((i & 1) == 0)
         {
+            /* If i is even, class is 'A' */
             employee.class = 'A';
         }
         else
         {
+            /* If i is odd, class is 'B */
             employee.class = 'B';
         }
 

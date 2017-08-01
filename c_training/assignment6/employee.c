@@ -65,14 +65,6 @@ int8_t employee_IsEqual(employee_t *pEmployee0, employee_t *pEmployee1)
     return true;
 }
 
-void employee_DefaultValue(employee_t *pEmployee)
-{
-    pEmployee->id = 0xFFFFFFFF;
-    pEmployee->class = 0xFF;
-    pEmployee->gpa = 0xFF;
-    pEmployee->isInserted = 0;
-}
-
 int32_t employee_RemoveFromList(linked_list_t *pList, employee_t *pEmployee)
 {
     return list_Remove(pList, pEmployee);
@@ -80,30 +72,33 @@ int32_t employee_RemoveFromList(linked_list_t *pList, employee_t *pEmployee)
 
 int32_t employee_InsertToList(linked_list_t *pList, employee_t *pEmployee)
 {
+    /* Error code which this function returns. */
     int32_t errCode = LIST_ERR_NONE;
 
-    /* If new employee has GPA larger than current employee in loop then */
-    /* isGpaLarger == true */
+    /* If new employee has GPA larger than current employee in loop then
+    isGpaLarger == true */
     bool isGpaLarger = false;
 
     /* Indexing variable */
     int32_t i = 0;
 
-    /* Point to inserted node.*/
+    /* points to inserted node.*/
     node_t *pNode = NULL;
 
-    /* Point to current working node. For iterating purpose. */
+    /* points to current working node. For iterating purpose. */
     node_t *pCurr = NULL;
 
-    /* Point to the node which is located before the node we want to insert. */
+    /* points to the node which is located before the node we want to insert. */
     node_t *pPrev = NULL;
 
+    /* Check if list is full. */
     if (pList->currentSize >= pList->arraySize)
     {
         errCode = LIST_ERR_FULL;
         return errCode;
     }
 
+    /* Search for an empty node. */
     errCode = list_AllocateNode(pList, &pNode);
     if (errCode != LIST_ERR_NONE)
     {
@@ -119,21 +114,25 @@ int32_t employee_InsertToList(linked_list_t *pList, employee_t *pEmployee)
     /* latter. */
     pList->currentSize++;
 
+    /* Check if list is empty. */
     if (pList->pHead == NULL)
     {
         pList->pHead = pNode;
         return errCode;
     }
 
-    for (pCurr = pList->pHead; pCurr != NULL; pCurr = pCurr->pNext)
+    /* Searching for suitable position for insertion. */
+    for (pCurr = pList->pHead; pCurr; pPrev = pCurr, pCurr = pCurr->pNext)
     {
         if (employee_IsDuplicated(pNode->pData, pCurr->pData))
         {
             /* There is an employee has the same ID in list => abort */
             errCode = LIST_ERR_DUPLICATED;
             pList->currentSize--;
+
             /* Reset node's state to empty so we can insert data latter */
             pNode->pData = NULL;
+            pNode->pNext = NULL;
             break;
         }
 
@@ -143,7 +142,7 @@ int32_t employee_InsertToList(linked_list_t *pList, employee_t *pEmployee)
 
         if (isGpaLarger && pPrev == NULL)
         {
-            /* pCurr point to first employee in list */
+            /* pCurr points to first employee in list */
             pNode->pNext = pCurr;
             pList->pHead = pNode;
             break;
@@ -151,22 +150,22 @@ int32_t employee_InsertToList(linked_list_t *pList, employee_t *pEmployee)
 
         if (isGpaLarger && pPrev != NULL)
         {
-            /* pCurr doesn't point to first employee in list */
+            /* pCurr doesn't points to first employee in list */
             pNode->pNext = pCurr;
             pPrev->pNext = pNode;
             break;
         }
-
-        pPrev = pCurr;
     }
 
     if (errCode != LIST_ERR_NONE)
     {
+        /* It will be duplicated if we insert new node. */
         return errCode;
     }
 
     if (!isGpaLarger)
     {
+        /* If its GPA is not larger any node then insert to last. */
         pPrev->pNext = pNode;
         pNode->pNext = NULL;
     }
