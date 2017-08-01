@@ -29,7 +29,7 @@ int32_t list_Init(linked_list_t *pList,
     pList->dataSize = dataSize;
 
     memset(nodeArray, 0, sizeof(node_t) * arraySize);
-    memset(dataArray, 0, dataSize * arraySize);
+    /* memset(dataArray, 0, dataSize * arraySize); */
 
     for (i = 0; i < arraySize; ++i)
     {

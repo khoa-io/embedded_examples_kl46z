@@ -35,6 +35,14 @@ int main(int argc, char *argv[])
     /* Purpose: create differences value for testing */
     employee_t employee;
 
+    /* Initialize default value for each item of dataArray */
+    for (i = 0; i < MAX_SIZE; ++i)
+    {
+        dataArray[i].id = 0xFFFFFFFF;
+        dataArray[i].class = 0xFF;
+        dataArray[i].gpa = 0xFF;
+    }
+
     /* Initialize list of employees */
     error = list_Init(&list, nodeArray, dataArray, MAX_SIZE, sizeof(employee_t));
     if (error)
