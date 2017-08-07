@@ -1,0 +1,15 @@
+{
+    "files.associations": {
+        "*.rs": "rust",
+        "srec_reader.h": "c",
+        "linked_list.h": "c",
+        "c++config.h": "c",
+        "stddef.h": "c",
+        "libio.h": "c",
+        "stdint.h": "c",
+        "node.h": "c",
+        "employee.h": "c",
+        "stdio2.h": "c",
+        "string.h": "c"
+    }
+}
