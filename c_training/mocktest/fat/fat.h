@@ -20,22 +20,18 @@
  * IN THE SOFTWARE.                                                            *
  ******************************************************************************/
 
-#include <stdint.h>
-#include <stddef.h>
+#ifndef _FAT_H_
+#define _FAT_H_
 
-#include "haltypes.h"
-#include "HAL.h"
-
-/*******************************************************************************
- * Code
- ******************************************************************************/
-
-INT kmc_read_sector(ULONG index, UCHAR *buff)
+struct boot_sector
 {
-    /* Not yet implemented */
-}
+    BYTE jmpBoot[3];
+    BYTE oemName[8];
+    struct bpb
+    {
+    };
+};
 
-INT kmc_read_multi_sector(ULONG index, UINT num, UCHAR *buff)
-{
-    /* Not yet implemented */
-}
+typedef struct boot_sector boot_sector_t;
+
+#endif /* _FAT_H_ */

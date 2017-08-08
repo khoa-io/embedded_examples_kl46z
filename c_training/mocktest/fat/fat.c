@@ -21,21 +21,6 @@
  ******************************************************************************/
 
 #include <stdint.h>
-#include <stddef.h>
 
-#include "haltypes.h"
-#include "HAL.h"
-
-/*******************************************************************************
- * Code
- ******************************************************************************/
-
-INT kmc_read_sector(ULONG index, UCHAR *buff)
-{
-    /* Not yet implemented */
-}
-
-INT kmc_read_multi_sector(ULONG index, UINT num, UCHAR *buff)
-{
-    /* Not yet implemented */
-}
+#include "hal/haltypes.h"
+#include "fat.h"

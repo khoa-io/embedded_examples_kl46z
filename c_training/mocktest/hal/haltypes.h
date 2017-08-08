@@ -20,22 +20,25 @@
  * IN THE SOFTWARE.                                                            *
  ******************************************************************************/
 
-#include <stdint.h>
-#include <stddef.h>
+/*!
+ * @file haltypes.h Define types used in HAL (Hardware Abstraction Layer).
+ */
 
-#include "haltypes.h"
-#include "HAL.h"
+#ifndef _HAL_TYPES_H_
+#define _HAL_TYPES_H_
 
 /*******************************************************************************
- * Code
+ * Definitions
  ******************************************************************************/
 
-INT kmc_read_sector(ULONG index, UCHAR *buff)
-{
-    /* Not yet implemented */
-}
+#define BYTE uint8_t
 
-INT kmc_read_multi_sector(ULONG index, UINT num, UCHAR *buff)
-{
-    /* Not yet implemented */
-}
+#define UCHAR unsigned char
+
+#define UINT unsigned int
+
+#define INT int
+
+#define ULONG unsigned long
+
+#endif /* _HAL_TYPES_H_ */

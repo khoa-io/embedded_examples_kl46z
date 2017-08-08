@@ -10,6 +10,9 @@
         "node.h": "c",
         "employee.h": "c",
         "stdio2.h": "c",
-        "string.h": "c"
+        "string.h": "c",
+        "haldef.h": "c",
+        "fat.h": "c",
+        "haltypes.h": "c"
     }
 }
