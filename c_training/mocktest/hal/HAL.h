@@ -27,7 +27,7 @@
  * API
  ******************************************************************************/
 /*!
- * @brief Read and copysdata on sector to buffer.
+ * @brief Read and copy data on sector to buffer.
  *
  * @param index Sector's index.
  * @param buff Destination buffer where data is copied to.

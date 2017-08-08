@@ -21,6 +21,47 @@
  ******************************************************************************/
 
 #include <stdint.h>
+#include <stdio.h>
 
 #include "hal/haltypes.h"
 #include "fat.h"
+
+/*******************************************************************************
+ * APIs
+ ******************************************************************************/
+
+int32_t fat16_open_fs(char *path, fat16_fs_t *fsp)
+{
+    /* Not yet fully implemented */
+
+    fsp->fp = fopen(path, "rb");
+
+    if (fsp->fp == NULL)
+    {
+        return FAT_ERROR_UNKNOWN;
+    }
+
+    fread(&fsp->header, sizeof(fat16_header_t), 1, fsp->fp);
+
+    fsp->fatOff = fsp->header.sectorSize * fsp->header.nReservedSectors;
+    fsp->fatSize = fsp->header.nFatsize * fsp->header.sectorSize;
+    fsp->rootDirOff = fsp->fatOff + fsp->header.nFats * fsp->fatSize;
+    fsp->rootDirSize = fsp->header.nRootEntries * 32;
+
+    return FAT_ERROR_NONE;
+}
+
+int32_t fat16_close_fs(fat16_fs_t *fsp)
+{
+    if (!fsp->fp)
+    {
+        return FAT_ERROR_FS_NOT_OPEN;
+    }
+
+    if (!fclose(fsp->fp))
+    {
+        return FAT_ERROR_UNKNOWN;
+    }
+
+    return FAT_ERROR_NONE;
+}

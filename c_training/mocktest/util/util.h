@@ -20,28 +20,29 @@
  * IN THE SOFTWARE.                                                            *
  ******************************************************************************/
 
-#include <stdint.h>
+/*!
+ * @file util.h Declaration of utilites functions.
+ */
+
+#ifndef _UTIL_H_
+#define _UTIL_H_
+
 #include <stdio.h>
-#include <stddef.h>
+#include <stdint.h>
+#include <string.h>
 
-#include "haltypes.h"
+#include "hal/haltypes.h"
 #include "fat/fat.h"
-#include "HAL.h"
 
 /*******************************************************************************
- * Global variables
+ * APIs
  ******************************************************************************/
 
-/*******************************************************************************
- * Code
- ******************************************************************************/
+/*!
+ * @brief Print FAT12/16 file system information to standard output.
+ *
+ * @param fsp Point to an open FAT12/16 file system.
+ */
+void printFat16FsInfo(fat16_fs_t *fsp);
 
-INT kmc_read_sector(ULONG index, UCHAR *buff)
-{
-    /* Not yet implemented */
-}
-
-INT kmc_read_multi_sector(ULONG index, UINT num, UCHAR *buff)
-{
-    /* Not yet implemented */
-}
+#endif /* _UTIL_H_ */

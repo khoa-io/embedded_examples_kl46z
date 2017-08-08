@@ -11,6 +11,7 @@
                 "${cwd}/main/*.c",
                 "${cwd}/hal/*.c",
                 "${cwd}/fat/*.c",
+                "${cwd}/util/*.c",
                 "-o",
                 "${workspaceRootFolderName}"
             ],

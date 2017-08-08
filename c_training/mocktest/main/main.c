@@ -22,33 +22,24 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include <string.h>
 
 #include "hal/haltypes.h"
 #include "fat/fat.h"
+#include "util/util.h"
 
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
 
-
 /*******************************************************************************
  * Code
  ******************************************************************************/
 
-void f(const char *path)
-{
-
-}
-
 int main(int argc, char *argv[])
 {
-
-    FILE *fp;
-
-    uint32_t sector[512] = {0};
-
-    uint32_t i = 0;
-    uint32_t c = 0;
+    fat16_fs_t fs;
+    int8_t buff[512] = {0};
 
     if (argc < 2)
     {
@@ -56,24 +47,11 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    fp = fopen(argv[1], "rb");
-    if (fp == NULL)
-    {
-        return 0;
-    }
+    fat16_open_fs(argv[1], &fs);
 
-    for (i = 0; i < 512; ++i)
-    {
-        fscanf(fp, "%u", &c);
-        sector[i] = c;
-    }
+    printFat16FsInfo(&fs);
 
-    for (i = 0; i < 512; ++i)
-    {
-        printf(" 0x%X", sector[i]);
-    }
-
-    fclose(fp);
+    fat16_close_fs(&fs);
 
     return 0;
 }
