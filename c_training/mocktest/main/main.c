@@ -21,9 +21,59 @@
  ******************************************************************************/
 
 #include <stdio.h>
+#include <stdint.h>
+
+#include "hal/haltypes.h"
+#include "fat/fat.h"
+
+/*******************************************************************************
+ * Prototypes
+ ******************************************************************************/
+
+
+/*******************************************************************************
+ * Code
+ ******************************************************************************/
+
+void f(const char *path)
+{
+
+}
 
 int main(int argc, char *argv[])
 {
-    printf("Hello World\n");
+
+    FILE *fp;
+
+    uint32_t sector[512] = {0};
+
+    uint32_t i = 0;
+    uint32_t c = 0;
+
+    if (argc < 2)
+    {
+        printf("Usage: mocktest /path/to/image/file\n");
+        return 0;
+    }
+
+    fp = fopen(argv[1], "rb");
+    if (fp == NULL)
+    {
+        return 0;
+    }
+
+    for (i = 0; i < 512; ++i)
+    {
+        fscanf(fp, "%u", &c);
+        sector[i] = c;
+    }
+
+    for (i = 0; i < 512; ++i)
+    {
+        printf(" 0x%X", sector[i]);
+    }
+
+    fclose(fp);
+
     return 0;
 }

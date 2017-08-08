@@ -33,6 +33,10 @@
 
 #define BYTE uint8_t
 
+#define WORD uint16_t
+
+#define DWORD uint32_t
+
 #define UCHAR unsigned char
 
 #define UINT unsigned int

@@ -1,19 +1,19 @@
 {
     "version": "0.2.0",
-    "configurations": [
-        {
+    "configurations": [{
             "name": "(gdb) Launch",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceRoot}/${workspaceRootFolderName}",
-            "args": [],
+            "args": [
+                "${cwd}/Simulator/floppy.img"
+            ],
             "stopAtEntry": false,
             "cwd": "${workspaceRoot}",
             "environment": [],
             "externalConsole": true,
             "MIMode": "gdb",
-            "setupCommands": [
-                {
+            "setupCommands": [{
                     "description": "Enable pretty-printing for gdb",
                     "text": "-enable-pretty-printing",
                     "ignoreFailures": true
