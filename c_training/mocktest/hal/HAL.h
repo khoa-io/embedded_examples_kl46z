@@ -26,6 +26,27 @@
 /*******************************************************************************
  * API
  ******************************************************************************/
+
+/*!
+ * @brief Open a FAT12/16 file system. You should use function fat_check_fs to
+ * check if the file system is FAT12/16 file system first.
+ *
+ * @param path [in] Path to the input file system.
+ * @param fsp [out] Point to FAT12/16 file system data structure.
+ *
+ * @return Return error code. Read Error codes section for more information.
+ */
+INT kmc_open_fs(char *path, fat16_fs_t *fsp);
+
+/*!
+ * @brief Close an open FAT12/16 file system.
+ *
+ * @param fsp Point to an open FAT12/16 file system.
+ *
+ * @return Return error code. Read Error codes section for more information.
+ */
+INT kmc_close_fs(fat16_fs_t *fsp);
+
 /*!
  * @brief Read and copy data on sector to buffer.
  *

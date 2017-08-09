@@ -27,6 +27,7 @@
 #include "hal/haltypes.h"
 #include "fat/fat.h"
 #include "util/util.h"
+#include "hal/HAL.h"
 
 /*******************************************************************************
  * Prototypes
@@ -39,7 +40,9 @@
 int main(int argc, char *argv[])
 {
     fat16_fs_t fs;
-    int8_t buff[512] = {0};
+    int8_t buff[1024] = {0};
+
+    int32_t ret = 0;
 
     if (argc < 2)
     {
@@ -47,11 +50,18 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    fat16_open_fs(argv[1], &fs);
+    ret = kmc_open_fs(argv[1], &fs);
+    if (ret)
+    {
+        printf("Error code: %d\n", ret);
+        return 0;
+    }
 
     printFat16FsInfo(&fs);
 
-    fat16_close_fs(&fs);
+    ret = kmc_read_multi_sector(1, 2, buff);
+
+    kmc_close_fs(&fs);
 
     return 0;
 }

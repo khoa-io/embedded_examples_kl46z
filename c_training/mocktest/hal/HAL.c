@@ -31,17 +31,51 @@
 /*******************************************************************************
  * Global variables
  ******************************************************************************/
+/* Access FAT12/16 file system */
+fat16_fs_t g_fs;
 
 /*******************************************************************************
  * Code
  ******************************************************************************/
 
+INT kmc_open_fs(char *path, fat16_fs_t *fsp)
+{
+    /* Return code */
+    int32_t ret = FAT_ERROR_NONE;
+
+    ret = fat16_open_fs(path, fsp);
+    g_fs = *fsp;
+
+    return ret;
+}
+
+INT kmc_close_fs(fat16_fs_t *fsp)
+{
+    /* Return code */
+    int32_t ret = FAT_ERROR_NONE;
+
+    ret = fat16_close_fs(fsp);
+    g_fs.fp = NULL;
+
+    return ret;
+}
+
 INT kmc_read_sector(ULONG index, UCHAR *buff)
 {
-    /* Not yet implemented */
+    int32_t ret = 0;
+
+    fseek(g_fs.fp, index * g_fs.header.sectorSize, SEEK_SET);
+    ret = fread(buff, g_fs.header.sectorSize, 1, g_fs.fp);
+
+    return ret;
 }
 
 INT kmc_read_multi_sector(ULONG index, UINT num, UCHAR *buff)
 {
-    /* Not yet implemented */
+    int32_t ret = 0;
+
+    fseek(g_fs.fp, index * g_fs.header.sectorSize, SEEK_SET);
+    ret = fread(buff, g_fs.header.sectorSize, num, g_fs.fp);
+
+    return ret;
 }
