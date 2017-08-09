@@ -23,8 +23,41 @@
 #ifndef _FAT_H_
 #define _FAT_H_
 
-#pragma pack(push)
-#pragma pack(1)
+/*******************************************************************************
+ * File system type codes
+ ******************************************************************************/
+
+/* Not a FAT file system */
+#define FS_NOT_FAT 0x00
+/* FAT12 file system */
+#define FS_FAT12 0x0C
+/* FAT16 file system */
+#define FS_FAT16 0x10
+/* FAT32 file system */
+#define FS_FAT32 0x40
+
+/*******************************************************************************
+ * Error codes
+ ******************************************************************************/
+
+/* No error */
+#define FAT_ERROR_NONE 0
+/* File system is not open. */
+#define FAT_ERROR_FS_NOT_OPEN 0x00000001
+/* Unknown error */
+#define FAT_ERROR_UNKNOWN 0xFFFFFFFF
+
+/*******************************************************************************
+ * File's attributes
+ ******************************************************************************/
+
+#define ATTR_READ_ONLY 0x01
+#define ATTR_HIDDEN 0x02
+#define ATTR_SYSTEM 0x04
+#define ATTR_VOLUME_ID 0x08
+#define ATTR_DIRECTORY 0x10
+#define ATTR_ARCHIVE 0x20
+#define ATTR_LONG_NAME ATTR_READ_ONLY | ATTR_HIDDEN | ATTR_SYSTEM | ATTR_VOLUME_ID
 
 /*******************************************************************************
  * Definitions
@@ -51,6 +84,9 @@
     WORD heads;            \
     DWORD hidden_sectors;  \
     DWORD total_sectors_ex
+
+#pragma pack(push)
+#pragma pack(1)
 
 /*!
  * @brief FAT12/16 First Sector's layout.
@@ -108,42 +144,6 @@ struct fat16_fs
 typedef struct fat16_header fat16_header_t;
 typedef struct fat16_fs fat16_fs_t;
 typedef struct fat_file_record fat_file_record_t;
-
-/*******************************************************************************
- * File system type codes
- ******************************************************************************/
-
-/* Not a FAT file system */
-#define FS_NOT_FAT 0x00
-/* FAT12 file system */
-#define FS_FAT12 0x0C
-/* FAT16 file system */
-#define FS_FAT16 0x10
-/* FAT32 file system */
-#define FS_FAT32 0x40
-
-/*******************************************************************************
- * Error codes
- ******************************************************************************/
-
-/* No error */
-#define FAT_ERROR_NONE 0
-/* File system is not open. */
-#define FAT_ERROR_FS_NOT_OPEN 0x00000001
-/* Unknown error */
-#define FAT_ERROR_UNKNOWN 0xFFFFFFFF
-
-/*******************************************************************************
- * File's attributes
- ******************************************************************************/
-
-#define ATTR_READ_ONLY 0x01
-#define ATTR_HIDDEN 0x02
-#define ATTR_SYSTEM 0x04
-#define ATTR_VOLUME_ID 0x08
-#define ATTR_DIRECTORY 0x10
-#define ATTR_ARCHIVE 0x20
-#define ATTR_LONG_NAME ATTR_READ_ONLY | ATTR_HIDDEN | ATTR_SYSTEM | ATTR_VOLUME_ID
 
 /*******************************************************************************
  * APIs

@@ -8,7 +8,7 @@
             "args": [
                 "-I${cwd}",
                 "-g",
-                "${cwd}/main/*.c",
+                "${cwd}/app/*.c",
                 "${cwd}/hal/*.c",
                 "${cwd}/fat/*.c",
                 "${cwd}/util/*.c",

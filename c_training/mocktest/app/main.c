@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    ret = kmc_open_fs(argv[1], &fs);
+    ret = kmc_open(argv[1], &fs);
     if (ret)
     {
         printf("Error code: %d\n", ret);
@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
     printf("Root directory content:\n");
     util_ls(&fs, NULL);
 
-    kmc_close_fs(&fs);
+    kmc_close(&fs);
 
     return 0;
 }

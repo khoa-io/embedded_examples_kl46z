@@ -24,28 +24,103 @@
 #define _HAL_H_
 
 /*******************************************************************************
+ * Integer type definitions
+ ******************************************************************************/
+
+#define BYTE uint8_t
+
+#define WORD uint16_t
+
+#define DWORD uint32_t
+
+#define UCHAR unsigned char
+
+#define UINT unsigned int
+
+#define INT int
+
+#define ULONG unsigned long
+
+/*******************************************************************************
+ * Status codes
+ ******************************************************************************/
+
+/* Un-initialized devices have this status code */
+#define HAL_STATUS_UNDEFINED 0x0
+/* Opened devices have this status code */
+#define HAL_STATUS_OPEN 0x1
+/* Closed devices have this status code */
+#define HAL_STATUS_CLOSE 0x2
+
+/*******************************************************************************
+ * Error codes
+ ******************************************************************************/
+
+/* No error code */
+#define HAL_ERROR_NONE 0x0
+/* Cannot open device */
+#define HAL_ERROR_CANNOT_OPEN 0x1
+/* Cannot close device */
+#define HAL_ERROR_CANNOT_CLOSE 0x2
+/* Unknown error code */
+#define HAL_ERROR_UNKNOWN 0xFFFFFFFF
+
+/*******************************************************************************
+ * Types and structues
+ ******************************************************************************/
+
+/*!
+ * @brief FAT module doesn't communicate with device directly. It does it
+ * through HAL module by using this structure.
+ * The idea was taken from Android HAL
+ * (https://source.android.com/reference/hal/structhw__device__t).
+ */
+typedef struct kmc_device_t
+{
+    /* Status of this device. See Status codes section. */
+    uint16_t status;
+
+    /* Size of a sector (byte). Default is 512 */
+    uint16_t sector_size;
+
+    /** Callback functions **/
+
+    /* Close this device */
+    uint32_t (*close)(struct kmc_device_t *device);
+
+    /* Read and copy data on a sector to buffer */
+    uint32_t (*read_single_sector)(struct kmc_device_t *device,
+                                   uint64_t index,
+                                   uint8_t *buff);
+
+    /* Read and copy data on multi sectors to buffer */
+    uint32_t (*read_multi_sector)(struct kmc_device_t *device,
+                                  uint64_t index,
+                                  uint32_t num,
+                                  uint8_t *buff);
+} kmc_device_t;
+
+/*******************************************************************************
  * API
  ******************************************************************************/
 
 /*!
- * @brief Open a FAT12/16 file system. You should use function fat_check_fs to
- * check if the file system is FAT12/16 file system first.
+ * @brief Open a disk image file with the given path.
  *
- * @param path [in] Path to the input file system.
- * @param fsp [out] Point to FAT12/16 file system data structure.
+ * @param path Path to the disk image file.
  *
  * @return Return error code. Read Error codes section for more information.
  */
-INT kmc_open_fs(char *path, fat16_fs_t *fsp);
+INT kmc_open(char *path, kmc_device_t *device);
 
 /*!
- * @brief Close an open FAT12/16 file system.
+ * @brief Close a disk image file with the given path.
  *
- * @param fsp Point to an open FAT12/16 file system.
+ * @param path Path to the device.
  *
  * @return Return error code. Read Error codes section for more information.
  */
-INT kmc_close_fs(fat16_fs_t *fsp);
+INT kmc_close(kmc_device_t *device);
 
 /*!
  * @brief Read and copy data on sector to buffer.

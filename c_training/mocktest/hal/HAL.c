@@ -22,62 +22,124 @@
 
 #include <stdint.h>
 #include <stdio.h>
-#include <stddef.h>
 
-#include "haltypes.h"
-#include "fat/fat.h"
 #include "HAL.h"
+
+/*******************************************************************************
+ * Definitions
+ ******************************************************************************/
+/* Default sector size (bytes) */
+#define SECTOR_SIZE 512
 
 /*******************************************************************************
  * Global variables
  ******************************************************************************/
-/* Access FAT12/16 file system */
-fat16_fs_t g_fs;
+
+/* Keep track of the file which this module use */
+FILE *g_fp;
+
+/* Keep track of the device */
+kmc_device_t g_device = {HAL_STATUS_UNDEFINED,
+                         SECTOR_SIZE,
+                         kmc_close,
+                         kmc_read_sector,
+                         kmc_read_multi_sector};
 
 /*******************************************************************************
  * Code
  ******************************************************************************/
 
-INT kmc_open_fs(char *path, fat16_fs_t *fsp)
+INT kmc_open(char *path, kmc_device_t *device)
 {
     /* Return code */
-    int32_t ret = FAT_ERROR_NONE;
+    int32_t ret = HAL_ERROR_NONE;
 
-    ret = fat16_open_fs(path, fsp);
-    g_fs = *fsp;
+    g_fp = fopen(path, "rb");
+
+    if (g_fp == NULL)
+    {
+        /* Cannot open file */
+        ret = HAL_ERROR_CANNOT_OPEN;
+    }
+    else
+    {
+        /* Open file successfully */
+        device = &g_device;
+        device->status = HAL_STATUS_OPEN;
+    }
 
     return ret;
 }
 
-INT kmc_close_fs(fat16_fs_t *fsp)
+INT kmc_close(kmc_device_t *device)
 {
     /* Return code */
-    int32_t ret = FAT_ERROR_NONE;
+    int32_t ret = HAL_ERROR_NONE;
 
-    ret = fat16_close_fs(fsp);
-    g_fs.fp = NULL;
+    ret = fclose(g_fp);
+    if (ret)
+    {
+        /* Unable to close file */
+        ret = HAL_ERROR_CANNOT_CLOSE;
+    }
+    else
+    {
+        ret = HAL_ERROR_NONE;
+    }
+
+    g_fp = NULL;
 
     return ret;
 }
 
 INT kmc_read_sector(ULONG index, UCHAR *buff)
 {
-    int32_t ret = 0;
+    /* Indexing variable */
+    int32_t i = 0;
 
-    fseek(g_fs.fp, index * g_fs.header.sector_size, SEEK_SET);
-    ret = fread(buff, g_fs.header.sector_size, 1, g_fs.fp);
-    ret = ret * g_fs.header.sector_size;
+    /* Store data from fgetc */
+    uint32_t c;
 
-    return ret;
+    fseek(g_fp, index * g_device.sector_size, SEEK_SET);
+
+    /* I dont's use fread because if file size < 512 bytes (cannot happen in
+    real life but still count) and data was read but fread still returns 0 */
+    for (; i < index * g_device.sector_size; ++i)
+    {
+        c = fgetc(g_fp);
+        if (c == EOF)
+        {
+            break;
+        }
+        buff[i] = (UCHAR)c;
+    }
+
+    return i;
 }
 
 INT kmc_read_multi_sector(ULONG index, UINT num, UCHAR *buff)
 {
+    /* Total number of read bytes */
     int32_t ret = 0;
 
-    fseek(g_fs.fp, index * g_fs.header.sector_size, SEEK_SET);
-    ret = fread(buff, g_fs.header.sector_size, num, g_fs.fp);
-    ret = ret * g_fs.header.sector_size;
+    /* Number of read bytes in each loop */
+    int32_t n = 0;
+
+    /* Indexing variable */
+    int32_t i = 0;
+
+    /* Read from sector index to sector index + num */
+    for (i = 0; i < num; ++i)
+    {
+        n = kmc_read_sector(index + i, buff + i * g_device.sector_size);
+        ret += n;
+
+        if (n < g_device.sector_size)
+        {
+            /* Reach end of file */
+            break;
+        }
+    }
 
     return ret;
 }
