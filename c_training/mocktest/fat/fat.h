@@ -102,7 +102,7 @@ struct fat16_fs
     /* Root directory's size (byte) */
     DWORD rootDirSize;
     /* Data's offset */
-    DWORD dataOffset;
+    DWORD dataOff;
 };
 
 typedef struct fat16_header fat16_header_t;

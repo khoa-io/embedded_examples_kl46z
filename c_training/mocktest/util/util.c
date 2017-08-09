@@ -37,11 +37,10 @@
 #define GET_HOUR(t) (((uint16_t)(t)) >> 11)
 #define GET_MIN(t) ((((uint16_t)(t)) >> 5) & 0x3F)
 #define GET_SEC(t) ((((uint16_t)(t)) & 0x1F) << 1)
-#define GET_HOUR(t) (((uint16_t)(t)) >> 11)
 
 #define GET_YEAR(t) ((((uint16_t)(t)) >> 9) + 1980)
 #define GET_MON(t) ((((uint16_t)(t)) >> 5) & 0xF)
-#define GET_DAY(t) ((((uint16_t)(t)) & 0x1F) << 1)
+#define GET_DAY(t) (((uint16_t)(t)) & 0x1F)
 
 /*******************************************************************************
  * Prototypes
@@ -53,6 +52,13 @@
  * @param pRecord Point to record;
  */
 void util_print_file_name(fat_file_record_t *pRecord);
+
+/*!
+ * @brief Print file size to stdout.
+ *
+ * @param pRecord Point to record;
+ */
+void util_print_file_size(fat_file_record_t *pRecord);
 
 /*******************************************************************************
  * Code
@@ -68,6 +74,27 @@ void util_print_file_name(fat_file_record_t *pRecord)
         {
             printf("%c", pRecord->name[i]);
         }
+    }
+}
+
+void util_print_file_size(fat_file_record_t *pRecord)
+{
+    if (pRecord->file_size < 1024)
+    {
+        printf("%4.u B\t", pRecord->file_size);
+        return;
+    }
+
+    if (pRecord->file_size < (1024 * 1024))
+    {
+        printf("%4.2f KB\t", pRecord->file_size * 1.0 / 1024);
+        return;
+    }
+
+    if (pRecord->file_size < (1024 * 1024 * 1024))
+    {
+        printf("%4.2f MB\t", pRecord->file_size * 1.0 / 1024 / 1024);
+        return;
     }
 }
 
@@ -122,6 +149,7 @@ void util_print_fs_info(fat16_fs_t *fsp)
 
     printf("Root directory offset: 0x%X\n", fsp->rootDirOff);
     printf("Root directory size (byte): %u\n", fsp->rootDirSize);
+    printf("Data region offset: 0x%X\n", fsp->dataOff);
 }
 
 int32_t util_ls(fat16_fs_t *fsp, char *dir)
@@ -129,6 +157,9 @@ int32_t util_ls(fat16_fs_t *fsp, char *dir)
     int32_t ret = UTIL_ERROR_NONE;
 
     int32_t i = 0;
+
+    /* Total of listed files. */
+    int32_t total = 0;
 
     fat_file_record_t record;
 
@@ -141,7 +172,7 @@ int32_t util_ls(fat16_fs_t *fsp, char *dir)
     /* Listing in root directory */
     fseek(fsp->fp, fsp->rootDirOff, SEEK_SET);
 
-    printf("Last modified \t Name\n");
+    printf("Created\t\t\tLast modified\t\tSize\tName\n");
 
     for (i = 0; i < fsp->header.root_entries; ++i)
     {
@@ -162,15 +193,32 @@ int32_t util_ls(fat16_fs_t *fsp, char *dir)
             continue;
         }
 
-        printf("%uh%um%us\t",
+        ++total;
+
+        /* Print modified  */
+        printf("%.2uh%.2um%.2us, %.2u-%.2u-%.4u\t",
                GET_HOUR(record.modified_time),
                GET_MIN(record.modified_time),
-               GET_SEC(record.modified_time));
+               GET_SEC(record.modified_time),
+               GET_DAY(record.modified_date),
+               GET_MON(record.modified_date),
+               GET_YEAR(record.modified_date));
+
+        printf("%.2uh%.2um%.2us, %.2u-%.2u-%.4u\t",
+               GET_HOUR(record.created_time),
+               GET_MIN(record.created_time),
+               GET_SEC(record.created_time),
+               GET_DAY(record.created_date),
+               GET_MON(record.created_date),
+               GET_YEAR(record.created_date));
+
+        util_print_file_size(&record);
 
         util_print_file_name(&record);
 
         printf("\n");
     }
+    printf("Total %u.\n", total);
 
     return ret;
 }

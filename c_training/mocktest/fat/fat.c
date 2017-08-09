@@ -47,6 +47,7 @@ int32_t fat16_open_fs(char *path, fat16_fs_t *fsp)
     fsp->fatSize = fsp->header.fat_size * fsp->header.sector_size;
     fsp->rootDirOff = fsp->fatOff + fsp->header.fats * fsp->fatSize;
     fsp->rootDirSize = fsp->header.root_entries * 32;
+    fsp->dataOff = fsp->rootDirOff + fsp->rootDirSize;
 
     return FAT_ERROR_NONE;
 }
