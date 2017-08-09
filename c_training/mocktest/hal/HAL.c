@@ -64,9 +64,9 @@ INT kmc_read_sector(ULONG index, UCHAR *buff)
 {
     int32_t ret = 0;
 
-    fseek(g_fs.fp, index * g_fs.header.sectorSize, SEEK_SET);
-    ret = fread(buff, g_fs.header.sectorSize, 1, g_fs.fp);
-    ret = ret * g_fs.header.sectorSize;
+    fseek(g_fs.fp, index * g_fs.header.sector_size, SEEK_SET);
+    ret = fread(buff, g_fs.header.sector_size, 1, g_fs.fp);
+    ret = ret * g_fs.header.sector_size;
 
     return ret;
 }
@@ -75,9 +75,9 @@ INT kmc_read_multi_sector(ULONG index, UINT num, UCHAR *buff)
 {
     int32_t ret = 0;
 
-    fseek(g_fs.fp, index * g_fs.header.sectorSize, SEEK_SET);
-    ret = fread(buff, g_fs.header.sectorSize, num, g_fs.fp);
-    ret = ret * g_fs.header.sectorSize;
+    fseek(g_fs.fp, index * g_fs.header.sector_size, SEEK_SET);
+    ret = fread(buff, g_fs.header.sector_size, num, g_fs.fp);
+    ret = ret * g_fs.header.sector_size;
 
     return ret;
 }

@@ -30,6 +30,8 @@
  * Definitions
  ******************************************************************************/
 
+#define FAT_FILE_RECORD_SIZE 32
+
 /* Fields start at offset 0 */
 #define FAT_PREAMBLE \
     BYTE jmpBoot[3]; \
@@ -37,18 +39,18 @@
 
 /* Fields start at offset 11 */
 #define FAT_BPB            \
-    WORD sectorSize;       \
-    BYTE clusterSize;      \
-    WORD nReservedSectors; \
-    BYTE nFats;            \
-    WORD nRootEntries;     \
-    WORD nTotalSectors;    \
-    BYTE mediaFlag;        \
-    WORD nFatsize;         \
-    WORD nTrackSize;       \
-    WORD nHeads;           \
-    DWORD nHiddenSectors;  \
-    DWORD nTotalSectorsEx
+    WORD sector_size;      \
+    BYTE cluster_size;     \
+    WORD reserved_sectors; \
+    BYTE fats;             \
+    WORD root_entries;     \
+    WORD total_sectors;    \
+    BYTE media_type;       \
+    WORD fat_size;         \
+    WORD track_size;       \
+    WORD heads;            \
+    DWORD hidden_sectors;  \
+    DWORD total_sectors_ex
 
 /*!
  * @brief FAT12/16 First Sector's layout.
@@ -58,12 +60,28 @@ struct fat16_header
     FAT_PREAMBLE;
     FAT_BPB;
 
-    BYTE driverNumber;
+    BYTE drv_num;
     BYTE reserved1;
-    BYTE bootSignature;
-    DWORD volumeSerialNumber;
-    BYTE volumeLabel[11];
-    BYTE fileSystemType[8];
+    BYTE boot_signature;
+    DWORD vol_serial;
+    BYTE vol_label[11];
+    BYTE file_system_type[8];
+};
+
+struct fat_file_record
+{
+    BYTE name[11];
+    BYTE attrs;
+    BYTE nt_reserved;
+    BYTE created_time_tenth;
+    WORD created_time;
+    WORD created_date;
+    WORD last_access_date;
+    WORD first_cluster_hi;
+    WORD modified_time;
+    WORD modified_date;
+    WORD first_cluster_lo;
+    DWORD file_size;
 };
 
 #pragma pack(pop)
@@ -89,6 +107,7 @@ struct fat16_fs
 
 typedef struct fat16_header fat16_header_t;
 typedef struct fat16_fs fat16_fs_t;
+typedef struct fat_file_record fat_file_record_t;
 
 /*******************************************************************************
  * File system type codes
@@ -113,6 +132,18 @@ typedef struct fat16_fs fat16_fs_t;
 #define FAT_ERROR_FS_NOT_OPEN 0x00000001
 /* Unknown error */
 #define FAT_ERROR_UNKNOWN 0xFFFFFFFF
+
+/*******************************************************************************
+ * File's attributes
+ ******************************************************************************/
+
+#define ATTR_READ_ONLY 0x01
+#define ATTR_HIDDEN 0x02
+#define ATTR_SYSTEM 0x04
+#define ATTR_VOLUME_ID 0x08
+#define ATTR_DIRECTORY 0x10
+#define ATTR_ARCHIVE 0x20
+#define ATTR_LONG_NAME ATTR_READ_ONLY | ATTR_HIDDEN | ATTR_SYSTEM | ATTR_VOLUME_ID
 
 /*******************************************************************************
  * APIs
@@ -150,4 +181,5 @@ int32_t fat16_open_fs(char *path, fat16_fs_t *fsp);
  * @return Return error code. Read Error codes section for more information.
  */
 int32_t fat16_close_fs(fat16_fs_t *fsp);
+
 #endif /* _FAT_H_ */

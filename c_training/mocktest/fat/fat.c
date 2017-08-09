@@ -43,10 +43,10 @@ int32_t fat16_open_fs(char *path, fat16_fs_t *fsp)
 
     fread(&fsp->header, sizeof(fat16_header_t), 1, fsp->fp);
 
-    fsp->fatOff = fsp->header.sectorSize * fsp->header.nReservedSectors;
-    fsp->fatSize = fsp->header.nFatsize * fsp->header.sectorSize;
-    fsp->rootDirOff = fsp->fatOff + fsp->header.nFats * fsp->fatSize;
-    fsp->rootDirSize = fsp->header.nRootEntries * 32;
+    fsp->fatOff = fsp->header.sector_size * fsp->header.reserved_sectors;
+    fsp->fatSize = fsp->header.fat_size * fsp->header.sector_size;
+    fsp->rootDirOff = fsp->fatOff + fsp->header.fats * fsp->fatSize;
+    fsp->rootDirSize = fsp->header.root_entries * 32;
 
     return FAT_ERROR_NONE;
 }

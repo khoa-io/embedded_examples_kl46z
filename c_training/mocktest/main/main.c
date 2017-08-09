@@ -57,14 +57,11 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    printFat16FsInfo(&fs);
+    printf("File system info:\n");
+    util_print_fs_info(&fs);
 
-    ret = kmc_read_sector(1, buff);
-    memset(buff, 0, 1024);
-    printf("Read %d bytes.\n", ret);
-
-    ret = kmc_read_multi_sector(1, 2, buff);
-    printf("Read %d bytes.\n", ret);
+    printf("Root directory content:\n");
+    util_ls(&fs, NULL);
 
     kmc_close_fs(&fs);
 

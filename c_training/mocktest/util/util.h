@@ -35,6 +35,15 @@
 #include "fat/fat.h"
 
 /*******************************************************************************
+ * Error codes
+ ******************************************************************************/
+/* No error */
+#define UTIL_ERROR_NONE 0x0
+
+/* Unknown error */
+#define UTIL_ERROR_UNKNOWN 0xFFFFFFFF
+
+/*******************************************************************************
  * APIs
  ******************************************************************************/
 
@@ -43,6 +52,16 @@
  *
  * @param fsp Point to an open FAT12/16 file system.
  */
-void printFat16FsInfo(fat16_fs_t *fsp);
+void util_print_fs_info(fat16_fs_t *fsp);
+
+/*!
+ * @brief List all files and folder in a directory.
+ *
+ * @param fsp Point to an open FAT12/16 file system.
+ * @param dir Path of directory. If dir == NULL then treat as root directory.
+ *
+ * @return Return error code. See Error codes section.
+ */
+int32_t util_ls(fat16_fs_t *fsp, char *dir);
 
 #endif /* _UTIL_H_ */

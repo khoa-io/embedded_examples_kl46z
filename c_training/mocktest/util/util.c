@@ -34,16 +34,49 @@
 
 #define BUFF_SIZE 13
 
+#define GET_HOUR(t) (((uint16_t)(t)) >> 11)
+#define GET_MIN(t) ((((uint16_t)(t)) >> 5) & 0x3F)
+#define GET_SEC(t) ((((uint16_t)(t)) & 0x1F) << 1)
+#define GET_HOUR(t) (((uint16_t)(t)) >> 11)
+
+#define GET_YEAR(t) ((((uint16_t)(t)) >> 9) + 1980)
+#define GET_MON(t) ((((uint16_t)(t)) >> 5) & 0xF)
+#define GET_DAY(t) ((((uint16_t)(t)) & 0x1F) << 1)
+
+/*******************************************************************************
+ * Prototypes
+ ******************************************************************************/
+
+/*!
+ * @brief Print file name to stdout.
+ *
+ * @param pRecord Point to record;
+ */
+void util_print_file_name(fat_file_record_t *pRecord);
+
 /*******************************************************************************
  * Code
  ******************************************************************************/
 
-void printFat16FsInfo(fat16_fs_t *fsp)
+void util_print_file_name(fat_file_record_t *pRecord)
+{
+    int32_t i = 0;
+
+    for (i = 0; i < 11; ++i)
+    {
+        if (pRecord->name[i])
+        {
+            printf("%c", pRecord->name[i]);
+        }
+    }
+}
+
+void util_print_fs_info(fat16_fs_t *fsp)
 {
     /* Not yet fully implemented */
     int8_t buff[BUFF_SIZE] = {0};
 
-    memcpy(buff, &fsp->header.fileSystemType, sizeof(fsp->header.fileSystemType));
+    memcpy(buff, &fsp->header.file_system_type, sizeof(fsp->header.file_system_type));
     printf("File system type: %s\n", buff);
     memset(buff, 0, BUFF_SIZE);
 
@@ -51,34 +84,34 @@ void printFat16FsInfo(fat16_fs_t *fsp)
     printf("OEM Name: %s\n", buff);
     memset(buff, 0, BUFF_SIZE);
 
-    printf("Sector size (byte): %u\n", fsp->header.sectorSize);
-    printf("Cluster size (sector): %u\n", fsp->header.clusterSize);
+    printf("Sector size (byte): %u\n", fsp->header.sector_size);
+    printf("Cluster size (sector): %u\n", fsp->header.cluster_size);
 
     printf("FAT tables offset = 0x%X\n", fsp->fatOff);
 
-    printf("Number of FAT tables: %u\n", fsp->header.nFats);
+    printf("Number of FAT tables: %u\n", fsp->header.fats);
 
     printf("FAT table size (byte): %u\n", fsp->fatSize);
 
-    printf("Max number of root directory's entries: %u\n", fsp->header.nRootEntries);
-    printf("Total sectors: %u\n", fsp->header.nTotalSectors);
+    printf("Max number of root directory's entries: %u\n", fsp->header.root_entries);
+    printf("Total sectors: %u\n", fsp->header.total_sectors);
 
-    if (fsp->header.mediaFlag == 0xF8)
+    if (fsp->header.media_type == 0xF8)
     {
         printf("Media: Hard disk\n");
     }
-    else if (fsp->header.mediaFlag == 0xF0)
+    else if (fsp->header.media_type == 0xF0)
     {
         printf("Media: Soft disk 1.44M\n");
     }
     else
     {
-        printf("Media code: 0x%X\n", fsp->header.mediaFlag);
+        printf("Media code: 0x%X\n", fsp->header.media_type);
     }
 
-    if (fsp->header.volumeLabel[0])
+    if (fsp->header.vol_label[0])
     {
-        memcpy(buff, &fsp->header.volumeLabel, sizeof(fsp->header.volumeLabel));
+        memcpy(buff, &fsp->header.vol_label, sizeof(fsp->header.vol_label));
         printf("Volume label: %s\n", buff);
         memset(buff, 0, BUFF_SIZE);
     }
@@ -89,4 +122,55 @@ void printFat16FsInfo(fat16_fs_t *fsp)
 
     printf("Root directory offset: 0x%X\n", fsp->rootDirOff);
     printf("Root directory size (byte): %u\n", fsp->rootDirSize);
+}
+
+int32_t util_ls(fat16_fs_t *fsp, char *dir)
+{
+    int32_t ret = UTIL_ERROR_NONE;
+
+    int32_t i = 0;
+
+    fat_file_record_t record;
+
+    if (dir)
+    {
+        ret = UTIL_ERROR_UNKNOWN;
+        return ret;
+    }
+
+    /* Listing in root directory */
+    fseek(fsp->fp, fsp->rootDirOff, SEEK_SET);
+
+    printf("Last modified \t Name\n");
+
+    for (i = 0; i < fsp->header.root_entries; ++i)
+    {
+        ret = fread((void *)&record, FAT_FILE_RECORD_SIZE, 1, fsp->fp);
+        if (ret <= 0)
+        {
+            ret = UTIL_ERROR_UNKNOWN;
+            return ret;
+        }
+
+        if (record.name[0] == 0xE5 || record.name[0] == 0x00)
+        {
+            continue;
+        }
+
+        if (record.attrs & ATTR_VOLUME_ID)
+        {
+            continue;
+        }
+
+        printf("%uh%um%us\t",
+               GET_HOUR(record.modified_time),
+               GET_MIN(record.modified_time),
+               GET_SEC(record.modified_time));
+
+        util_print_file_name(&record);
+
+        printf("\n");
+    }
+
+    return ret;
 }
