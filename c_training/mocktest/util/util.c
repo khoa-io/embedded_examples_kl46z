@@ -60,10 +60,53 @@ void util_print_file_name(fat_file_record_t *pRecord);
  */
 void util_print_file_size(fat_file_record_t *pRecord);
 
+/*!
+ * @brief Print file record to stdout.
+ *
+ * @param pRecord Point to record;
+ */
+void util_print_file_record(fat_file_record_t *pRecord);
+
 /*******************************************************************************
  * Code
  ******************************************************************************/
 
+void util_print_file_record(fat_file_record_t *pRecord)
+{
+    /* Print last modified date */
+    printf("%.2uh%.2um%.2us, %.2u-%.2u-%.4u\t",
+           GET_HOUR(pRecord->modified_time),
+           GET_MIN(pRecord->modified_time),
+           GET_SEC(pRecord->modified_time),
+           GET_DAY(pRecord->modified_date),
+           GET_MON(pRecord->modified_date),
+           GET_YEAR(pRecord->modified_date));
+
+    /* Print created date */
+    printf("%.2uh%.2um%.2us, %.2u-%.2u-%.4u\t",
+           GET_HOUR(pRecord->created_time),
+           GET_MIN(pRecord->created_time),
+           GET_SEC(pRecord->created_time),
+           GET_DAY(pRecord->created_date),
+           GET_MON(pRecord->created_date),
+           GET_YEAR(pRecord->created_date));
+
+    if (!(pRecord->attrs & ATTR_DIRECTORY))
+    {
+        util_print_file_size(pRecord);
+    }
+    else
+    {
+        /* Not yet implemented */
+        printf("\t");
+    }
+
+    util_print_file_name(pRecord);
+
+    printf("\n");
+}
+
+/* Anh Hải comment hàm này ko thực sự cần thiết với Long File Name */
 void util_print_file_name(fat_file_record_t *pRecord)
 {
     /* Indexing on pRecord-name */
@@ -71,7 +114,7 @@ void util_print_file_name(fat_file_record_t *pRecord)
     /* Indexing on buff */
     int32_t j = 0;
 
-    uint8_t buff[12] = {0};
+    uint8_t buff[13] = {0};
 
     for (; i < 8; ++i)
     {
@@ -173,17 +216,23 @@ void util_print_fs_info(fat16_fs_t *fsp)
 
 int32_t util_ls(fat16_fs_t *fsp, char *dir)
 {
+    /* Return code */
     int32_t ret = UTIL_ERROR_NONE;
 
+    /* Indexing variable */
     int32_t i = 0;
 
     /* Total of listed files. */
     int32_t total = 0;
 
+    /* Current working file record */
     fat_file_record_t record;
+
+    printf("Created\t\t\tLast modified\t\tSize\tName\n");
 
     if (dir)
     {
+        /* Not yet implemented */
         ret = UTIL_ERROR_UNKNOWN;
         return ret;
     }
@@ -191,11 +240,10 @@ int32_t util_ls(fat16_fs_t *fsp, char *dir)
     /* Listing in root directory */
     fseek(fsp->fp, fsp->rootDirOff, SEEK_SET);
 
-    printf("Created\t\t\tLast modified\t\tSize\tName\n");
-
     for (i = 0; i < fsp->header.root_entries; ++i)
     {
         ret = fread((void *)&record, FAT_FILE_RECORD_SIZE, 1, fsp->fp);
+
         if (ret <= 0)
         {
             ret = UTIL_ERROR_UNKNOWN;
@@ -214,36 +262,7 @@ int32_t util_ls(fat16_fs_t *fsp, char *dir)
 
         ++total;
 
-        /* Print modified  */
-        printf("%.2uh%.2um%.2us, %.2u-%.2u-%.4u\t",
-               GET_HOUR(record.modified_time),
-               GET_MIN(record.modified_time),
-               GET_SEC(record.modified_time),
-               GET_DAY(record.modified_date),
-               GET_MON(record.modified_date),
-               GET_YEAR(record.modified_date));
-
-        printf("%.2uh%.2um%.2us, %.2u-%.2u-%.4u\t",
-               GET_HOUR(record.created_time),
-               GET_MIN(record.created_time),
-               GET_SEC(record.created_time),
-               GET_DAY(record.created_date),
-               GET_MON(record.created_date),
-               GET_YEAR(record.created_date));
-
-        if (!(record.attrs & ATTR_DIRECTORY))
-        {
-            util_print_file_size(&record);
-        }
-        else
-        {
-            /* Not yet implemented */
-            printf("\t");
-        }
-
-        util_print_file_name(&record);
-
-        printf("\n");
+        util_print_file_record(&record);
     }
     printf("Total %u files and directories.\n", total);
 
