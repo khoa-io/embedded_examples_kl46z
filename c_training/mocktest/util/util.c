@@ -66,15 +66,34 @@ void util_print_file_size(fat_file_record_t *pRecord);
 
 void util_print_file_name(fat_file_record_t *pRecord)
 {
+    /* Indexing on pRecord-name */
     int32_t i = 0;
+    /* Indexing on buff */
+    int32_t j = 0;
 
-    for (i = 0; i < 11; ++i)
+    uint8_t buff[12] = {0};
+
+    for (; i < 8; ++i)
     {
-        if (pRecord->name[i])
+        if (pRecord->name[i] != 0x20)
         {
-            printf("%c", pRecord->name[i]);
+            buff[j++] = pRecord->name[i];
         }
     }
+
+    if (!(pRecord->attrs & ATTR_DIRECTORY))
+    {
+        buff[j++] = '.';
+
+        for (; i < 11; ++i)
+        {
+            if (pRecord->name[i])
+            {
+                buff[j++] = pRecord->name[i];
+            }
+        }
+    }
+    printf("%s", buff);
 }
 
 void util_print_file_size(fat_file_record_t *pRecord)
@@ -212,13 +231,21 @@ int32_t util_ls(fat16_fs_t *fsp, char *dir)
                GET_MON(record.created_date),
                GET_YEAR(record.created_date));
 
-        util_print_file_size(&record);
+        if (!(record.attrs & ATTR_DIRECTORY))
+        {
+            util_print_file_size(&record);
+        }
+        else
+        {
+            /* Not yet implemented */
+            printf("\t");
+        }
 
         util_print_file_name(&record);
 
         printf("\n");
     }
-    printf("Total %u.\n", total);
+    printf("Total %u files and directories.\n", total);
 
     return ret;
 }
