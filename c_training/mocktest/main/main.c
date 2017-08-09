@@ -59,7 +59,12 @@ int main(int argc, char *argv[])
 
     printFat16FsInfo(&fs);
 
+    ret = kmc_read_sector(1, buff);
+    memset(buff, 0, 1024);
+    printf("Read %d bytes.\n", ret);
+
     ret = kmc_read_multi_sector(1, 2, buff);
+    printf("Read %d bytes.\n", ret);
 
     kmc_close_fs(&fs);
 
