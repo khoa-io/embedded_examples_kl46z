@@ -38,14 +38,11 @@
  * Global variables
  ******************************************************************************/
 
-/* Use this to communicate with device */
-kmc_device_t *g_pDevice = NULL;
-
 /*******************************************************************************
  * APIs
  ******************************************************************************/
 
-int32_t fat16_open_fs(char *path, fat16_fs_t *fsp)
+int32_t fat16_open_fs(char *path, fat16_fs_t *fs)
 {
     /* Temporary variable to store return code from functions */
     int32_t ret = FAT_ERROR_NONE;
@@ -53,44 +50,51 @@ int32_t fat16_open_fs(char *path, fat16_fs_t *fsp)
     /* Buffer to read first 512 bytes */
     uint8_t buff[BUFF_SIZE];
 
-    ret = kmc_open(path, &g_pDevice);
-    if (ret || g_pDevice->status != HAL_STATUS_OPEN)
+    ret = kmc_open(path, &fs->dev);
+
+    if (ret || fs->dev->status != HAL_STATUS_OPEN)
     {
         ret = FAT_ERROR_CANNOT_OPEN;
         return ret;
     }
 
     /* Read first 512 bytes then initialize FAT12/16 header */
-    ret = g_pDevice->read_single_sector(g_pDevice, 0, buff);
+    ret = fs->dev->read_single_sector(fs->dev, 0, buff);
     if (ret < BUFF_SIZE)
     {
         ret = FAT_ERROR_CANNOT_OPEN;
         return ret;
     }
 
-    memcpy(&fsp->header, buff, sizeof(fat16_header_t));
+    memcpy(&fs->header, buff, sizeof(fat16_header_t));
 
-    g_pDevice->sector_size = fsp->header.sector_size;
+    fs->dev->sector_size = fs->header.sector_size;
 
-    fsp->fat_off = fsp->header.reserved_sectors_count;
-    fsp->fat_size = fsp->header.fat_size;
-    fsp->root_dir_off = fsp->fat_off + fsp->header.fats_count * fsp->fat_size;
+    fs->fat_off = fs->header.reserved_sectors_count;
+    fs->fat_size = fs->header.fat_size;
+    fs->root_dir_off = fs->fat_off + fs->header.fats_count * fs->fat_size;
     /* root_entries_count * 32 always devide sector_size */
-    fsp->root_dir_size = fsp->header.root_entries_count * 32 / fsp->header.sector_size;
-    fsp->data_off = fsp->root_dir_off + fsp->root_dir_size;
+    fs->root_dir_size = fs->header.root_entries_count * 32 / fs->header.sector_size;
+    fs->data_off = fs->root_dir_off + fs->root_dir_size;
 
     return FAT_ERROR_NONE;
 }
 
-int32_t fat16_close_fs(fat16_fs_t *fsp)
+int32_t fat16_close_fs(fat16_fs_t *fs)
 {
     /* Return code */
     int32_t ret = FAT_ERROR_NONE;
 
-    g_pDevice->close(g_pDevice);
-    g_pDevice = NULL;
+    if (fs->dev == NULL)
+    {
+        ret = FAT_ERROR_NOT_OPEN;
+        return ret;
+    }
 
-    if (ret)
+    fs->dev->close(fs->dev);
+    fs->dev = NULL;
+
+    if (ret != HAL_ERROR_NONE)
     {
         ret = FAT_ERROR_CANNOT_CLOSE;
     }
@@ -100,4 +104,15 @@ int32_t fat16_close_fs(fat16_fs_t *fsp)
     }
 
     return ret;
+}
+
+int32_t fat16_readfolder(fat16_fs_t *fs,
+                         DWORD off,
+                         const fat_file_record_t *records,
+                         int32_t max)
+{
+    /* Return code */
+    int32_t rc = FAT_ERROR_NONE;
+
+    return rc;
 }

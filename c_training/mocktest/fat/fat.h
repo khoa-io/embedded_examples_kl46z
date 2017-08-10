@@ -56,6 +56,8 @@
 #define FAT_ERROR_CANNOT_OPEN 0x1
 /* Cannot close the device */
 #define FAT_ERROR_CANNOT_CLOSE 0x2
+/* File system is not opened */
+#define FAT_ERROR_NOT_OPEN 0x3
 /* Unknown error */
 #define FAT_ERROR_UNKNOWN 0xFFFFFFFF
 
@@ -134,21 +136,35 @@ struct fat_file_record
 
 #pragma pack(pop)
 
+struct kmc_device_t;
+
 /*!
  * @brief Represent FAT12/16 file system.
  */
 struct fat16_fs
 {
-    FILE *fp;
     struct fat16_header header;
+
+#ifdef _HAL_H_
+    /* When building with HAL, FAT module use this to keep track the device. */
+    /* Use this pointer to communicate with the device. */
+    kmc_device_t *dev;
+#else
+    /* When not building with HAL but application. So application doesn's
+     know about HAL. */
+    void *dev;
+#endif /* _HAL_H */
+
     /* First sector of FAT Table */
     DWORD fat_off;
     /* Size of each FAT table (sectors) */
     DWORD fat_size;
+
     /* First sector of root directory */
     DWORD root_dir_off;
     /* Root directory's size (sectors) */
     DWORD root_dir_size;
+
     /* First sector of data region */
     DWORD data_off;
 };
@@ -179,19 +195,34 @@ int32_t fat_check_fs(char *path);
  * check if the file system is FAT12/16 file system before calling this.
  *
  * @param path [in] Path of the device.
- * @param fsp [out] Point to FAT12/16 file system data structure.
+ * @param fs [out] Point to FAT12/16 file system data structure.
  *
  * @return Return error code. Read Error codes section for more information.
  */
-int32_t fat16_open_fs(char *path, fat16_fs_t *fsp);
+int32_t fat16_open_fs(char *path, fat16_fs_t *fs);
 
 /*!
  * @brief Close an open FAT12/16 file system.
  *
- * @param fsp Point to an open FAT12/16 file system.
+ * @param fs Point to an open FAT12/16 file system.
  *
  * @return Return error code. Read Error codes section for more information.
  */
-int32_t fat16_close_fs(fat16_fs_t *fsp);
+int32_t fat16_close_fs(fat16_fs_t *fs);
+
+/*!
+ * @brief List all files and directories inside a folder.
+ *
+ * @param fs [in] File system structure.
+ * @param off [in] First sector of the folder.
+ * @param records [in,out] Stores listed files and directories.
+ * @param max [in] Max of the number of files and directories could retrieved.
+ *
+ * @return Return error code. Refer Error codes section.
+ */
+int32_t fat16_readfolder(fat16_fs_t *fs,
+                         DWORD off,
+                         const fat_file_record_t *records,
+                         int32_t max);
 
 #endif /* _FAT_H_ */

@@ -46,14 +46,4 @@
  * APIs
  ******************************************************************************/
 
-/*!
- * @brief List all files and folder in a directory.
- *
- * @param fsp Point to an open FAT12/16 file system.
- * @param dir Path of directory. If dir == NULL then treat as root directory.
- *
- * @return Return error code. See Error codes section.
- */
-int32_t util_ls(fat16_fs_t *fsp, char *dir);
-
 #endif /* _UTIL_H_ */
