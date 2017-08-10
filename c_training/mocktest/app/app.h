@@ -58,13 +58,6 @@ int32_t app_cmd_help();
 int32_t app_cmd_exit();
 
 /*!
- * @brief Wait user input a command and then call the command if it exists.
- *
- * @return Return command's return code.
- */
-int32_t app_prompt();
-
-/*!
  * @brief Command "fsinfo": read and display file system's information.
  *
  * @param fs Point to initialized FAT file system structure.
@@ -72,5 +65,16 @@ int32_t app_prompt();
  * @param Return error code. Refer Error codes section.
  */
 int32_t app_cmd_fsinfo(fat16_fs_t *fs);
+
+/*!
+ * @brief List all files and directories inside a folder and print to stdout.
+ *
+ * @param fs [in] File system structure.
+ * @param off [in] First sector of the folder.
+ *
+ * @return Return error code. Refer Error codes section.
+ */
+int32_t app_cmd_ls(fat16_fs_t *fs, DWORD off);
+
 
 #endif /* _APP_H_ */

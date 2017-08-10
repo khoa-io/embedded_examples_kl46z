@@ -74,6 +74,20 @@
 #define ATTR_LONG_NAME ATTR_READ_ONLY | ATTR_HIDDEN | ATTR_SYSTEM | ATTR_VOLUME_ID
 
 /*******************************************************************************
+ * FAT directory entry statistics code in fat_file_record_t::name[0]
+ ******************************************************************************/
+
+/* The directory entry is free (there is no  file or directory name in this
+entry) */
+#define FAT_DIR_STAT_FREE 0xE5
+/* The directory entry is free (same as FAT_DIR_STAT_FREE) and there are no
+allocated directory entries after this one. */
+#define FAT_DIR_STAT_END 0x00
+/* The actual file name character for this byte is 0xE5. Not used in this
+module yet */
+#define FAT_DIR_STAT_KANJI 0x05
+
+/*******************************************************************************
  * Definitions
  ******************************************************************************/
 
@@ -120,7 +134,8 @@ struct fat16_header
 
 struct fat_file_record
 {
-    BYTE name[11];
+    BYTE name[8];
+    BYTE ext[3];
     BYTE attrs;
     BYTE nt_reserved;
     BYTE created_time_tenth;
@@ -217,12 +232,14 @@ int32_t fat16_close_fs(fat16_fs_t *fs);
  * @param off [in] First sector of the folder.
  * @param records [in,out] Stores listed files and directories.
  * @param max [in] Max of the number of files and directories could retrieved.
+ * @param total [out] The number of listed files and directories.
  *
  * @return Return error code. Refer Error codes section.
  */
 int32_t fat16_readfolder(fat16_fs_t *fs,
                          DWORD off,
-                         const fat_file_record_t *records,
-                         int32_t max);
+                         fat_file_record_t *records,
+                         int32_t max,
+                         int32_t *total);
 
 #endif /* _FAT_H_ */

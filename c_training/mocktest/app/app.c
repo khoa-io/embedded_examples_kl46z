@@ -25,12 +25,14 @@
 #include <string.h>
 
 #include "fat/fat.h"
+#include "util/util.h"
 #include "app/app.h"
 
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
 #define BUFF_SIZE 512
+
 
 /*******************************************************************************
  * Code
@@ -93,4 +95,118 @@ int32_t app_cmd_fsinfo(fat16_fs_t *fs)
     printf("Data region offset: 0x%X\n", fs->data_off);
 
     return APP_ERROR_NONE;
+}
+
+int32_t app_cmd_ls(fat16_fs_t *fs, DWORD off)
+{
+    /* Stores all listed files and sub-folders */
+    fat_file_record_t records[BUFF_SIZE];
+
+    /* Return code */
+    int32_t rc = FAT_ERROR_NONE;
+
+    /* Indexing variable */
+    int32_t i = 0;
+
+    /* The number of listed files and directories */
+    int32_t total = 0;
+
+    rc = fat16_readfolder(fs, off, records, BUFF_SIZE, &total);
+    if (rc != FAT_ERROR_NONE)
+    {
+        printf("Cannot list folder!\n");
+        rc = APP_ERROR_UNKNOWN;
+        return rc;
+    }
+
+    printf("Created\t\t\tLast modified\t\tSize\tName\n");
+
+    for (i = 0; i < total; ++i)
+    {
+        util_print_file_record(&records[i]);
+    }
+
+    return rc;
+}
+
+int32_t app_cmd_help()
+{
+    printf("Available commands:\n");
+    printf("help\t-\tPrint this message\n");
+    printf("fsinfo\t-\tDisplay file system information\n");
+    printf("cwd\t-\tGet current working directory\n");
+    printf("ls\t-\tList all files and directories in a folder\n");
+    printf("exit\t-\tExit program\n");
+
+    return APP_ERROR_NONE;
+}
+
+int32_t app_cmd_exit()
+{
+    return APP_ERROR_EXIT;
+}
+
+int main(int argc, char *argv[])
+{
+    int8_t buff[BUFF_SIZE] = {0};
+
+    int32_t rc = APP_ERROR_NONE;
+
+    /* Store command user entered */
+    int8_t cmd[MAX_CMD_LEN] = {0};
+
+    /* Use this to work with FAT12/16 file system */
+    fat16_fs_t fs;
+
+    /* Current working directory. Default is root directory */
+    fat_file_record_t cwd;
+    /* First sector of current working directory */
+    DWORD cwdOff;
+
+    if (argc < 2)
+    {
+        printf("Usage: mocktest /path/to/image/file\n");
+        return 0;
+    }
+
+    rc = fat16_open_fs(argv[1], &fs);
+    if (rc != FAT_ERROR_NONE)
+    {
+        printf("Cannot open file system! Error code: %d\n", rc);
+        return 0;
+    }
+
+    app_cmd_help();
+    for (rc = APP_ERROR_NONE; rc == APP_ERROR_NONE;)
+    {
+        printf("Command: ");
+        scanf("%s", cmd);
+
+        if (strcmp(cmd, "help") == 0)
+        {
+            rc = app_cmd_help();
+        }
+        else if (strcmp(cmd, "exit") == 0)
+        {
+            rc = app_cmd_exit();
+        }
+        else if (strcmp(cmd, "fsinfo") == 0)
+        {
+            rc = app_cmd_fsinfo(&fs);
+        }
+        else if(strcmp(cmd, "ls") == 0)
+        {
+            rc = app_cmd_ls(&fs, fs.root_dir_off);
+        }
+        else
+        {
+            printf("Invalid command!\n");
+        }
+    }
+
+    printf("Error code: 0x%X", rc);
+
+    fat16_close_fs(&fs);
+
+    return 0;
 }

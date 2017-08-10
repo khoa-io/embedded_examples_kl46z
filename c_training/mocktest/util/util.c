@@ -59,13 +59,6 @@ void util_print_file_name(fat_file_record_t *pRecord);
  */
 void util_print_file_size(fat_file_record_t *pRecord);
 
-/*!
- * @brief Print file record to stdout.
- *
- * @param pRecord Point to record;
- */
-void util_print_file_record(fat_file_record_t *pRecord);
-
 /*******************************************************************************
  * Code
  ******************************************************************************/

@@ -22,6 +22,7 @@
 
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "hal/HAL.h"
@@ -108,11 +109,47 @@ int32_t fat16_close_fs(fat16_fs_t *fs)
 
 int32_t fat16_readfolder(fat16_fs_t *fs,
                          DWORD off,
-                         const fat_file_record_t *records,
-                         int32_t max)
+                         fat_file_record_t *records,
+                         int32_t max,
+                         int32_t *total)
 {
     /* Return code */
     int32_t rc = FAT_ERROR_NONE;
+
+    /* Stores data read from disk */
+    uint8_t *buff = NULL;
+
+    /* Indexing variable */
+    int32_t i = 0;
+    int32_t j = 0;
+
+    /* Current working record */
+    fat_file_record_t record;
+
+    if (fs->dev == NULL || fs->dev->status != HAL_STATUS_OPEN)
+    {
+        rc = FAT_ERROR_NOT_OPEN;
+        return rc;
+    }
+
+    buff = (uint8_t *)malloc(fs->header.sector_size);
+
+    fs->dev->read_multi_sector(fs->dev, off, fs->root_dir_size, buff);
+
+    for (i = 0; i < fs->header.root_entries_count; ++i)
+    {
+        memcpy(&record, buff + (i * FAT_FILE_RECORD_SIZE), FAT_FILE_RECORD_SIZE);
+
+        if (record.name[0] == FAT_DIR_STAT_FREE || record.name[0] == FAT_DIR_STAT_END)
+        {
+            break;
+        }
+
+        records[j++] = record;
+    }
+
+    free(buff);
+    *total = j;
 
     return rc;
 }
