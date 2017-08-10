@@ -132,7 +132,7 @@ int32_t fat16_readfolder(fat16_fs_t *fs,
         return rc;
     }
 
-    buff = (uint8_t *)malloc(fs->header.sector_size);
+    buff = (uint8_t *)malloc(fs->root_dir_size * fs->header.sector_size);
 
     fs->dev->read_multi_sector(fs->dev, off, fs->root_dir_size, buff);
 
@@ -145,11 +145,16 @@ int32_t fat16_readfolder(fat16_fs_t *fs,
             break;
         }
 
+        if (record.attrs & ATTR_VOLUME_ID)
+        {
+            continue;
+        }
+
         records[j++] = record;
     }
 
-    free(buff);
     *total = j;
+    free(buff);
 
     return rc;
 }

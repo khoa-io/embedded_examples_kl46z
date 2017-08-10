@@ -49,8 +49,17 @@
 /*!
  * @brief Print file record to stdout.
  *
- * @param pRecord Point to record;
+ * @param record File record.
  */
-void util_print_file_record(fat_file_record_t *pRecord);
+void util_print_file_record(fat_file_record_t *record);
+
+/*!
+ * @brief Get file name from a file record.
+ *
+ * @param record [int] File record.
+ * @param name [out] Store name of the file. This function treats as the param
+ * is large enough to store file name.
+ */
+void util_get_file_name(fat_file_record_t *record, int8_t *name);
 
 #endif /* _UTIL_H_ */

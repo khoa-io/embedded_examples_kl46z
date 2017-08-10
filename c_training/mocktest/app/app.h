@@ -51,13 +51,6 @@
 int32_t app_cmd_help();
 
 /*!
- * @brief Command "exit": exit program.
- *
- * @return Return APP_ERROR_EXIT
- */
-int32_t app_cmd_exit();
-
-/*!
  * @brief Command "fsinfo": read and display file system's information.
  *
  * @param fs Point to initialized FAT file system structure.
@@ -67,7 +60,8 @@ int32_t app_cmd_exit();
 int32_t app_cmd_fsinfo(fat16_fs_t *fs);
 
 /*!
- * @brief List all files and directories inside a folder and print to stdout.
+ * @brief Command "ls": list all files and directories inside a folder and
+ * print result to stdout.
  *
  * @param fs [in] File system structure.
  * @param off [in] First sector of the folder.
@@ -76,5 +70,17 @@ int32_t app_cmd_fsinfo(fat16_fs_t *fs);
  */
 int32_t app_cmd_ls(fat16_fs_t *fs, DWORD off);
 
+/*!
+ * @brief Command "cd": change working directory to a sub or parent directory
+ * (with one level due to simplyness of implementation).
+ *
+ * @param fs [in] File system structure.
+ * @param cwd [in,out] Current working directory's record.
+ * @param cwd_off [in,out] Current working directory's first sector.
+ *
+ * @return Return error code. Refer Error codes section.
+ */
+int32_t app_cmd_cd(fat16_fs_t *fs,
+                   fat_file_record_t *cwd, DWORD *cwd_off);
 
 #endif /* _APP_H_ */

@@ -48,106 +48,115 @@
 /*!
  * @brief Print file name to stdout.
  *
- * @param pRecord Point to record;
+ * @param record Point to record;
  */
-void util_print_file_name(fat_file_record_t *pRecord);
+void util_print_file_name(fat_file_record_t *record);
 
 /*!
  * @brief Print file size to stdout.
  *
- * @param pRecord Point to record;
+ * @param record Point to record;
  */
-void util_print_file_size(fat_file_record_t *pRecord);
+void util_print_file_size(fat_file_record_t *record);
 
 /*******************************************************************************
  * Code
  ******************************************************************************/
 
-void util_print_file_record(fat_file_record_t *pRecord)
+void util_print_file_record(fat_file_record_t *record)
 {
     /* Print last modified date */
     printf("%.2uh%.2um%.2us, %.2u-%.2u-%.4u\t",
-           GET_HOUR(pRecord->modified_time),
-           GET_MIN(pRecord->modified_time),
-           GET_SEC(pRecord->modified_time),
-           GET_DAY(pRecord->modified_date),
-           GET_MON(pRecord->modified_date),
-           GET_YEAR(pRecord->modified_date));
+           GET_HOUR(record->modified_time),
+           GET_MIN(record->modified_time),
+           GET_SEC(record->modified_time),
+           GET_DAY(record->modified_date),
+           GET_MON(record->modified_date),
+           GET_YEAR(record->modified_date));
 
     /* Print created date */
     printf("%.2uh%.2um%.2us, %.2u-%.2u-%.4u\t",
-           GET_HOUR(pRecord->created_time),
-           GET_MIN(pRecord->created_time),
-           GET_SEC(pRecord->created_time),
-           GET_DAY(pRecord->created_date),
-           GET_MON(pRecord->created_date),
-           GET_YEAR(pRecord->created_date));
+           GET_HOUR(record->created_time),
+           GET_MIN(record->created_time),
+           GET_SEC(record->created_time),
+           GET_DAY(record->created_date),
+           GET_MON(record->created_date),
+           GET_YEAR(record->created_date));
 
-    if (!(pRecord->attrs & ATTR_DIRECTORY))
+    if (!(record->attrs & ATTR_DIRECTORY))
     {
-        util_print_file_size(pRecord);
+        util_print_file_size(record);
     }
     else
     {
         /* Not yet implemented */
-        printf("\t");
+        printf("\t\t");
     }
 
-    util_print_file_name(pRecord);
+    util_print_file_name(record);
 
     printf("\n");
 }
 
 /* Anh Hải comment hàm này ko thực sự cần thiết với Long File Name */
-void util_print_file_name(fat_file_record_t *pRecord)
+void util_print_file_name(fat_file_record_t *record)
 {
-    /* Indexing on pRecord-name */
+    /* Indexing on record-name */
     int32_t i = 0;
     /* Indexing on buff */
     int32_t j = 0;
 
     uint8_t buff[13] = {0};
-
-    for (; i < 8; ++i)
-    {
-        if (pRecord->name[i] != 0x20)
-        {
-            buff[j++] = pRecord->name[i];
-        }
-    }
-
-    if (!(pRecord->attrs & ATTR_DIRECTORY))
-    {
-        buff[j++] = '.';
-
-        for (; i < 11; ++i)
-        {
-            if (pRecord->name[i])
-            {
-                buff[j++] = pRecord->name[i];
-            }
-        }
-    }
+    util_get_file_name(record, buff);
     printf("%s", buff);
 }
 
-void util_print_file_size(fat_file_record_t *pRecord)
+void util_get_file_name(fat_file_record_t *record, int8_t *name)
 {
-    if (pRecord->file_size < 1024)
+    /* Indexing on record-name */
+    int32_t i = 0;
+    /* Indexing on buff */
+    int32_t j = 0;
+
+    for (; i < 8; ++i)
     {
-        printf("%4.u B\t", pRecord->file_size);
+        if (record->name[i] != 0x20)
+        {
+            name[j++] = record->name[i];
+        }
+    }
+
+    if (!(record->attrs & ATTR_DIRECTORY))
+    {
+        name[j++] = '.';
+
+        for (; i < 11; ++i)
+        {
+            if (record->name[i])
+            {
+                name[j++] = record->name[i];
+            }
+        }
+    }
+}
+
+void util_print_file_size(fat_file_record_t *record)
+{
+    if (record->file_size < 1024)
+    {
+        printf("%4.u B\t\t", record->file_size);
         return;
     }
 
-    if (pRecord->file_size < (1024 * 1024))
+    if (record->file_size < (1024 * 1024))
     {
-        printf("%4.2f KB\t", pRecord->file_size * 1.0 / 1024);
+        printf("%4.2f KB\t\t", record->file_size * 1.0 / 1024);
         return;
     }
 
-    if (pRecord->file_size < (1024 * 1024 * 1024))
+    if (record->file_size < (1024 * 1024 * 1024))
     {
-        printf("%4.2f MB\t", pRecord->file_size * 1.0 / 1024 / 1024);
+        printf("%4.2f MB\t\t", record->file_size * 1.0 / 1024 / 1024);
         return;
     }
 }

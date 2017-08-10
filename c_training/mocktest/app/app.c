@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
+#include <ctype.h>
 
 #include "fat/fat.h"
 #include "util/util.h"
@@ -32,7 +33,6 @@
  * Definitions
  ******************************************************************************/
 #define BUFF_SIZE 512
-
 
 /*******************************************************************************
  * Code
@@ -119,7 +119,7 @@ int32_t app_cmd_ls(fat16_fs_t *fs, DWORD off)
         return rc;
     }
 
-    printf("Created\t\t\tLast modified\t\tSize\tName\n");
+    printf("Created\t\t\tLast modified\t\tSize\t\tName\n");
 
     for (i = 0; i < total; ++i)
     {
@@ -129,21 +129,82 @@ int32_t app_cmd_ls(fat16_fs_t *fs, DWORD off)
     return rc;
 }
 
+int32_t app_cmd_cd(fat16_fs_t *fs,
+                   fat_file_record_t *cwd, DWORD *cwd_off)
+{
+    /* Return code */
+    int32_t rc = APP_ERROR_NONE;
+
+    /* Stores all listed files and sub-folders */
+    fat_file_record_t records[BUFF_SIZE];
+
+    /* Indexing variable */
+    int32_t i = 0;
+
+    /* The number of listed files and directories */
+    int32_t total = 0;
+
+    /* Name of new directory. Can be: parent or sub directory name in ONE level */
+    int8_t name[BUFF_SIZE] = {0};
+    /* Temporary buffer */
+    int8_t buff[BUFF_SIZE] = {0};
+
+    printf("New directory: ");
+    scanf("%s", name);
+
+    for (i = 0; i < BUFF_SIZE; ++i)
+    {
+        name[i] = toupper(name[i]);
+    }
+
+    rc = fat16_readfolder(fs, *cwd_off, records, BUFF_SIZE, &total);
+    if (rc != FAT_ERROR_NONE)
+    {
+        printf("Cannot list folder!\n");
+        rc = APP_ERROR_UNKNOWN;
+        return rc;
+    }
+
+    for (i = 0; i < total; ++i)
+    {
+        memset(buff, 0, BUFF_SIZE);
+        util_get_file_name(&records[i], buff);
+        if (strcmp(buff, name) == 0)
+        {
+            if (records[i].attrs & ATTR_DIRECTORY == 0)
+            {
+                printf("Not a directory!\n");
+                break;
+            }
+
+            *cwd = records[i];
+            *cwd_off = ((cwd->first_cluster_lo - 2) * fs->header.cluster_size) +
+                       fs->data_off;
+
+            /* Sub-directory is root directory */
+            if (cwd->first_cluster_lo == 0)
+            {
+                *cwd_off = fs->root_dir_off;
+            }
+
+            printf("Changed working directory into %s\n", name);
+            break;
+        }
+    }
+
+    return rc;
+}
 int32_t app_cmd_help()
 {
     printf("Available commands:\n");
     printf("help\t-\tPrint this message\n");
     printf("fsinfo\t-\tDisplay file system information\n");
     printf("cwd\t-\tGet current working directory\n");
+    printf("cd\t-\tChange working directory\n");
     printf("ls\t-\tList all files and directories in a folder\n");
     printf("exit\t-\tExit program\n");
 
     return APP_ERROR_NONE;
-}
-
-int32_t app_cmd_exit()
-{
-    return APP_ERROR_EXIT;
 }
 
 int main(int argc, char *argv[])
@@ -161,7 +222,7 @@ int main(int argc, char *argv[])
     /* Current working directory. Default is root directory */
     fat_file_record_t cwd;
     /* First sector of current working directory */
-    DWORD cwdOff;
+    DWORD cwd_off;
 
     if (argc < 2)
     {
@@ -176,6 +237,8 @@ int main(int argc, char *argv[])
         return 0;
     }
 
+    cwd_off = fs.root_dir_off;
+
     app_cmd_help();
     for (rc = APP_ERROR_NONE; rc == APP_ERROR_NONE;)
     {
@@ -188,15 +251,20 @@ int main(int argc, char *argv[])
         }
         else if (strcmp(cmd, "exit") == 0)
         {
-            rc = app_cmd_exit();
+            rc = APP_ERROR_NONE;
+            break;
         }
         else if (strcmp(cmd, "fsinfo") == 0)
         {
             rc = app_cmd_fsinfo(&fs);
         }
-        else if(strcmp(cmd, "ls") == 0)
+        else if (strcmp(cmd, "ls") == 0)
         {
-            rc = app_cmd_ls(&fs, fs.root_dir_off);
+            rc = app_cmd_ls(&fs, cwd_off);
+        }
+        else if (strcmp(cmd, "cd") == 0)
+        {
+            rc = app_cmd_cd(&fs, &cwd, &cwd_off);
         }
         else
         {
@@ -204,7 +272,10 @@ int main(int argc, char *argv[])
         }
     }
 
-    printf("Error code: 0x%X", rc);
+    if (rc != APP_ERROR_NONE)
+    {
+        printf("Error code: 0x%X", rc);
+    }
 
     fat16_close_fs(&fs);
 
