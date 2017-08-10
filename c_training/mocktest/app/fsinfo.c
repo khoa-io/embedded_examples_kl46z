@@ -20,84 +20,77 @@
  * IN THE SOFTWARE.                                                            *
  ******************************************************************************/
 
-#include <stdint.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <string.h>
 
-#include "hal/HAL.h"
-#include "fat.h"
+#include "fat/fat.h"
+#include "app/app.h"
 
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
-/* Let default sector size is 512 bytes. So default buffer size is 512 bytes too
- */
 #define BUFF_SIZE 512
 
 /*******************************************************************************
- * Global variables
+ * Code
  ******************************************************************************/
 
-/* Use this to communicate with device */
-kmc_device_t *g_pDevice = NULL;
-
-/*******************************************************************************
- * APIs
- ******************************************************************************/
-
-int32_t fat16_open_fs(char *path, fat16_fs_t *fsp)
+int32_t app_cmd_fsinfo(fat16_fs_t *fs)
 {
-    /* Temporary variable to store return code from functions */
-    int32_t ret = FAT_ERROR_NONE;
+    int8_t buff[BUFF_SIZE] = {0};
 
-    /* Buffer to read first 512 bytes */
-    uint8_t buff[BUFF_SIZE];
+    printf("FILE SYSTEM INFORMATION: \n");
 
-    ret = kmc_open(path, &g_pDevice);
-    if (ret || g_pDevice->status != HAL_STATUS_OPEN)
+    memcpy(buff, &fs->header.fs_type, sizeof(fs->header.fs_type));
+    printf("Format: %s\n", buff);
+    memset(buff, 0, BUFF_SIZE);
+
+    memcpy(buff, &fs->header.oemName, sizeof(fs->header.oemName));
+    printf("OEM Name: %s\n", buff);
+    memset(buff, 0, BUFF_SIZE);
+
+    printf("Sector size (bytes): %u\n", fs->header.sector_size);
+    printf("Cluster size (sectors): %u\n", fs->header.cluster_size);
+    printf("Number of reserved sectors: %u\n",
+           fs->header.reserved_sectors_count);
+
+    printf("Number of FAT tables: %u\n", fs->header.fats_count);
+    printf("FAT tables start at sector 0x%X\n", fs->fat_off);
+    printf("FAT table size (byte): %u\n", fs->fat_size);
+
+    printf("Max number of root directory's entries: %u\n",
+           fs->header.root_entries_count);
+
+    printf("Total sectors: %u\n", fs->header.total_sectors);
+
+    if (fs->header.media_type == 0xF8)
     {
-        ret = FAT_ERROR_CANNOT_OPEN;
-        return ret;
+        printf("Media: Hard disk\n");
     }
-
-    /* Read first 512 bytes then initialize FAT12/16 header */
-    ret = g_pDevice->read_single_sector(g_pDevice, 0, buff);
-    if (ret < BUFF_SIZE)
+    else if (fs->header.media_type == 0xF0)
     {
-        ret = FAT_ERROR_CANNOT_OPEN;
-        return ret;
-    }
-
-    memcpy(&fsp->header, buff, sizeof(fat16_header_t));
-
-    g_pDevice->sector_size = fsp->header.sector_size;
-
-    fsp->fat_off = fsp->header.reserved_sectors_count;
-    fsp->fat_size = fsp->header.fat_size;
-    fsp->root_dir_off = fsp->fat_off + fsp->header.fats_count * fsp->fat_size;
-    /* root_entries_count * 32 always devide sector_size */
-    fsp->root_dir_size = fsp->header.root_entries_count * 32 / fsp->header.sector_size;
-    fsp->data_off = fsp->root_dir_off + fsp->root_dir_size;
-
-    return FAT_ERROR_NONE;
-}
-
-int32_t fat16_close_fs(fat16_fs_t *fsp)
-{
-    /* Return code */
-    int32_t ret = FAT_ERROR_NONE;
-
-    g_pDevice->close(g_pDevice);
-    g_pDevice = NULL;
-
-    if (ret)
-    {
-        ret = FAT_ERROR_CANNOT_CLOSE;
+        printf("Media: Soft disk 1.44M\n");
     }
     else
     {
-        ret = FAT_ERROR_NONE;
+        printf("Media code: 0x%X\n", fs->header.media_type);
     }
 
-    return ret;
+    if (fs->header.vol_label[0])
+    {
+        memcpy(buff, &fs->header.vol_label, sizeof(fs->header.vol_label));
+        printf("Volume label: %s\n", buff);
+        memset(buff, 0, BUFF_SIZE);
+    }
+    else
+    {
+        printf("Volume label: NO NAME\n");
+    }
+
+    printf("Root directory offset: 0x%X\n", fs->root_dir_off);
+    printf("Root directory size (byte): %u\n", fs->root_dir_size);
+    printf("Data region offset: 0x%X\n", fs->data_off);
+
+    return APP_ERROR_NONE;
 }

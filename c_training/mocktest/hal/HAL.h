@@ -27,19 +27,13 @@
  * Integer type definitions
  ******************************************************************************/
 
-#define BYTE uint8_t
+#define UCHAR uint8_t
 
-#define WORD uint16_t
+#define UINT uint32_t
 
-#define DWORD uint32_t
+#define INT int32_t
 
-#define UCHAR unsigned char
-
-#define UINT unsigned int
-
-#define INT int
-
-#define ULONG unsigned long
+#define ULONG uint64_t
 
 /*******************************************************************************
  * Status codes
@@ -69,6 +63,8 @@
  * Types and structues
  ******************************************************************************/
 
+#pragma pack(push)
+#pragma pack(1)
 /*!
  * @brief FAT module doesn't communicate with device directly. It does it
  * through HAL module by using this structure.
@@ -86,19 +82,30 @@ typedef struct kmc_device_t
     /** Callback functions **/
 
     /* Close this device */
-    uint32_t (*close)(struct kmc_device_t *device);
+    uint32_t (*close)(struct kmc_device_t *dev);
 
     /* Read and copy data on a sector to buffer */
-    uint32_t (*read_single_sector)(struct kmc_device_t *device,
+    uint32_t (*read_single_sector)(struct kmc_device_t *dev,
                                    uint64_t index,
                                    uint8_t *buff);
 
     /* Read and copy data on multi sectors to buffer */
-    uint32_t (*read_multi_sector)(struct kmc_device_t *device,
+    uint32_t (*read_multi_sector)(struct kmc_device_t *dev,
                                   uint64_t index,
                                   uint32_t num,
                                   uint8_t *buff);
 } kmc_device_t;
+
+#pragma pack(pop)
+
+typedef uint32_t (*kmc_close_callback)(kmc_device_t *);
+typedef uint32_t (*kmc_read_single_sector_callback)(kmc_device_t *,
+                                                    uint64_t,
+                                                    uint8_t *);
+typedef uint32_t (*kmc_read_multi_sector_callback)(kmc_device_t *,
+                                                   uint64_t,
+                                                   uint32_t,
+                                                   uint8_t *);
 
 /*******************************************************************************
  * API
@@ -111,7 +118,7 @@ typedef struct kmc_device_t
  *
  * @return Return error code. Read Error codes section for more information.
  */
-INT kmc_open(char *path, kmc_device_t *device);
+INT kmc_open(char *path, kmc_device_t **dev);
 
 /*!
  * @brief Close a disk image file with the given path.
@@ -120,7 +127,7 @@ INT kmc_open(char *path, kmc_device_t *device);
  *
  * @return Return error code. Read Error codes section for more information.
  */
-INT kmc_close(kmc_device_t *device);
+INT kmc_close(kmc_device_t *dev);
 
 /*!
  * @brief Read and copy data on sector to buffer.

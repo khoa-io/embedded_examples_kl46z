@@ -24,6 +24,16 @@
 #define _FAT_H_
 
 /*******************************************************************************
+ * Integer type definitions
+ ******************************************************************************/
+
+#define BYTE uint8_t
+
+#define WORD uint16_t
+
+#define DWORD uint32_t
+
+/*******************************************************************************
  * File system type codes
  ******************************************************************************/
 
@@ -42,8 +52,10 @@
 
 /* No error */
 #define FAT_ERROR_NONE 0
-/* File system is not open. */
-#define FAT_ERROR_FS_NOT_OPEN 0x00000001
+/* Cannot open the device. */
+#define FAT_ERROR_CANNOT_OPEN 0x1
+/* Cannot close the device */
+#define FAT_ERROR_CANNOT_CLOSE 0x2
 /* Unknown error */
 #define FAT_ERROR_UNKNOWN 0xFFFFFFFF
 
@@ -71,18 +83,18 @@
     BYTE oemName[8]
 
 /* Fields start at offset 11 */
-#define FAT_BPB            \
-    WORD sector_size;      \
-    BYTE cluster_size;     \
-    WORD reserved_sectors; \
-    BYTE fats;             \
-    WORD root_entries;     \
-    WORD total_sectors;    \
-    BYTE media_type;       \
-    WORD fat_size;         \
-    WORD track_size;       \
-    WORD heads;            \
-    DWORD hidden_sectors;  \
+#define FAT_BPB                  \
+    WORD sector_size;            \
+    BYTE cluster_size;           \
+    WORD reserved_sectors_count; \
+    BYTE fats_count;             \
+    WORD root_entries_count;     \
+    WORD total_sectors;          \
+    BYTE media_type;             \
+    WORD fat_size;               \
+    WORD track_size;             \
+    WORD heads;                  \
+    DWORD hidden_sectors;        \
     DWORD total_sectors_ex
 
 #pragma pack(push)
@@ -101,7 +113,7 @@ struct fat16_header
     BYTE boot_signature;
     DWORD vol_serial;
     BYTE vol_label[11];
-    BYTE file_system_type[8];
+    BYTE fs_type[8];
 };
 
 struct fat_file_record
@@ -129,16 +141,16 @@ struct fat16_fs
 {
     FILE *fp;
     struct fat16_header header;
-    /* First FAT table's offset */
-    DWORD fatOff;
-    /* Size of each FAT table (byte) */
-    DWORD fatSize;
-    /* Root directory's offset */
-    DWORD rootDirOff;
-    /* Root directory's size (byte) */
-    DWORD rootDirSize;
-    /* Data's offset */
-    DWORD dataOff;
+    /* First sector of FAT Table */
+    DWORD fat_off;
+    /* Size of each FAT table (sectors) */
+    DWORD fat_size;
+    /* First sector of root directory */
+    DWORD root_dir_off;
+    /* Root directory's size (sectors) */
+    DWORD root_dir_size;
+    /* First sector of data region */
+    DWORD data_off;
 };
 
 typedef struct fat16_header fat16_header_t;
@@ -164,9 +176,9 @@ int32_t fat_check_fs(char *path);
 
 /*!
  * @brief Open a FAT12/16 file system. You should use function fat_check_fs to
- * check if the file system is FAT12/16 file system first.
+ * check if the file system is FAT12/16 file system before calling this.
  *
- * @param path [in] Path to the input file system.
+ * @param path [in] Path of the device.
  * @param fsp [out] Point to FAT12/16 file system data structure.
  *
  * @return Return error code. Read Error codes section for more information.

@@ -13,6 +13,7 @@
         "string.h": "c",
         "haldef.h": "c",
         "fat.h": "c",
-        "haltypes.h": "c"
+        "haltypes.h": "c",
+        "app.h": "c"
     }
 }

@@ -24,7 +24,6 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "hal/haltypes.h"
 #include "fat/fat.h"
 #include "util/util.h"
 
@@ -160,60 +159,6 @@ void util_print_file_size(fat_file_record_t *pRecord)
     }
 }
 
-void util_print_fs_info(fat16_fs_t *fsp)
-{
-    /* Not yet fully implemented */
-    int8_t buff[BUFF_SIZE] = {0};
-
-    memcpy(buff, &fsp->header.file_system_type, sizeof(fsp->header.file_system_type));
-    printf("File system type: %s\n", buff);
-    memset(buff, 0, BUFF_SIZE);
-
-    memcpy(buff, &fsp->header.oemName, sizeof(fsp->header.oemName));
-    printf("OEM Name: %s\n", buff);
-    memset(buff, 0, BUFF_SIZE);
-
-    printf("Sector size (byte): %u\n", fsp->header.sector_size);
-    printf("Cluster size (sector): %u\n", fsp->header.cluster_size);
-
-    printf("FAT tables offset = 0x%X\n", fsp->fatOff);
-
-    printf("Number of FAT tables: %u\n", fsp->header.fats);
-
-    printf("FAT table size (byte): %u\n", fsp->fatSize);
-
-    printf("Max number of root directory's entries: %u\n", fsp->header.root_entries);
-    printf("Total sectors: %u\n", fsp->header.total_sectors);
-
-    if (fsp->header.media_type == 0xF8)
-    {
-        printf("Media: Hard disk\n");
-    }
-    else if (fsp->header.media_type == 0xF0)
-    {
-        printf("Media: Soft disk 1.44M\n");
-    }
-    else
-    {
-        printf("Media code: 0x%X\n", fsp->header.media_type);
-    }
-
-    if (fsp->header.vol_label[0])
-    {
-        memcpy(buff, &fsp->header.vol_label, sizeof(fsp->header.vol_label));
-        printf("Volume label: %s\n", buff);
-        memset(buff, 0, BUFF_SIZE);
-    }
-    else
-    {
-        printf("Volume label: NO NAME\n");
-    }
-
-    printf("Root directory offset: 0x%X\n", fsp->rootDirOff);
-    printf("Root directory size (byte): %u\n", fsp->rootDirSize);
-    printf("Data region offset: 0x%X\n", fsp->dataOff);
-}
-
 int32_t util_ls(fat16_fs_t *fsp, char *dir)
 {
     /* Return code */
@@ -238,9 +183,9 @@ int32_t util_ls(fat16_fs_t *fsp, char *dir)
     }
 
     /* Listing in root directory */
-    fseek(fsp->fp, fsp->rootDirOff, SEEK_SET);
+    fseek(fsp->fp, fsp->root_dir_off, SEEK_SET);
 
-    for (i = 0; i < fsp->header.root_entries; ++i)
+    for (i = 0; i < fsp->header.root_entries_count; ++i)
     {
         ret = fread((void *)&record, FAT_FILE_RECORD_SIZE, 1, fsp->fp);
 

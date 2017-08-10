@@ -24,22 +24,60 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "hal/haltypes.h"
 #include "fat/fat.h"
-#include "util/util.h"
-#include "hal/HAL.h"
+#include "app/app.h"
 
 /*******************************************************************************
- * Prototypes
+ * Global variables
  ******************************************************************************/
+
+fat16_fs_t g_fs;
 
 /*******************************************************************************
  * Code
  ******************************************************************************/
 
+int32_t app_cmd_help()
+{
+    printf("Available commands:\n");
+    printf("help\t-\tPrint this message\n");
+    printf("fsinfo\t-\tDisplay file system information\n");
+    printf("exit\t-\tExit program\n");
+
+    return APP_ERROR_NONE;
+}
+
+int32_t app_cmd_exit()
+{
+    return APP_ERROR_EXIT;
+}
+
+int32_t app_prompt()
+{
+    int32_t rc = APP_ERROR_NONE;
+    int8_t cmd[MAX_CMD_LEN] = {0};
+
+    printf("cmd: ");
+    scanf("%s", cmd);
+
+    if (strcmp(cmd, "help") == 0)
+    {
+        rc = app_cmd_help();
+    }
+    else if (strcmp(cmd, "exit") == 0)
+    {
+        rc = app_cmd_exit();
+    }
+    else if (strcmp(cmd, "fsinfo") == 0)
+    {
+        rc = app_cmd_fsinfo(&g_fs);
+    }
+
+    return rc;
+}
+
 int main(int argc, char *argv[])
 {
-    fat16_fs_t fs;
     int8_t buff[1024] = {0};
 
     int32_t ret = 0;
@@ -50,20 +88,20 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    ret = kmc_open(argv[1], &fs);
-    if (ret)
+    ret = fat16_open_fs(argv[1], &g_fs);
+    if (ret != FAT_ERROR_NONE)
     {
         printf("Error code: %d\n", ret);
         return 0;
     }
 
-    printf("File system info:\n");
-    util_print_fs_info(&fs);
+    app_cmd_help();
+    for (ret = APP_ERROR_NONE; ret == APP_ERROR_NONE;)
+    {
+        ret = app_prompt();
+    }
 
-    printf("Root directory content:\n");
-    util_ls(&fs, NULL);
-
-    kmc_close(&fs);
+    fat16_close_fs(&g_fs);
 
     return 0;
 }

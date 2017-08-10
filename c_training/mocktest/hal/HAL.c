@@ -22,6 +22,7 @@
 
 #include <stdint.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "HAL.h"
 
@@ -32,6 +33,38 @@
 #define SECTOR_SIZE 512
 
 /*******************************************************************************
+ * Prototype
+ ******************************************************************************/
+
+/*!
+ * @brief Read a single sector's data and copy to buff.
+ *
+ * @param dev Device structure.
+ * @param index The sector to read.
+ * @param buff The buffer to store data
+ *
+ * @return Return the number of read bytes.
+ */
+static uint32_t read_single_sector(kmc_device_t *dev,
+                                   uint64_t index,
+                                   uint8_t *buff);
+
+/*!
+ * @brief Read multi sectors data and copy to buff.
+ *
+ * @param dev Device structure.
+ * @param index The first sector to read.
+ * @param num The number of sectors.
+ * @param buff The buffer to store data
+ *
+ * @return Return the number of read bytes.
+ */
+static uint32_t read_multi_sector(kmc_device_t *dev,
+                                  uint64_t index,
+                                  uint32_t num,
+                                  uint8_t *buff);
+
+/*******************************************************************************
  * Global variables
  ******************************************************************************/
 
@@ -39,17 +72,45 @@
 FILE *g_fp;
 
 /* Keep track of the device */
-kmc_device_t g_device = {HAL_STATUS_UNDEFINED,
-                         SECTOR_SIZE,
-                         kmc_close,
-                         kmc_read_sector,
-                         kmc_read_multi_sector};
+kmc_device_t g_dev = {
+    .status = HAL_STATUS_UNDEFINED,
+    .sector_size = SECTOR_SIZE,
+    .close = (kmc_close_callback)kmc_close,
+    .read_single_sector = (kmc_read_single_sector_callback)read_single_sector,
+    .read_multi_sector = (kmc_read_multi_sector_callback)read_multi_sector,
+};
 
 /*******************************************************************************
  * Code
  ******************************************************************************/
+static uint32_t read_single_sector(kmc_device_t *dev,
+                                   uint64_t index,
+                                   uint8_t *buff)
+{
+    /* Number of read bytes */
+    uint32_t n = 0;
 
-INT kmc_open(char *path, kmc_device_t *device)
+    if (dev->status != HAL_STATUS_OPEN)
+    {
+        n = 0;
+    }
+    else
+    {
+        n = kmc_read_sector(index, buff);
+    }
+
+    return n;
+}
+
+static uint32_t read_multi_sector(kmc_device_t *dev,
+                                  uint64_t index,
+                                  uint32_t num,
+                                  uint8_t *buff)
+{
+    return kmc_read_multi_sector(index, num, buff);
+}
+
+INT kmc_open(char *path, kmc_device_t **dev)
 {
     /* Return code */
     int32_t ret = HAL_ERROR_NONE;
@@ -64,8 +125,8 @@ INT kmc_open(char *path, kmc_device_t *device)
     else
     {
         /* Open file successfully */
-        device = &g_device;
-        device->status = HAL_STATUS_OPEN;
+        g_dev.status = HAL_STATUS_OPEN;
+        *dev = &g_dev;
     }
 
     return ret;
@@ -94,17 +155,25 @@ INT kmc_close(kmc_device_t *device)
 
 INT kmc_read_sector(ULONG index, UCHAR *buff)
 {
+    /* Return code */
+    int32_t rc = 0;
+
     /* Indexing variable */
     int32_t i = 0;
 
     /* Store data from fgetc */
     uint32_t c;
 
-    fseek(g_fp, index * g_device.sector_size, SEEK_SET);
+    rc = fseek(g_fp, index * g_dev.sector_size, SEEK_SET);
+    if (rc)
+    {
+        /* Cannot set file position */
+        return 0;
+    }
 
     /* I dont's use fread because if file size < 512 bytes (cannot happen in
     real life but still count) and data was read but fread still returns 0 */
-    for (; i < index * g_device.sector_size; ++i)
+    for (i = 0; i < g_dev.sector_size; ++i)
     {
         c = fgetc(g_fp);
         if (c == EOF)
@@ -131,10 +200,10 @@ INT kmc_read_multi_sector(ULONG index, UINT num, UCHAR *buff)
     /* Read from sector index to sector index + num */
     for (i = 0; i < num; ++i)
     {
-        n = kmc_read_sector(index + i, buff + i * g_device.sector_size);
+        n = kmc_read_sector(index + i, buff + i * g_dev.sector_size);
         ret += n;
 
-        if (n < g_device.sector_size)
+        if (n < g_dev.sector_size)
         {
             /* Reach end of file */
             break;

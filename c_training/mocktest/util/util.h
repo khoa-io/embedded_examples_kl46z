@@ -31,7 +31,6 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "hal/haltypes.h"
 #include "fat/fat.h"
 
 /*******************************************************************************
@@ -46,13 +45,6 @@
 /*******************************************************************************
  * APIs
  ******************************************************************************/
-
-/*!
- * @brief Print FAT12/16 file system information to standard output.
- *
- * @param fsp Point to an open FAT12/16 file system.
- */
-void util_print_fs_info(fat16_fs_t *fsp);
 
 /*!
  * @brief List all files and folder in a directory.
