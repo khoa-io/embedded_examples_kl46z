@@ -107,11 +107,16 @@ int32_t fat16_close_fs(fat16_fs_t *fs)
     return ret;
 }
 
-int32_t fat16_readfolder(fat16_fs_t *fs,
-                         DWORD off,
-                         fat_file_record_t *records,
-                         int32_t max,
-                         int32_t *total)
+DWORD fat_get_cluster_off(fat16_fs_t *fs, DWORD cluster_num)
+{
+    return ((cluster_num - 2) * fs->header.cluster_size) + fs->data_off;
+}
+
+int32_t fat16_read_folder(fat16_fs_t *fs,
+                          DWORD off,
+                          fat_file_record_t *records,
+                          int32_t max,
+                          int32_t *total)
 {
     /* Return code */
     int32_t rc = FAT_ERROR_NONE;
@@ -155,6 +160,36 @@ int32_t fat16_readfolder(fat16_fs_t *fs,
 
     *total = j;
     free(buff);
+
+    return rc;
+}
+
+int32_t fat16_read_file(fat16_fs_t *fs,
+                        fat_file_record_t *record,
+                        int8_t *buff)
+{
+    /* Return code */
+    int32_t rc = FAT_ERROR_NONE;
+
+    /* Indexing variable */
+    int32_t i = 0;
+
+    /* Current working sector */
+    DWORD curr = fat_get_cluster_off(fs, record->first_cluster_lo);
+
+    for (i = 0; curr < 0xFF8; ++i)
+    {
+        rc = fs->dev->read_multi_sector(fs->dev,
+                                        curr,
+                                        fs->header.cluster_size,
+                                        buff + i * fs->header.cluster_size);
+
+        if (rc == 0)
+        {
+            rc = FAT_ERROR_CANNOT_READ;
+            break;
+        }
+    }
 
     return rc;
 }

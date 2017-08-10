@@ -80,7 +80,16 @@ int32_t app_cmd_ls(fat16_fs_t *fs, DWORD off);
  *
  * @return Return error code. Refer Error codes section.
  */
-int32_t app_cmd_cd(fat16_fs_t *fs,
-                   fat_file_record_t *cwd, DWORD *cwd_off);
+int32_t app_cmd_cd(fat16_fs_t *fs, fat_file_record_t *cwd, DWORD *cwd_off);
+
+/*!
+ * @brief Command "cat": read data of a file in current working directory and
+ * print it to stdout.
+ *
+ * @param fs [in] File system structure.
+ *
+ * @return Return error code. Refer Error codes section.
+ */
+int32_t app_cmd_cat(fat16_fs_t *fs, fat_file_record_t *cwd, DWORD *cwd_off);
 
 #endif /* _APP_H_ */

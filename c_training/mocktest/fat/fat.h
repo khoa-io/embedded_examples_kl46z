@@ -58,6 +58,8 @@
 #define FAT_ERROR_CANNOT_CLOSE 0x2
 /* File system is not opened */
 #define FAT_ERROR_NOT_OPEN 0x3
+/* Cannot read file */
+#define FAT_ERROR_CANNOT_READ 0x4
 /* Unknown error */
 #define FAT_ERROR_UNKNOWN 0xFFFFFFFF
 
@@ -226,6 +228,16 @@ int32_t fat16_open_fs(char *path, fat16_fs_t *fs);
 int32_t fat16_close_fs(fat16_fs_t *fs);
 
 /*!
+ * @brief Get offset of the first sector stores file data.
+ *
+ * @param fs Point to an open FAT12/16 file system.
+ * @param cluster_num Cluster number.
+ *
+ * @param Return the offset or 0.
+ */
+DWORD fat_get_cluster_off(fat16_fs_t *fs, DWORD cluster_num);
+
+/*!
  * @brief List all files and directories inside a folder.
  *
  * @param fs [in] File system structure.
@@ -236,10 +248,33 @@ int32_t fat16_close_fs(fat16_fs_t *fs);
  *
  * @return Return error code. Refer Error codes section.
  */
-int32_t fat16_readfolder(fat16_fs_t *fs,
-                         DWORD off,
-                         fat_file_record_t *records,
-                         int32_t max,
-                         int32_t *total);
+int32_t fat16_read_folder(fat16_fs_t *fs,
+                          DWORD off,
+                          fat_file_record_t *records,
+                          int32_t max,
+                          int32_t *total);
+
+/*!
+ * @brief Read and copy all file data to buffer.
+ *
+ * @param fs [in] File system structure.
+ * @param record [in] Record of read file.
+ * @param buff [out] Store file data. This function treats that buff is wide
+ * enough to store all file data (due to simplyness of implementation).
+ *
+ * @return Return error code. Refer Error codes section.
+ */
+int32_t fat16_read_file(fat16_fs_t *fs,
+                        fat_file_record_t *record,
+                        int8_t *buff);
+
+/*!
+ * @brief Get next cluster number.
+ *
+ * @param fs File system structure.
+ * @param curr Current cluster number.
+ *
+ */
+DWORD fat16_get_next_cluster(fat16_fs_t *fs, DWORD curr);
 
 #endif /* _FAT_H_ */
