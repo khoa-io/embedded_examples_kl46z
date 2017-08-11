@@ -27,7 +27,7 @@
 #include <stdbool.h>
 
 #include "fat/fat.h"
-#include "util/util.h"
+#include "util.h"
 #include "app/app.h"
 
 /*******************************************************************************

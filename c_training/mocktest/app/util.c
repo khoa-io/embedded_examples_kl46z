@@ -25,13 +25,17 @@
 #include <string.h>
 
 #include "fat/fat.h"
-#include "util/util.h"
+#include "util.h"
 
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
 
 #define BUFF_SIZE 13
+
+/*******************************************************************************
+ * Macros to time from fat_file_record_t
+ ******************************************************************************/
 
 #define GET_HOUR(t) (((uint16_t)(t)) >> 11)
 #define GET_MIN(t) ((((uint16_t)(t)) >> 5) & 0x3F)
@@ -46,13 +50,6 @@
  ******************************************************************************/
 
 /*!
- * @brief Print file name to stdout.
- *
- * @param record Point to record;
- */
-void util_print_file_name(fat_file_record_t *record);
-
-/*!
  * @brief Print file size to stdout.
  *
  * @param record Point to record;
@@ -65,6 +62,9 @@ void util_print_file_size(fat_file_record_t *record);
 
 void util_print_file_record(fat_file_record_t *record)
 {
+    /* File name */
+    uint8_t name[13] = {0};
+
     /* Print last modified date */
     printf("%.2uh%.2um%.2us, %.2u-%.2u-%.4u\t",
            GET_HOUR(record->modified_time),
@@ -93,22 +93,18 @@ void util_print_file_record(fat_file_record_t *record)
         printf("\t\t");
     }
 
-    util_print_file_name(record);
-
-    printf("\n");
+    util_get_file_name(record, name);
+    printf("%s\n", name);
 }
 
 /* Anh Hải comment hàm này ko thực sự cần thiết với Long File Name */
+/* TODO */
 void util_print_file_name(fat_file_record_t *record)
 {
     /* Indexing on record-name */
     int32_t i = 0;
     /* Indexing on buff */
     int32_t j = 0;
-
-    uint8_t buff[13] = {0};
-    util_get_file_name(record, buff);
-    printf("%s", buff);
 }
 
 void util_get_file_name(fat_file_record_t *record, int8_t *name)
@@ -144,19 +140,19 @@ void util_print_file_size(fat_file_record_t *record)
 {
     if (record->file_size < 1024)
     {
-        printf("%4.u B\t\t", record->file_size);
+        printf("%5.5u B\t\t", record->file_size);
         return;
     }
 
     if (record->file_size < (1024 * 1024))
     {
-        printf("%4.2f KB\t\t", record->file_size * 1.0 / 1024);
+        printf("%5.2f KB\t\t", record->file_size * 1.0 / 1024);
         return;
     }
 
     if (record->file_size < (1024 * 1024 * 1024))
     {
-        printf("%4.2f MB\t\t", record->file_size * 1.0 / 1024 / 1024);
+        printf("%5.2f MB\t\t", record->file_size * 1.0 / 1024 / 1024);
         return;
     }
 }
