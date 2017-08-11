@@ -93,7 +93,11 @@ module yet */
  * Definitions
  ******************************************************************************/
 
+/* Size of a file record in FAT */
 #define FAT_FILE_RECORD_SIZE 32
+
+/* End of cluster chain value (12 bit LSB) */
+#define FAT_EOC 0xFF8
 
 /* Fields start at offset 0 */
 #define FAT_PREAMBLE \
@@ -266,15 +270,6 @@ int32_t fat16_read_folder(fat16_fs_t *fs,
  */
 int32_t fat16_read_file(fat16_fs_t *fs,
                         fat_file_record_t *record,
-                        int8_t *buff);
-
-/*!
- * @brief Get next cluster number.
- *
- * @param fs File system structure.
- * @param curr Current cluster number.
- *
- */
-DWORD fat16_get_next_cluster(fat16_fs_t *fs, DWORD curr);
+                        uint8_t *buff);
 
 #endif /* _FAT_H_ */

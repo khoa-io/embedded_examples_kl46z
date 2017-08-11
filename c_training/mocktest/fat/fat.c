@@ -166,22 +166,40 @@ int32_t fat16_read_folder(fat16_fs_t *fs,
 
 int32_t fat16_read_file(fat16_fs_t *fs,
                         fat_file_record_t *record,
-                        int8_t *buff)
+                        uint8_t *buff)
 {
     /* Return code */
     int32_t rc = FAT_ERROR_NONE;
 
     /* Indexing variable */
-    int32_t i = 0;
+    size_t i = 0;
+    size_t j = 0;
+
+    /* FAT Table data*/
+    uint8_t *tab = NULL;
 
     /* Current working sector */
-    DWORD curr = fat_get_cluster_off(fs, record->first_cluster_lo);
+    DWORD off = 0;
 
-    for (i = 0; curr < 0xFF8; ++i)
+    /* Current working cluster's number */
+    DWORD curr = record->first_cluster_lo;
+
+    off = fat_get_cluster_off(fs, curr);
+
+    tab = (uint8_t *) malloc(fs->fat_size * fs->header.sector_size);
+
+
+    /* Read FAT table */
+    rc = fs->dev->read_multi_sector(fs->dev, fs->fat_off, fs->fat_size, tab);
+    if (rc == 0)
     {
-        rc = fs->dev->read_multi_sector(fs->dev,
-                                        curr,
-                                        fs->header.cluster_size,
+        rc = FAT_ERROR_CANNOT_READ;
+        return rc;
+    }
+
+    for (i = 0; (curr & 0xFFF) < FAT_EOC; ++i)
+    {
+        rc = fs->dev->read_multi_sector(fs->dev, off, fs->header.cluster_size,
                                         buff + i * fs->header.cluster_size);
 
         if (rc == 0)
@@ -189,7 +207,14 @@ int32_t fat16_read_file(fat16_fs_t *fs,
             rc = FAT_ERROR_CANNOT_READ;
             break;
         }
+
+        rc = FAT_ERROR_NONE;
+
+        j = (size_t)(curr * 1.5);
+        curr = (tab[j] << 4) | ( tab[j+1] >> 4);
     }
+
+    free(tab);
 
     return rc;
 }

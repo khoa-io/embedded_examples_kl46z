@@ -84,7 +84,7 @@ int32_t app_cmd_cd(fat16_fs_t *fs, fat_file_record_t *cwd, DWORD *cwd_off);
 
 /*!
  * @brief Command "cat": read data of a file in current working directory and
- * print it to stdout.
+ * print it to stdout. Note that this function work only for small file.
  *
  * @param fs [in] File system structure.
  *
