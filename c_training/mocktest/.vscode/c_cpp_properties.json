@@ -1,6 +1,5 @@
 {
-    "configurations": [
-        {
+    "configurations": [{
             "name": "Mac",
             "includePath": [
                 "/usr/include",
@@ -28,7 +27,7 @@
                 "/usr/lib/gcc/x86_64-redhat-linux/7/include",
                 "${workspaceRoot}"
             ],
-            "defines": [],
+            "defines": [""],
             "intelliSenseMode": "clang-x64",
             "browse": {
                 "path": [

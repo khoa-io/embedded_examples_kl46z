@@ -20,11 +20,11 @@
  * IN THE SOFTWARE.                                                            *
  ******************************************************************************/
 
-#include <stdio.h>
-#include <stdint.h>
-#include <string.h>
 #include <ctype.h>
 #include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
 
 #include "fat/fat.h"
 #include "util.h"
@@ -34,55 +34,56 @@
  * Definitions
  ******************************************************************************/
 #define BUFF_SIZE 512
+/* TODO remove when done */
 
 /*******************************************************************************
  * Code
  ******************************************************************************/
 
-int32_t app_cmd_fsinfo(fat16_fs_t *fs)
+int32_t app_cmd_fsinfo(fat_fs_t *fs)
 {
     int8_t buff[BUFF_SIZE] = {0};
 
     printf("FILE SYSTEM INFORMATION: \n");
 
-    memcpy(buff, &fs->header.fs_type, sizeof(fs->header.fs_type));
+    memcpy(buff, fs->fs_name, sizeof(fs->bs.fat16_bs_ex.fs_type));
     printf("Format: %s\n", buff);
     memset(buff, 0, BUFF_SIZE);
 
-    memcpy(buff, &fs->header.oemName, sizeof(fs->header.oemName));
+    memcpy(buff, &fs->bs.oem_name, sizeof(fs->bs.oem_name));
     printf("OEM Name: %s\n", buff);
     memset(buff, 0, BUFF_SIZE);
 
-    printf("Sector size (bytes): %u\n", fs->header.sector_size);
-    printf("Cluster size (sectors): %u\n", fs->header.cluster_size);
-    printf("Number of reserved sectors: %u\n",
-           fs->header.reserved_sectors_count);
+    printf("Sector size (bytes): %u\n", fs->bs.sec_sz);
+    printf("Cluster size (sectors): %u\n", fs->bs.clus_sz);
+    printf("Number of reserved sectors: %u\n", fs->bs.rsvd_sec_cnt);
 
-    printf("Number of FAT tables: %u\n", fs->header.fats_count);
-    printf("FAT tables start at sector 0x%X\n", fs->fat_off);
-    printf("FAT table size (sector): %u\n", fs->fat_size);
+    printf("Number of FAT tables: %u\n", fs->bs.fat_cnt);
+    printf("FAT tables start at sector 0x%X\n", fs->fat_sec_num);
+    printf("FAT table size (sector): %u\n", fs->fat_sz);
 
-    printf("Max number of root directory's entries: %u\n",
-           fs->header.root_entries_count);
+    printf("Max number of root directory's entries: %u\n", fs->bs.root_ent_cnt);
 
-    printf("Total sectors: %u\n", fs->header.total_sectors);
+    printf("Total of sectors: %u\n", fs->total_sec_cnt);
+    printf("Total of clusters: %u\n", fs->total_clus_cnt);
 
-    if (fs->header.media_type == 0xF8)
+    if (fs->bs.media_type == 0xF8)
     {
         printf("Media: Hard disk\n");
     }
-    else if (fs->header.media_type == 0xF0)
+    else if (fs->bs.media_type == 0xF0)
     {
         printf("Media: Soft disk 1.44M\n");
     }
     else
     {
-        printf("Media code: 0x%X\n", fs->header.media_type);
+        printf("Media code: 0x%X\n", fs->bs.media_type);
     }
 
-    if (fs->header.vol_label[0])
+    if (fs->bs.fat16_bs_ex.label[0])
     {
-        memcpy(buff, &fs->header.vol_label, sizeof(fs->header.vol_label));
+        memcpy(buff, &fs->bs.fat16_bs_ex.label,
+               sizeof(fs->bs.fat16_bs_ex.label));
         printf("Volume label: %s\n", buff);
         memset(buff, 0, BUFF_SIZE);
     }
@@ -91,17 +92,18 @@ int32_t app_cmd_fsinfo(fat16_fs_t *fs)
         printf("Volume label: NO NAME\n");
     }
 
-    printf("Root directory offset: 0x%X\n", fs->root_dir_off);
-    printf("Root directory size (byte): %u\n", fs->root_dir_size);
-    printf("Data region offset: 0x%X\n", fs->data_off);
+    printf("Root directory offset: 0x%X\n", fs->root_dir_sec_num);
+    printf("Root directory size (sectors): %u\n", fs->root_dir_sz);
+    printf("Data region offset: 0x%X\n", fs->data_sec_num);
+    printf("Data region size (sectors): 0x%X\n", fs->data_sz);
 
     return APP_ERROR_NONE;
 }
 
-int32_t app_cmd_ls(fat16_fs_t *fs, DWORD off)
+int32_t app_cmd_ls(fat_fs_t *fs, DWORD off)
 {
     /* Stores all listed files and sub-folders */
-    fat_file_record_t records[BUFF_SIZE];
+    fat_frec_t records[BUFF_SIZE];
 
     /* Return code */
     int32_t rc = FAT_ERROR_NONE;
@@ -112,7 +114,7 @@ int32_t app_cmd_ls(fat16_fs_t *fs, DWORD off)
     /* The number of listed files and directories */
     int32_t total = 0;
 
-    rc = fat16_read_folder(fs, off, records, BUFF_SIZE, &total);
+    rc = fat_read_folder(fs, off, records, BUFF_SIZE, &total);
     if (rc != FAT_ERROR_NONE)
     {
         printf("Cannot list folder!\n");
@@ -127,17 +129,18 @@ int32_t app_cmd_ls(fat16_fs_t *fs, DWORD off)
         util_print_file_record(&records[i]);
     }
 
+    printf("Total %d\n", total);
+
     return rc;
 }
 
-int32_t app_cmd_cd(fat16_fs_t *fs,
-                   fat_file_record_t *cwd, DWORD *cwd_off)
+int32_t app_cmd_cd(fat_fs_t *fs, fat_frec_t *cwd, DWORD *cwd_sec_num)
 {
     /* Return code */
     int32_t rc = APP_ERROR_NONE;
 
     /* Stores all listed files and sub-folders */
-    fat_file_record_t records[BUFF_SIZE];
+    fat_frec_t records[BUFF_SIZE];
 
     /* Indexing variable */
     int32_t i = 0;
@@ -145,8 +148,9 @@ int32_t app_cmd_cd(fat16_fs_t *fs,
     /* The number of listed files and directories */
     int32_t total = 0;
 
-    /* Name of new directory. Can be: parent or sub directory name in ONE level */
-    int8_t name[BUFF_SIZE] = {0};
+    /* Name of new directory. Can be: parent or sub directory name in ONE level
+     */
+    char name[BUFF_SIZE] = {0};
     /* Temporary buffer */
     int8_t buff[BUFF_SIZE] = {0};
 
@@ -161,7 +165,7 @@ int32_t app_cmd_cd(fat16_fs_t *fs,
         name[i] = toupper(name[i]);
     }
 
-    rc = fat16_read_folder(fs, *cwd_off, records, BUFF_SIZE, &total);
+    rc = fat_read_folder(fs, *cwd_sec_num, records, BUFF_SIZE, &total);
     if (rc != FAT_ERROR_NONE)
     {
         printf("Cannot list folder!\n");
@@ -182,12 +186,12 @@ int32_t app_cmd_cd(fat16_fs_t *fs,
             }
 
             *cwd = records[i];
-            *cwd_off = fat_get_cluster_off(fs, cwd->first_cluster_lo);
+            *cwd_sec_num = FAT_CLUS_SEC_NUM(fs, cwd->first_clus_lo);
 
             /* Sub-directory is root directory */
-            if (cwd->first_cluster_lo == 0)
+            if (cwd->first_clus_lo == 0)
             {
-                *cwd_off = fs->root_dir_off;
+                *cwd_sec_num = fs->root_dir_sec_num;
             }
 
             changed = true;
@@ -204,14 +208,14 @@ int32_t app_cmd_cd(fat16_fs_t *fs,
     return rc;
 }
 
-int32_t app_cmd_cat(fat16_fs_t *fs, fat_file_record_t *cwd, DWORD *cwd_off)
+int32_t app_cmd_cat(fat_fs_t *fs, fat_frec_t *cwd, DWORD *cwd_sec_num)
 {
 
     /* Return code */
     int32_t rc = APP_ERROR_NONE;
 
     /* Stores all listed files and sub-folders */
-    fat_file_record_t records[BUFF_SIZE];
+    fat_frec_t records[BUFF_SIZE];
 
     /* Indexing variable */
     int32_t i = 0;
@@ -219,13 +223,11 @@ int32_t app_cmd_cat(fat16_fs_t *fs, fat_file_record_t *cwd, DWORD *cwd_off)
     /* The number of listed files and directories */
     int32_t total = 0;
 
-    /* Name of new directory. Can be: parent or sub directory name in ONE level */
+    /* Name of new directory. Can be: parent or sub directory name in ONE level
+     */
     int8_t name[BUFF_SIZE] = {0};
     /* Temporary buffer */
     int8_t buff[BUFF_SIZE] = {0};
-
-    /* TODO test */
-    DWORD file_off = 0;
 
     printf("File name: ");
     scanf("%s", name);
@@ -235,7 +237,7 @@ int32_t app_cmd_cat(fat16_fs_t *fs, fat_file_record_t *cwd, DWORD *cwd_off)
         name[i] = toupper(name[i]);
     }
 
-    rc = fat16_read_folder(fs, *cwd_off, records, BUFF_SIZE, &total);
+    rc = fat_read_folder(fs, *cwd_sec_num, records, BUFF_SIZE, &total);
     if (rc != FAT_ERROR_NONE)
     {
         printf("Cannot list folder!\n");
@@ -257,7 +259,7 @@ int32_t app_cmd_cat(fat16_fs_t *fs, fat_file_record_t *cwd, DWORD *cwd_off)
                 break;
             }
 
-            rc = fat16_read_file(fs, &records[i], buff);
+            rc = fat_read_file(fs, &records[i], buff);
             printf("%s\n", buff);
 
             break;
@@ -290,12 +292,12 @@ int main(int argc, char *argv[])
     int8_t cmd[MAX_CMD_LEN] = {0};
 
     /* Use this to work with FAT12/16 file system */
-    fat16_fs_t fs;
+    fat_fs_t fs;
 
     /* Current working directory. Default is root directory */
-    fat_file_record_t cwd;
+    fat_frec_t cwd;
     /* First sector of current working directory */
-    DWORD cwd_off;
+    DWORD cwd_sec_num;
 
     if (argc < 2)
     {
@@ -303,14 +305,14 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    rc = fat16_open_fs(argv[1], &fs);
+    rc = fat_open_fs(argv[1], &fs);
     if (rc != FAT_ERROR_NONE)
     {
         printf("Cannot open file system! Error code: %d\n", rc);
         return 0;
     }
 
-    cwd_off = fs.root_dir_off;
+    cwd_sec_num = fs.root_dir_sec_num;
 
     app_cmd_help();
     for (rc = APP_ERROR_NONE; rc == APP_ERROR_NONE;)
@@ -333,15 +335,15 @@ int main(int argc, char *argv[])
         }
         else if (strcmp(cmd, "ls") == 0)
         {
-            rc = app_cmd_ls(&fs, cwd_off);
+            rc = app_cmd_ls(&fs, cwd_sec_num);
         }
         else if (strcmp(cmd, "cd") == 0)
         {
-            rc = app_cmd_cd(&fs, &cwd, &cwd_off);
+            rc = app_cmd_cd(&fs, &cwd, &cwd_sec_num);
         }
         else if (strcmp(cmd, "cat") == 0)
         {
-            rc = app_cmd_cat(&fs, &cwd, &cwd_off);
+            rc = app_cmd_cat(&fs, &cwd, &cwd_sec_num);
         }
         else
         {
@@ -354,7 +356,7 @@ int main(int argc, char *argv[])
         printf("Error code: 0x%X\n", rc);
     }
 
-    fat16_close_fs(&fs);
+    fat_close_fs(&fs);
 
     return 0;
 }

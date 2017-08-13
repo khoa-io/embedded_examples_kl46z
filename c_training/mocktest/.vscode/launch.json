@@ -6,7 +6,8 @@
             "request": "launch",
             "program": "${workspaceRoot}/${workspaceRootFolderName}",
             "args": [
-                "${cwd}/Simulator/floppy.img"
+                /* "${cwd}/Simulator/floppy.img" */
+                "${cwd}/Simulator/usb.img"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceRoot}",

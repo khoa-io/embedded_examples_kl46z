@@ -7,7 +7,10 @@
     // words - list of words to be always considered correct
     "words": [
         "SREC",
+        "clus",
+        "fatfs",
         "inprogress",
+        "rsvd",
         "srec"
     ],
     // flagWords - list of words to be always considered incorrect

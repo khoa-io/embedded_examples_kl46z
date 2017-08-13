@@ -37,60 +37,56 @@
  ******************************************************************************/
 
 /*!
- * @brief Read a single sector's data and copy to buff.
+ * @brief Read and copy data of a sector to buffer. The buffer must be
+ * wide enough to store sector's data.
  *
- * @param dev Device structure.
- * @param index The sector to read.
- * @param buff The buffer to store data
+ * @param dev Point to this structure.
+ * @param index Sector's index.
+ * @param buff Destination buffer where data is copied to.
  *
  * @return Return the number of read bytes.
  */
-static uint32_t read_single_sector(kmc_device_t *dev,
-                                   uint64_t index,
-                                   uint8_t *buff);
+static uint32_t read_sector(kmc_device_t *dev, uint64_t index, uint8_t *buff);
 
 /*!
- * @brief Read multi sectors data and copy to buff.
+ * @brief Read multiple sectors and copy data to buffer. The buffer must
+ * be wide enough to store sector's data.
  *
- * @param dev Device structure.
- * @param index The first sector to read.
- * @param num The number of sectors.
- * @param buff The buffer to store data
+ * @param dev Point to this structure.
+ * @param index First sector's index.
+ * @param num Number of sector.
+ * @param buff Destination buffer where data is copied to.
  *
  * @return Return the number of read bytes.
  */
-static uint32_t read_multi_sector(kmc_device_t *dev,
-                                  uint64_t index,
-                                  uint32_t num,
-                                  uint8_t *buff);
+static uint32_t read_sectors(kmc_device_t *dev, uint64_t index, uint32_t num,
+                             uint8_t *buff);
 
 /*******************************************************************************
  * Global variables
  ******************************************************************************/
 
 /* Keep track of the file which this module use */
-FILE *g_fp;
+FILE *g_fp = NULL;
 
-/* Keep track of the device */
+/* Keep track of the device structure. */
 kmc_device_t g_dev = {
     .status = HAL_STATUS_UNDEFINED,
-    .sector_size = SECTOR_SIZE,
+    .sec_sz = SECTOR_SIZE,
     .close = (kmc_close_callback)kmc_close,
-    .read_single_sector = (kmc_read_single_sector_callback)read_single_sector,
-    .read_multi_sector = (kmc_read_multi_sector_callback)read_multi_sector,
+    .read_sector = (kmc_read_sector_callback)read_sector,
+    .read_sectors = (kmc_read_sectors_callback)read_sectors,
 };
 
 /*******************************************************************************
  * Code
  ******************************************************************************/
-static uint32_t read_single_sector(kmc_device_t *dev,
-                                   uint64_t index,
-                                   uint8_t *buff)
+static uint32_t read_sector(kmc_device_t *dev, uint64_t index, uint8_t *buff)
 {
     /* Number of read bytes */
     uint32_t n = 0;
 
-    if (dev->status != HAL_STATUS_OPEN)
+    if (!dev || dev->status != HAL_STATUS_OPENED)
     {
         n = 0;
     }
@@ -102,55 +98,69 @@ static uint32_t read_single_sector(kmc_device_t *dev,
     return n;
 }
 
-static uint32_t read_multi_sector(kmc_device_t *dev,
-                                  uint64_t index,
-                                  uint32_t num,
-                                  uint8_t *buff)
+static uint32_t read_sectors(kmc_device_t *dev, uint64_t index, uint32_t num,
+                             uint8_t *buff)
 {
-    return kmc_read_multi_sector(index, num, buff);
+    /* Number of read bytes. */
+    uint32_t n = 0;
+
+    if (!dev || dev->status != HAL_STATUS_OPENED)
+    {
+        /* Unknown device or device is not open!! */
+        n = 0;
+    }
+    else
+    {
+        n = kmc_read_sectors(index, num, buff);
+    }
+
+    return n;
 }
 
 INT kmc_open(char *path, kmc_device_t **dev)
 {
     /* Return code */
-    int32_t ret = HAL_ERROR_NONE;
+    int32_t rc = HAL_ERROR_NONE;
 
     g_fp = fopen(path, "rb");
 
-    if (g_fp == NULL)
+    if (!g_fp)
     {
         /* Cannot open file */
-        ret = HAL_ERROR_CANNOT_OPEN;
+        rc = HAL_ERROR_CANNOT_OPEN;
     }
     else
     {
         /* Open file successfully */
-        g_dev.status = HAL_STATUS_OPEN;
+        g_dev.status = HAL_STATUS_OPENED;
         *dev = &g_dev;
     }
 
-    return ret;
+    return rc;
 }
 
-INT kmc_close(kmc_device_t *device)
+INT kmc_close(kmc_device_t *dev)
 {
-    /* Return code */
-    int32_t ret = HAL_ERROR_NONE;
+    /* Return code. */
+    int32_t rc = HAL_ERROR_NONE;
 
-    ret = fclose(g_fp);
-    if (ret)
+    rc = fclose(g_fp);
+
+    /* Device is closed anyway. */
+    dev->status = HAL_STATUS_CLOSED;
+    g_fp = NULL;
+
+    if (rc)
     {
-        /* Unable to close file */
-        ret = HAL_ERROR_CANNOT_CLOSE;
+        /* Unable to close file. */
+        rc = HAL_ERROR_CANNOT_CLOSE;
     }
     else
     {
-        ret = HAL_ERROR_NONE;
+        rc = HAL_ERROR_NONE;
     }
 
-    g_fp = NULL;
-
-    return ret;
+    return rc;
 }
 
 INT kmc_read_sector(ULONG index, UCHAR *buff)
@@ -164,20 +174,23 @@ INT kmc_read_sector(ULONG index, UCHAR *buff)
     /* Store data from fgetc */
     uint32_t c;
 
-    rc = fseek(g_fp, index * g_dev.sector_size, SEEK_SET);
+    rc = fseek(g_fp, index * g_dev.sec_sz, SEEK_SET);
     if (rc)
     {
         /* Cannot set file position */
         return 0;
     }
 
-    /* I dont's use fread because if file size < 512 bytes (cannot happen in
-    real life but still count) and data was read but fread still returns 0 */
-    for (i = 0; i < g_dev.sector_size; ++i)
+    /* Avoid to use fread because if file size < 512 bytes (cannot happen in
+     * real life but still count) and data was read but fread still returns 0.
+     * Beside, fread will call fgetc so they're same.
+     */
+    for (i = 0; i < g_dev.sec_sz; ++i)
     {
         c = fgetc(g_fp);
         if (c == EOF)
         {
+            /* Reached end of file. */
             break;
         }
         buff[i] = (UCHAR)c;
@@ -186,10 +199,10 @@ INT kmc_read_sector(ULONG index, UCHAR *buff)
     return i;
 }
 
-INT kmc_read_multi_sector(ULONG index, UINT num, UCHAR *buff)
+INT kmc_read_sectors(ULONG index, UINT num, UCHAR *buff)
 {
     /* Total number of read bytes */
-    int32_t ret = 0;
+    int32_t total = 0;
 
     /* Number of read bytes in each loop */
     int32_t n = 0;
@@ -197,18 +210,18 @@ INT kmc_read_multi_sector(ULONG index, UINT num, UCHAR *buff)
     /* Indexing variable */
     int32_t i = 0;
 
-    /* Read from sector index to sector index + num */
+    /* Read from sector (index) to sector (index + num) */
     for (i = 0; i < num; ++i)
     {
-        n = kmc_read_sector(index + i, buff + i * g_dev.sector_size);
-        ret += n;
+        n = kmc_read_sector(index + i, buff + i * g_dev.sec_sz);
+        total += n;
 
-        if (n < g_dev.sector_size)
+        if (n < g_dev.sec_sz)
         {
             /* Reach end of file */
             break;
         }
     }
 
-    return ret;
+    return total;
 }

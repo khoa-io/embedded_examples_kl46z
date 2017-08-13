@@ -42,9 +42,9 @@
 /* Un-initialized devices have this status code */
 #define HAL_STATUS_UNDEFINED 0x0
 /* Opened devices have this status code */
-#define HAL_STATUS_OPEN 0x1
+#define HAL_STATUS_OPENED 0x1
 /* Closed devices have this status code */
-#define HAL_STATUS_CLOSE 0x2
+#define HAL_STATUS_CLOSED 0x2
 
 /*******************************************************************************
  * Error codes
@@ -63,58 +63,77 @@
  * Types and structues
  ******************************************************************************/
 
-#pragma pack(push)
-#pragma pack(1)
 /*!
  * @brief FAT module doesn't communicate with device directly. It does it
  * through HAL module by using this structure.
  * The idea was taken from Android HAL
  * (https://source.android.com/reference/hal/structhw__device__t).
  */
-typedef struct kmc_device_t
+typedef struct kmc_device
 {
     /* Status of this device. See Status codes section. */
     uint16_t status;
 
-    /* Size of a sector (byte). Default is 512 */
-    uint16_t sector_size;
+    /* Size of a sector (byte). Default is 512. Upper layer can change this
+     * value.
+     */
+    uint16_t sec_sz;
 
     /** Callback functions **/
 
     /* Close this device */
-    uint32_t (*close)(struct kmc_device_t *dev);
+    uint32_t (*close)(struct kmc_device *dev);
 
-    /* Read and copy data on a sector to buffer */
-    uint32_t (*read_single_sector)(struct kmc_device_t *dev,
-                                   uint64_t index,
-                                   uint8_t *buff);
+    /*!
+     * @brief Read and copy data of a sector to buffer. The buffer must be
+     * wide enough to store sector's data.
+     *
+     * @param dev Point to this structure.
+     * @param index Sector's index.
+     * @param buff Destination buffer where data is copied to.
+     *
+     * @return Return the number of read bytes.
+     */
+    uint32_t (*read_sector)(struct kmc_device *dev,
+                            uint64_t index,
+                            uint8_t *buff);
 
-    /* Read and copy data on multi sectors to buffer */
-    uint32_t (*read_multi_sector)(struct kmc_device_t *dev,
-                                  uint64_t index,
-                                  uint32_t num,
-                                  uint8_t *buff);
+    /*!
+     * @brief Read multiple sectors and copy data to buffer. The buffer must
+     * be wide enough to store sector's data.
+     *
+     * @param dev Point to this structure.
+     * @param index First sector's index.
+     * @param num Number of sector.
+     * @param buff Destination buffer where data is copied to.
+     *
+     * @return Return the number of read bytes.
+     */
+    uint32_t (*read_sectors)(struct kmc_device *dev,
+                             uint64_t index,
+                             uint32_t num,
+                             uint8_t *buff);
 } kmc_device_t;
 
-#pragma pack(pop)
-
+/* TODO check and remove if not necessary. */
 typedef uint32_t (*kmc_close_callback)(kmc_device_t *);
-typedef uint32_t (*kmc_read_single_sector_callback)(kmc_device_t *,
-                                                    uint64_t,
-                                                    uint8_t *);
-typedef uint32_t (*kmc_read_multi_sector_callback)(kmc_device_t *,
-                                                   uint64_t,
-                                                   uint32_t,
-                                                   uint8_t *);
+typedef uint32_t (*kmc_read_sector_callback)(kmc_device_t *,
+                                             uint64_t,
+                                             uint8_t *);
+typedef uint32_t (*kmc_read_sectors_callback)(kmc_device_t *,
+                                              uint64_t,
+                                              uint32_t,
+                                              uint8_t *);
 
 /*******************************************************************************
  * API
  ******************************************************************************/
 
 /*!
- * @brief Open a disk image file with the given path.
+ * @brief Open device associates with the given path. Only open ONE device at a
+ * time. It means you must call kmc_close(kmc_device_t) before open new device.
  *
- * @param path Path to the disk image file.
+ * @param path Path to the device.
  *
  * @return Return error code. Read Error codes section for more information.
  */
@@ -148,6 +167,6 @@ INT kmc_read_sector(ULONG index, UCHAR *buff);
  *
  * @return Return the number of read bytes.
  */
-INT kmc_read_multi_sector(ULONG index, UINT num, UCHAR *buff);
+INT kmc_read_sectors(ULONG index, UINT num, UCHAR *buff);
 
 #endif /* _HAL_H_ */

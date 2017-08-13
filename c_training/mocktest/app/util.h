@@ -51,7 +51,7 @@
  *
  * @param record File record.
  */
-void util_print_file_record(fat_file_record_t *record);
+void util_print_file_record(fat_frec_t *record);
 
 /*!
  * @brief Get file name from a file record.
@@ -60,6 +60,6 @@ void util_print_file_record(fat_file_record_t *record);
  * @param name [out] Store name of the file. This function treats as the param
  * is large enough to store file name.
  */
-void util_get_file_name(fat_file_record_t *record, int8_t *name);
+void util_get_file_name(fat_frec_t *record, int8_t *name);
 
 #endif /* _UTIL_H_ */

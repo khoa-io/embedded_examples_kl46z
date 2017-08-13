@@ -34,7 +34,7 @@
 #define BUFF_SIZE 13
 
 /*******************************************************************************
- * Macros to time from fat_file_record_t
+ * Macros to time from fat_frec_t
  ******************************************************************************/
 
 #define GET_HOUR(t) (((uint16_t)(t)) >> 11)
@@ -54,38 +54,32 @@
  *
  * @param record Point to record;
  */
-void util_print_file_size(fat_file_record_t *record);
+void util_print_file_sz(fat_frec_t *record);
 
 /*******************************************************************************
  * Code
  ******************************************************************************/
 
-void util_print_file_record(fat_file_record_t *record)
+void util_print_file_record(fat_frec_t *record)
 {
     /* File name */
     uint8_t name[13] = {0};
 
     /* Print last modified date */
-    printf("%.2uh%.2um%.2us, %.2u-%.2u-%.4u\t",
-           GET_HOUR(record->modified_time),
-           GET_MIN(record->modified_time),
-           GET_SEC(record->modified_time),
-           GET_DAY(record->modified_date),
-           GET_MON(record->modified_date),
+    printf("%.2uh%.2um%.2us, %.2u-%.2u-%.4u\t", GET_HOUR(record->modified_time),
+           GET_MIN(record->modified_time), GET_SEC(record->modified_time),
+           GET_DAY(record->modified_date), GET_MON(record->modified_date),
            GET_YEAR(record->modified_date));
 
     /* Print created date */
-    printf("%.2uh%.2um%.2us, %.2u-%.2u-%.4u\t",
-           GET_HOUR(record->created_time),
-           GET_MIN(record->created_time),
-           GET_SEC(record->created_time),
-           GET_DAY(record->created_date),
-           GET_MON(record->created_date),
+    printf("%.2uh%.2um%.2us, %.2u-%.2u-%.4u\t", GET_HOUR(record->created_time),
+           GET_MIN(record->created_time), GET_SEC(record->created_time),
+           GET_DAY(record->created_date), GET_MON(record->created_date),
            GET_YEAR(record->created_date));
 
     if (!(record->attrs & ATTR_DIRECTORY))
     {
-        util_print_file_size(record);
+        util_print_file_sz(record);
     }
     else
     {
@@ -99,7 +93,7 @@ void util_print_file_record(fat_file_record_t *record)
 
 /* Anh Hải comment hàm này ko thực sự cần thiết với Long File Name */
 /* TODO */
-void util_print_file_name(fat_file_record_t *record)
+void util_print_file_name(fat_frec_t *record)
 {
     /* Indexing on record-name */
     int32_t i = 0;
@@ -107,7 +101,7 @@ void util_print_file_name(fat_file_record_t *record)
     int32_t j = 0;
 }
 
-void util_get_file_name(fat_file_record_t *record, int8_t *name)
+void util_get_file_name(fat_frec_t *record, int8_t *name)
 {
     /* Indexing on record-name */
     int32_t i = 0;
@@ -136,23 +130,23 @@ void util_get_file_name(fat_file_record_t *record, int8_t *name)
     }
 }
 
-void util_print_file_size(fat_file_record_t *record)
+void util_print_file_sz(fat_frec_t *record)
 {
-    if (record->file_size < 1024)
+    if (record->file_sz < 1024)
     {
-        printf("%5.5u B\t\t", record->file_size);
+        printf("%5.5u B\t\t", record->file_sz);
         return;
     }
 
-    if (record->file_size < (1024 * 1024))
+    if (record->file_sz < (1024 * 1024))
     {
-        printf("%5.2f KB\t\t", record->file_size * 1.0 / 1024);
+        printf("%5.2f KB\t\t", record->file_sz * 1.0 / 1024);
         return;
     }
 
-    if (record->file_size < (1024 * 1024 * 1024))
+    if (record->file_sz < (1024 * 1024 * 1024))
     {
-        printf("%5.2f MB\t\t", record->file_size * 1.0 / 1024 / 1024);
+        printf("%5.2f MB\t\t", record->file_sz * 1.0 / 1024 / 1024);
         return;
     }
 }

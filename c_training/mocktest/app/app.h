@@ -57,7 +57,7 @@ int32_t app_cmd_help();
  *
  * @param Return error code. Refer Error codes section.
  */
-int32_t app_cmd_fsinfo(fat16_fs_t *fs);
+int32_t app_cmd_fsinfo(fat_fs_t *fs);
 
 /*!
  * @brief Command "ls": list all files and directories inside a folder and
@@ -68,7 +68,7 @@ int32_t app_cmd_fsinfo(fat16_fs_t *fs);
  *
  * @return Return error code. Refer Error codes section.
  */
-int32_t app_cmd_ls(fat16_fs_t *fs, DWORD off);
+int32_t app_cmd_ls(fat_fs_t *fs, DWORD off);
 
 /*!
  * @brief Command "cd": change working directory to a sub or parent directory
@@ -80,7 +80,7 @@ int32_t app_cmd_ls(fat16_fs_t *fs, DWORD off);
  *
  * @return Return error code. Refer Error codes section.
  */
-int32_t app_cmd_cd(fat16_fs_t *fs, fat_file_record_t *cwd, DWORD *cwd_off);
+int32_t app_cmd_cd(fat_fs_t *fs, fat_frec_t *cwd, DWORD *cwd_off);
 
 /*!
  * @brief Command "cat": read data of a file in current working directory and
@@ -90,6 +90,6 @@ int32_t app_cmd_cd(fat16_fs_t *fs, fat_file_record_t *cwd, DWORD *cwd_off);
  *
  * @return Return error code. Refer Error codes section.
  */
-int32_t app_cmd_cat(fat16_fs_t *fs, fat_file_record_t *cwd, DWORD *cwd_off);
+int32_t app_cmd_cat(fat_fs_t *fs, fat_frec_t *cwd, DWORD *cwd_off);
 
 #endif /* _APP_H_ */
