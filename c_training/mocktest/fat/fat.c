@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <wchar.h>
 
 #include "fat/fat.h"
 #include "hal/HAL.h"
@@ -99,6 +100,14 @@ static DWORD fat_get_clus_entry_val(fat_fs_t *fs, DWORD n);
  */
 static bool fat_is_eof(fat_fs_t *fs, DWORD val);
 
+/*!
+ * @brief Read name of a Long File Name entry and copy to a buffer.
+ *
+ * @param lfn_chain Long File Name entries chain.
+ * @param s         Buffer stores name.
+ */
+static void fat_read_lfn(fat_lfn_rec_t *lfn_chain, DWORD *s);
+
 /*******************************************************************************
  * Global variables.
  ******************************************************************************/
@@ -109,6 +118,35 @@ kmc_device_t *g_disk = NULL;
 /*******************************************************************************
  * Code
  ******************************************************************************/
+static void fat_read_lfn(fat_lfn_rec_t *lfn_chain, DWORD *s)
+{
+    /* Indexing on lfn_chain. */
+    int8_t i = 0;
+
+    /* Indexing on s. */
+    int8_t j = 0;
+
+    /* Indexing on name fields. */
+    int8_t k = 0;
+
+    for (i = 0; i < 20 || lfn_chain[i].ord == 0; ++i)
+    {
+        /*         for (; i < 5; ++i, ++j)
+                {
+                    s[j] = lfn_rec->name1[i];
+                }
+
+                for (i = 0; i < 6; ++i, ++j)
+                {
+                    s[j] = lfn_rec->name2[i];
+                }
+
+                for (i = 0; i < 2; ++i, ++j)
+                {
+                    s[j] = lfn_rec->name3[i];
+                } */
+    }
+}
 
 static bool fat_is_eof(fat_fs_t *fs, DWORD val)
 {
@@ -287,29 +325,32 @@ int32_t fat_read_folder(fat_fs_t *fs, DWORD sec_num, fat_frec_t *recs,
     /* Return code */
     int32_t rc = FAT_ERROR_NONE;
 
-    /* Indexing variable. */
+    /* Indexing on buff. */
     int32_t i = 0;
+
+    /* Indexing on recs. */
     int32_t j = 0;
 
     /* Offset (sectors) from sector sec_num. */
     int32_t k = 0;
 
-    /* Indexing on lfrec[20]. */
-    int32_t l = 0;
+    /* Indexing on lfn_rect[20]. */
+    int32_t l = 20;
 
     /* Used in case of Root Directory lies on more than 1 sector. */
     uint32_t cnt = 0;
 
     /* Current working record. */
     fat_frec_t rec;
+
     /* Current working first long file name entries. */
-    fat_lfrec_t lfrec[20];
+    fat_lfn_rec_t lfn_chain[20];
 
     /* Stores data read from disk */
     BYTE *buff = NULL;
 
     /* Store long file name. */
-    /* DWORD ln[256] = {0}; */
+    DWORD ln[256] = {0};
 
     if (g_disk == NULL || g_disk->status != HAL_STATUS_OPENED)
     {
@@ -356,17 +397,20 @@ int32_t fat_read_folder(fat_fs_t *fs, DWORD sec_num, fat_frec_t *recs,
 
         if (FAT_IS_LONG_FILE(fs, &rec))
         {
-            /* Found a long file name entry. */
-            fount_ln = true;
-            memcpy(lfrec + l, &rec, sizeof(rec));
-            /* if (lfrec[l++].ord != 1)
+            /* Found a long file name entry.
+            memcpy(lfn_chain + (--l), &rec, sizeof(rec));
+            if (lfn_chain[l].ord == 1)
             {
+                /* Reached last entry of LFNs chain.
+                fat_read_lfn(&lfn_chain[++l], ln);
+                printf("%ls", (wchar_t *)ln);
                 continue;
-            } */
+            }
+            */
             continue;
         }
 
-        if (rec.attrs & ATTR_VOLUME_ID)
+        if ((rec.attrs & ATTR_VOLUME_ID) == ATTR_VOLUME_ID)
         {
             continue;
         }
@@ -438,9 +482,8 @@ int32_t fat_read_root16(fat_fs_t *fs, fat_frec_t *recs, int32_t max,
             continue;
         }
 
-        if (rec.attrs & ATTR_VOLUME_ID)
+        if ((rec.attrs & ATTR_VOLUME_ID) == ATTR_VOLUME_ID)
         {
-            printf("ATTR_VOLUME_ID\n");
             continue;
         }
 

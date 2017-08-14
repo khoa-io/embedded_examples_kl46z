@@ -99,7 +99,7 @@
 /*******************************************************************************
  * Other definitions
  ******************************************************************************/
-/* Value of fat_lfrec_t::ord shows that this is the last entry. */
+/* Value of fat_lfn_rec_t::ord shows that this is the last entry. */
 #define LAST_LONG_ENTRY 0x40
 
 /*******************************************************************************
@@ -117,14 +117,16 @@
     ((((clus_num)-2) * (fs)->bs.clus_sz) + (fs)->data_sec_num)
 
 /*!
- * @brief Check if a fat_frec structure is a fat_lfrec structure.
+ * @brief Check if a fat_frec structure is a fat_lfn_rec structure.
  *
  * @param  fs  Pointer points to fat_fs structure.
  * @param  rec Pointer points to fat_frec structure.
- * @return     Returns true if rec is fat_lfrec structure.
+ * @return     Returns true if rec is fat_lfn_rec structure.
  */
 #define FAT_IS_LONG_FILE(fs, rec)                                              \
-    ((fs)->fs_type == FS_FAT32 ? ((rec)->attrs & ATTR_LONG_NAME) : false)
+    ((fs)->fs_type == FS_FAT32                                                 \
+         ? (((rec)->attrs & ATTR_LONG_NAME) == ATTR_LONG_NAME)                 \
+         : false)
 
 /*******************************************************************************
  * FAT's structures.
@@ -282,7 +284,7 @@ struct fat_frec
 /*!
  * @brief FAT Long Directory Structure.
  */
-struct fat_lfrec
+struct fat_lfn_rec
 {
     /* The order of this entry in the sequence of long dir entries. */
     BYTE ord;
@@ -360,7 +362,7 @@ struct fat_file
 typedef struct fat_bs fat_bs_t;
 typedef struct fat_fs fat_fs_t;
 typedef struct fat_frec fat_frec_t;
-typedef struct fat_lfrec fat_lfrec_t;
+typedef struct fat_lfn_rec fat_lfn_rec_t;
 
 /*******************************************************************************
  * APIs
@@ -414,7 +416,7 @@ int32_t fat_read_folder(fat_fs_t *fs, DWORD sec_num, fat_frec_t *records,
  * @return Return error code. Refer Error codes section.
  */
 int32_t fat_read_root16(fat_fs_t *fs, fat_frec_t *records, int32_t max,
-                      int32_t *total);
+                        int32_t *total);
 
 /*!
  * @brief Read and copy all file data to buffer.
