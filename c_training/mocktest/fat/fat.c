@@ -278,15 +278,6 @@ int32_t fat_close_fs(fat_fs_t *fs)
     g_disk->close(g_disk);
     g_disk = NULL;
 
-    if (rc != HAL_ERROR_NONE)
-    {
-        rc = FAT_ERROR_CANNOT_CLOSE;
-    }
-    else
-    {
-        rc = FAT_ERROR_NONE;
-    }
-
     return rc;
 }
 
@@ -296,20 +287,20 @@ int32_t fat_read_folder(fat_fs_t *fs, DWORD sec_num, fat_frec_t *recs,
     /* Return code */
     int32_t rc = FAT_ERROR_NONE;
 
-    /* Indexing variable */
+    /* Indexing variable. */
     int32_t i = 0;
     int32_t j = 0;
     int32_t k = 0;
+    /* Indexing on lfrec[20]. */
+    int32_t l = 0;
 
     /* Used in case of Root Directory lies on more than 1 sector. */
     uint32_t cnt = 0;
 
     /* Current working record. */
     fat_frec_t rec;
-    /* rec as a long file name entry. */
-    /* fat_lfrec_t lfrec; */
-    /* Current working first long file name entry. */
-    /* fat_frec_t rec83; */
+    /* Current working first long file name entries. */
+    fat_lfrec_t lfrec[20];
 
     /* Stores data read from disk */
     BYTE *buff = NULL;
@@ -357,15 +348,15 @@ int32_t fat_read_folder(fat_fs_t *fs, DWORD sec_num, fat_frec_t *recs,
         if (FAT_IS_LONG_FILE(fs, &rec))
         {
             /* Found a long file name entry. */
-            /* memcpy(&lfrec, &rec, sizeof(rec)); */
-            if (rec.name[0] != 1)
+            memcpy(lfrec + l, &rec, sizeof(rec));
+            printf("HERE\n");
+            if (lfrec[l].ord != 1)
             {
                 continue;
             }
-            else
-            {
-                printf("First entry!\n");
-            }
+
+
+            printf("First entry!\n");
         }
 
         if (rec.attrs & ATTR_VOLUME_ID)

@@ -42,11 +42,11 @@
 /* Not a FAT file system */
 #define FS_UNKNOWN 0x00
 /* FAT12 file system */
-#define FS_FAT12 0x0C
+#define FS_FAT12 0x0CU
 /* FAT16 file system */
-#define FS_FAT16 0x10
+#define FS_FAT16 0x10U
 /* FAT32 file system */
-#define FS_FAT32 0x40
+#define FS_FAT32 0x40U
 
 /*******************************************************************************
  * Error codes

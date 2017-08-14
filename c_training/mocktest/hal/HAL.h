@@ -115,7 +115,6 @@ typedef struct kmc_device
                              uint8_t *buff);
 } kmc_device_t;
 
-/* TODO check and remove if not necessary. */
 typedef uint32_t (*kmc_close_callback)(kmc_device_t *);
 typedef uint32_t (*kmc_read_sector_callback)(kmc_device_t *,
                                              uint64_t,
