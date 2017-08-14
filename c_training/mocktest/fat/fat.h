@@ -23,6 +23,8 @@
 #ifndef _FAT_H_
 #define _FAT_H_
 
+#include <stdint.h>
+
 /*******************************************************************************
  * Integer type definitions
  ******************************************************************************/
@@ -74,25 +76,31 @@
 #define ATTR_DIRECTORY 0x10
 #define ATTR_ARCHIVE 0x20
 #define ATTR_LONG_NAME                                                         \
-    (ATTR_READ_ONLY | ATTR_HIDDEN | ATTR_SYSTEM | ATTR_VOLUME_ID)
+        (ATTR_READ_ONLY | ATTR_HIDDEN | ATTR_SYSTEM | ATTR_VOLUME_ID)
 
 #define ATTR_LONG_NAME_MASK                                                    \
-    (ATTR_READ_ONLY | ATTR_HIDDEN | ATTR_SYSTEM | ATTR_VOLUME_ID |             \
-     ATTR_DIRECTORY | ATTR_ARCHIVE)
+        (ATTR_READ_ONLY | ATTR_HIDDEN | ATTR_SYSTEM | ATTR_VOLUME_ID |             \
+         ATTR_DIRECTORY | ATTR_ARCHIVE)
 
 /*******************************************************************************
  * FAT directory entry statistics code in fat_frec_t::name[0]
  ******************************************************************************/
 
 /* The directory entry is free (there is no  file or directory name in this
-entry) */
+   entry) */
 #define FAT_DIR_STAT_FREE 0xE5
 /* The directory entry is free (same as FAT_DIR_STAT_FREE) and there are no
-allocated directory entries after this one. */
+   allocated directory entries after this one. */
 #define FAT_DIR_STAT_END 0x00
 /* The actual file name character for this byte is 0xE5. Not used in this
-module yet */
+   module yet */
 #define FAT_DIR_STAT_KANJI 0x05
+
+/*******************************************************************************
+ * Other definitions
+ ******************************************************************************/
+/* Value of fat_lfrec_t::ord shows that this is the last entry. */
+#define LAST_LONG_ENTRY 0x40
 
 /*******************************************************************************
  * Macros
@@ -106,7 +114,17 @@ module yet */
  * @return          The sector number of the first sector of the cluster.
  */
 #define FAT_CLUS_SEC_NUM(fs, clus_num)                                         \
-    ((((clus_num)-2) * (fs)->bs.clus_sz) + (fs)->data_sec_num)
+        ((((clus_num)-2) * (fs)->bs.clus_sz) + (fs)->data_sec_num)
+
+/*!
+ * @brief Check if a fat_frec structure is a fat_lfrec structure.
+ *
+ * @param  fs  Pointer points to fat_fs structure.
+ * @param  rec Pointer points to fat_frec structure.
+ * @return     Returns true if rec is fat_lfrec structure.
+ */
+#define FAT_IS_LONG_FILE(fs, rec)                                              \
+        ((fs)->fs_type == FS_FAT32 ? ((rec)->attrs & ATTR_LONG_NAME) : false)
 
 /*******************************************************************************
  * FAT's structures.
@@ -118,59 +136,59 @@ module yet */
 /* Extended FAT12/16 boot sector. Start from offset 36. */
 struct fat16_bs_ex
 {
-    /* Number of physical disk. For example: 0: floppy disk, 0x80: hard disk. */
-    BYTE drv_num;
-    /* Not used. */
-    BYTE reserved1;
-    /* Extended boot signature (0x29). */
-    BYTE boot_sig;
-    /* Volume serial number. */
-    DWORD serial;
-    /* Volume label. */
-    BYTE label[11];
-    /* File system type. */
-    BYTE fs_type[8];
+        /* Number of physical disk. For example: 0: floppy disk, 0x80: hard disk. */
+        BYTE drv_num;
+        /* Not used. */
+        BYTE reserved1;
+        /* Extended boot signature (0x29). */
+        BYTE boot_sig;
+        /* Volume serial number. */
+        DWORD serial;
+        /* Volume label. */
+        BYTE label[11];
+        /* File system type. */
+        BYTE fs_type[8];
 };
 
 /* Extended FAT32 boot sector. Start from offset 36 */
 struct fat32_bs_ex
 {
-    /* FAT32 32-bit count of sectors occupied by ONE FAT */
-    DWORD fat32_sz;
-    /*
-     * Bits  0-3: Zero-based number of active FAT. Only valid if mirroring is
-     * disable.
-     * Bits  4-6: Reserved.
-     * Bit     7: 0 means the FAT is mirrored at runtime into all FATs.
-     *          : 1 means only one FAT is active; it is the one referenced in
-     *            bits 0-3.
-     * Bits 8-15: Reserved.
-     */
-    WORD ext_flags;
-    /* High byte is major revision number. Low byte is minor revision number.
-     * This is version number of the FAT32 volume.
-     */
-    WORD ver;
-    /* Root's first cluster. */
-    DWORD root_clus_num;
-    /* The sector number contains fs_info. */
-    WORD fs_info_sec_num;
-    /* The sector number contains backup of boot sector. */
-    WORD bk_boot_sec_num;
-    /* Not used. */
-    BYTE reserved[12];
-    /* Driver number. Example: 0: floppy disk, 0x80: hard disk. */
-    BYTE drv_num;
-    /* Not used. */
-    BYTE reserved1;
-    /* Extended boot signature (0x29). */
-    BYTE boot_sig;
-    /* Volume serial number, or volume ID. */
-    DWORD serial;
-    /* Volume label. */
-    BYTE label[11];
-    /* File system type. */
-    BYTE fs_type[8];
+        /* FAT32 32-bit count of sectors occupied by ONE FAT */
+        DWORD fat32_sz;
+        /*
+         * Bits  0-3: Zero-based number of active FAT. Only valid if mirroring is
+         * disable.
+         * Bits  4-6: Reserved.
+         * Bit     7: 0 means the FAT is mirrored at runtime into all FATs.
+         *          : 1 means only one FAT is active; it is the one referenced in
+         *            bits 0-3.
+         * Bits 8-15: Reserved.
+         */
+        WORD ext_flags;
+        /* High byte is major revision number. Low byte is minor revision number.
+         * This is version number of the FAT32 volume.
+         */
+        WORD ver;
+        /* Root's first cluster. */
+        DWORD root_clus_num;
+        /* The sector number contains fs_info. */
+        WORD fs_info_sec_num;
+        /* The sector number contains backup of boot sector. */
+        WORD bk_boot_sec_num;
+        /* Not used. */
+        BYTE reserved[12];
+        /* Driver number. Example: 0: floppy disk, 0x80: hard disk. */
+        BYTE drv_num;
+        /* Not used. */
+        BYTE reserved1;
+        /* Extended boot signature (0x29). */
+        BYTE boot_sig;
+        /* Volume serial number, or volume ID. */
+        DWORD serial;
+        /* Volume label. */
+        BYTE label[11];
+        /* File system type. */
+        BYTE fs_type[8];
 };
 
 /*!
@@ -178,51 +196,51 @@ struct fat32_bs_ex
  */
 struct fat_bs
 {
-    /* Jump instruction to boot code. */
-    BYTE jmp_boot[3];
-    /* Name of the system formatted the volume. */
-    BYTE oem_name[8];
-    /* Count of bytes per sector. */
-    WORD sec_sz;
-    /* Number of sectors per cluster. */
-    BYTE clus_sz;
-    /* Number of reserved sectors in the Reserved region of the volume starting
-     * at the first sector of the volume. */
-    WORD rsvd_sec_cnt;
-    /* The count of FAT tables. */
-    BYTE fat_cnt;
-    /* FAT12/16: The count of 32-byte directory entries in the root directory.
-       FAT32: This field must be set to 0. */
-    WORD root_ent_cnt;
-    /* FAT12/16: Total sectors of this volume.
-       FAT32: This field must be set to 0. */
-    WORD tot_sec_16;
-    /* Indicate type of the media (non-removable or removable) */
-    BYTE media_type;
-    /* FAT12/16: The 16-bit count of sectors occupied by a FAT12/16 table.
-       In FAT32: This field must be 0. */
-    WORD fat16_sz;
-    /* Sectors per track. */
-    WORD trk_sz;
-    /* Number of heads. */
-    WORD num_heads;
-    DWORD hidden_sectors;
-    /* This field is the new 32-bit total count of sectors on the volume
-       FAT12/16: This field contains the sector count if tot_sec_16 == 0.
-       FAT32: This field must be non-zero. */
-    DWORD tot_sec_32;
+        /* Jump instruction to boot code. */
+        BYTE jmp_boot[3];
+        /* Name of the system formatted the volume. */
+        BYTE oem_name[8];
+        /* Count of bytes per sector. */
+        WORD sec_sz;
+        /* Number of sectors per cluster. */
+        BYTE clus_sz;
+        /* Number of reserved sectors in the Reserved region of the volume starting
+         * at the first sector of the volume. */
+        WORD rsvd_sec_cnt;
+        /* The count of FAT tables. */
+        BYTE fat_cnt;
+        /* FAT12/16: The count of 32-byte directory entries in the root directory.
+           FAT32: This field must be set to 0. */
+        WORD root_ent_cnt;
+        /* FAT12/16: Total sectors of this volume.
+           FAT32: This field must be set to 0. */
+        WORD tot_sec_16;
+        /* Indicate type of the media (non-removable or removable) */
+        BYTE media_type;
+        /* FAT12/16: The 16-bit count of sectors occupied by a FAT12/16 table.
+           In FAT32: This field must be 0. */
+        WORD fat16_sz;
+        /* Sectors per track. */
+        WORD trk_sz;
+        /* Number of heads. */
+        WORD num_heads;
+        DWORD hidden_sectors;
+        /* This field is the new 32-bit total count of sectors on the volume
+           FAT12/16: This field contains the sector count if tot_sec_16 == 0.
+           FAT32: This field must be non-zero. */
+        DWORD tot_sec_32;
 
-    /* Fields start at offset 0x24 */
-    union {
-        struct fat16_bs_ex fat16_bs_ex;
-        struct fat32_bs_ex fat32_bs_ex;
-    };
+        /* Fields start at offset 0x24 */
+        union {
+                struct fat16_bs_ex fat16_bs_ex;
+                struct fat32_bs_ex fat32_bs_ex;
+        };
 
-    /* Not used in this program. */
-    BYTE not_used[420];
+        /* Not used in this program. */
+        BYTE not_used[420];
 
-    /* System signature. */
-    BYTE sys_sig[2];
+        /* System signature. */
+        BYTE sys_sig[2];
 };
 
 /* FAT File Record. This represent a file or folder in FAT file system.
@@ -231,34 +249,34 @@ struct fat_bs
  */
 struct fat_frec
 {
-    /* Short name */
-    BYTE name[8];
-    /* Extension. For example: exe, bat, txt, doc, ... */
-    BYTE ext[3];
-    /* File's properties. */
-    BYTE attrs;
-    /* Not used. */
-    BYTE nt_reserved;
-    /* Timestamp when created file. */
-    BYTE created_timestamp;
-    /* Time file was created. */
-    WORD created_time;
-    /* Date file was created. */
-    WORD created_date;
-    /* Last read or write file date. */
-    WORD last_access_date;
-    /* High word of this entry's first cluster number (always 0 for a FAT12 or
-     * FAT16 volume).
-     */
-    WORD first_clus_hi;
-    /* Time of last write. */
-    WORD modified_time;
-    /* Date of last write. */
-    WORD modified_date;
-    /* Low word of this entry's first cluster number. */
-    WORD first_clus_lo;
-    /* File size in bytes. */
-    DWORD file_sz;
+        /* Short name */
+        BYTE name[8];
+        /* Extension. For example: exe, bat, txt, doc, ... */
+        BYTE ext[3];
+        /* File's properties. */
+        BYTE attrs;
+        /* Not used. */
+        BYTE nt_reserved;
+        /* Timestamp when created file. */
+        BYTE created_timestamp;
+        /* Time file was created. */
+        WORD created_time;
+        /* Date file was created. */
+        WORD created_date;
+        /* Last read or write file date. */
+        WORD last_access_date;
+        /* High word of this entry's first cluster number (always 0 for a FAT12 or
+         * FAT16 volume).
+         */
+        WORD first_clus_hi;
+        /* Time of last write. */
+        WORD modified_time;
+        /* Date of last write. */
+        WORD modified_date;
+        /* Low word of this entry's first cluster number. */
+        WORD fst_clus_lo;
+        /* File size in bytes. */
+        DWORD file_sz;
 };
 
 /*!
@@ -266,12 +284,27 @@ struct fat_frec
  */
 struct fat_lfrec
 {
-    BYTE ord;
-    BYTE name1[10];
-    BYTE attrs;
-    BYTE type;
-    BYTE chk_sum;
-    BYTE name[12];
+        /* The order of this entry in the sequence of long dir entries. */
+        BYTE ord;
+        /* Unicode characters 1-5 of the long-name sub-component in this dir
+         * entry. */
+        WORD name1[5];
+        /* Attributes - must be ATTR_LONG_NAME. */
+        BYTE attrs;
+        /* If zero: this entry is sub-component of a long name.
+         * If non-zero: reserved. */
+        BYTE type;
+        /* Checksum of name in the short dir entry at the end of the long dir
+         * set. */
+        BYTE chk_sum;
+        /* Unicode characters 6-11 of the long-name sub-component in this dir
+         * entry. */
+        WORD name2[6];
+        /* Must be ZERO. */
+        WORD fst_clus_lo;
+        /* Unicode characters 12-13 of the long-name sub-component in this dir
+         * entry. */
+        WORD name3[2];
 };
 
 #pragma pack(pop)
@@ -281,46 +314,53 @@ struct fat_lfrec
  */
 struct fat_fs
 {
-    /* FAT's boot sector. */
-    struct fat_bs bs;
+        /* FAT's boot sector. */
+        struct fat_bs bs;
 
-    /* One of:
-     * - FS_UNKNOWN (0x00)
-     * - FS_FAT12   (0x0C)
-     * - FS_FAT16   (0x10)
-     * - FS_FAT32   (0x40)
-     */
-    BYTE fs_type;
-    /* Name of the file system. */
-    BYTE *fs_name;
+        /* One of:
+         * - FS_UNKNOWN (0x00)
+         * - FS_FAT12   (0x0C)
+         * - FS_FAT16   (0x10)
+         * - FS_FAT32   (0x40)
+         */
+        BYTE fs_type;
+        /* Name of the file system. */
+        BYTE *fs_name;
 
-    /* Total numbers of sectors of the partition. */
-    DWORD total_sec_cnt;
-    /* Total numbers of clusters (starting at cluster 2) of the partition. */
-    DWORD total_clus_cnt;
+        /* Total numbers of sectors of the partition. */
+        DWORD total_sec_cnt;
+        /* Total numbers of clusters (starting at cluster 2) of the partition. */
+        DWORD total_clus_cnt;
 
-    /* First sector of FAT Table. */
-    DWORD fat_sec_num;
-    /* Size of each FAT table (sectors). */
-    DWORD fat_sz;
+        /* First sector of FAT Table. */
+        DWORD fat_sec_num;
+        /* Size of each FAT table (sectors). */
+        DWORD fat_sz;
 
-    /* The sector number of the first sector of root directory. */
-    DWORD root_dir_sec_num;
-    /* Root Directory's size (sectors). It's only meaning in FAT12/16. In FAT32,
-     * Root Directory's, like any other directories, is not fixed. Thus, in
-     * FAT32, root_dir_sz = 0.
-     */
-    DWORD root_dir_sz;
+        /* The sector number of the first sector of root directory. */
+        DWORD root_dir_sec_num;
+        /* Root Directory's size (sectors). It's only meaning in FAT12/16. In FAT32,
+         * Root Directory's, like any other directories, is not fixed. Thus, in
+         * FAT32, root_dir_sz = 0.
+         */
+        DWORD root_dir_sz;
 
-    /* The sector number of the first sector of data region. */
-    DWORD data_sec_num;
-    /* Data region's size (sectors). */
-    DWORD data_sz;
+        /* The sector number of the first sector of data region. */
+        DWORD data_sec_num;
+        /* Data region's size (sectors). */
+        DWORD data_sz;
+};
+
+struct fat_file
+{
+    struct fat_frec frec;
+    DWORD name[256];
 };
 
 typedef struct fat_bs fat_bs_t;
 typedef struct fat_fs fat_fs_t;
 typedef struct fat_frec fat_frec_t;
+typedef struct fat_lfrec fat_lfrec_t;
 
 /*******************************************************************************
  * APIs

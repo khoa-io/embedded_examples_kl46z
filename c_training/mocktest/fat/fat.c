@@ -290,14 +290,11 @@ int32_t fat_close_fs(fat_fs_t *fs)
     return rc;
 }
 
-int32_t fat_read_folder(fat_fs_t *fs, DWORD sec_num, fat_frec_t *records,
+int32_t fat_read_folder(fat_fs_t *fs, DWORD sec_num, fat_frec_t *recs,
                         int32_t max, int32_t *total)
 {
     /* Return code */
     int32_t rc = FAT_ERROR_NONE;
-
-    /* Stores data read from disk */
-    BYTE *buff = NULL;
 
     /* Indexing variable */
     int32_t i = 0;
@@ -307,8 +304,18 @@ int32_t fat_read_folder(fat_fs_t *fs, DWORD sec_num, fat_frec_t *records,
     /* Used in case of Root Directory lies on more than 1 sector. */
     uint32_t cnt = 0;
 
-    /* Current working record */
-    fat_frec_t record;
+    /* Current working record. */
+    fat_frec_t rec;
+    /* rec as a long file name entry. */
+    /* fat_lfrec_t lfrec; */
+    /* Current working first long file name entry. */
+    /* fat_frec_t rec83; */
+
+    /* Stores data read from disk */
+    BYTE *buff = NULL;
+
+    /* Store long file name. */
+    DWORD long_name[256] = {0};
 
     if (g_disk == NULL || g_disk->status != HAL_STATUS_OPENED)
     {
@@ -318,7 +325,7 @@ int32_t fat_read_folder(fat_fs_t *fs, DWORD sec_num, fat_frec_t *records,
 
     buff = (BYTE *)malloc(fs->bs.sec_sz);
 
-    for (i = 0; /* i < fs->bs.root_ent_cnt */; ++i)
+    for (i = 0;; ++i)
     {
         rc = g_disk->read_sector(g_disk, sec_num + k, buff);
         if (rc < g_disk->sec_sz)
@@ -326,7 +333,7 @@ int32_t fat_read_folder(fat_fs_t *fs, DWORD sec_num, fat_frec_t *records,
             rc = FAT_ERROR_CANNOT_READ;
             return rc;
         }
-        memcpy(&record, buff + (i * sizeof(fat_frec_t)), sizeof(fat_frec_t));
+        memcpy(&rec, buff + (i * sizeof(fat_frec_t)), sizeof(fat_frec_t));
 
         cnt += sizeof(fat_frec_t);
         /* Check if need to fetch next sector. */
@@ -336,31 +343,38 @@ int32_t fat_read_folder(fat_fs_t *fs, DWORD sec_num, fat_frec_t *records,
             k++;
         }
 
-        if (record.name[0] == FAT_DIR_STAT_END)
+        if (rec.name[0] == FAT_DIR_STAT_END)
         {
             /* There is no more entries from this entry. */
             break;
         }
 
-        if (record.name[0] == FAT_DIR_STAT_FREE) {
+        if (rec.name[0] == FAT_DIR_STAT_FREE)
+        {
             continue;
         }
 
-        if (record.attrs & ATTR_LONG_NAME_MASK)
+        if (FAT_IS_LONG_FILE(fs, &rec))
         {
-            if (fs->fs_type != FS_FAT32)
+            /* Found a long file name entry. */
+            /* memcpy(&lfrec, &rec, sizeof(rec)); */
+            if (rec.name[0] != 1)
             {
-              continue;
+                continue;
+            }
+            else
+            {
+                printf("First entry!\n");
             }
         }
 
-        if (record.attrs & ATTR_VOLUME_ID)
+        if (rec.attrs & ATTR_VOLUME_ID)
         {
-            /* Ignore empty or special entries. */
+            printf("ATTR_VOLUME_ID\n");
             continue;
         }
 
-        records[j++] = record;
+        recs[j++] = rec;
     }
 
     *total = j;
@@ -370,7 +384,7 @@ int32_t fat_read_folder(fat_fs_t *fs, DWORD sec_num, fat_frec_t *records,
     return rc;
 }
 
-int32_t fat_read_file(fat_fs_t *fs, fat_frec_t *record, uint8_t *buff)
+int32_t fat_read_file(fat_fs_t *fs, fat_frec_t *rec, uint8_t *buff)
 {
     /* Return code */
     int32_t rc = FAT_ERROR_NONE;
@@ -379,7 +393,7 @@ int32_t fat_read_file(fat_fs_t *fs, fat_frec_t *record, uint8_t *buff)
     size_t i = 0;
 
     /* Current working cluster's number */
-    DWORD curr = record->first_clus_lo;
+    DWORD curr = rec->fst_clus_lo;
 
     /* Current working sector */
     DWORD sec_num = FAT_CLUS_SEC_NUM(fs, curr);

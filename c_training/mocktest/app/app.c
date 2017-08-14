@@ -34,7 +34,23 @@
  * Definitions
  ******************************************************************************/
 #define BUFF_SIZE 512
-/* TODO remove when done */
+
+struct
+{
+    uint8_t media;
+    const char *descr;
+} mediatytes[] = {
+    {0xf0, "5.25\" or 3.5\" HD floppy"},
+    {0xf8, "Hard disk"},
+    {0xf9, "3,5\" 720k floppy 2s/80tr/9sec or "
+           "5.25\" 1.2M floppy 2s/80tr/15sec"},
+    {0xfa, "5.25\" 320k floppy 1s/80tr/8sec"},
+    {0xfb, "3.5\" 640k floppy 2s/80tr/8sec"},
+    {0xfc, "5.25\" 180k floppy 1s/40tr/9sec"},
+    {0xfd, "5.25\" 360k floppy 2s/40tr/9sec"},
+    {0xfe, "5.25\" 160k floppy 1s/40tr/8sec"},
+    {0xff, "5.25\" 320k floppy 2s/40tr/8sec"},
+};
 
 /*******************************************************************************
  * Code
@@ -42,7 +58,11 @@
 
 int32_t app_cmd_fsinfo(fat_fs_t *fs)
 {
+    /* Temporary buffer. */
     int8_t buff[BUFF_SIZE] = {0};
+
+    /* Indexing variable. */
+    uint8_t i = 0;
 
     printf("FILE SYSTEM INFORMATION: \n");
 
@@ -67,17 +87,12 @@ int32_t app_cmd_fsinfo(fat_fs_t *fs)
     printf("Total of sectors: %u\n", fs->total_sec_cnt);
     printf("Total of clusters: %u\n", fs->total_clus_cnt);
 
-    if (fs->bs.media_type == 0xF8)
+    for (i = 0; i < sizeof(mediatytes) / sizeof(*mediatytes); ++i)
     {
-        printf("Media: Hard disk\n");
-    }
-    else if (fs->bs.media_type == 0xF0)
-    {
-        printf("Media: Soft disk 1.44M\n");
-    }
-    else
-    {
-        printf("Media code: 0x%X\n", fs->bs.media_type);
+        if (fs->bs.media_type == mediatytes[i].media)
+        {
+            printf("Media type: %s\n", mediatytes[i].descr);
+        }
     }
 
     if (fs->bs.fat16_bs_ex.label[0])
@@ -177,7 +192,7 @@ int32_t app_cmd_cd(fat_fs_t *fs, fat_frec_t *cwd, DWORD *cwd_sec_num)
     {
         memset(buff, 0, BUFF_SIZE);
         util_get_file_name(&records[i], buff);
-        if (strcmp(buff, name) == 0)
+        if (strcmp((const char *)buff, (const char *)name) == 0)
         {
             if ((records[i].attrs & ATTR_DIRECTORY) == 0)
             {
@@ -186,10 +201,10 @@ int32_t app_cmd_cd(fat_fs_t *fs, fat_frec_t *cwd, DWORD *cwd_sec_num)
             }
 
             *cwd = records[i];
-            *cwd_sec_num = FAT_CLUS_SEC_NUM(fs, cwd->first_clus_lo);
+            *cwd_sec_num = FAT_CLUS_SEC_NUM(fs, cwd->fst_clus_lo);
 
             /* Sub-directory is root directory */
-            if (cwd->first_clus_lo == 0)
+            if (cwd->fst_clus_lo == 0)
             {
                 *cwd_sec_num = fs->root_dir_sec_num;
             }
@@ -252,7 +267,7 @@ int32_t app_cmd_cat(fat_fs_t *fs, fat_frec_t *cwd, DWORD *cwd_sec_num)
         memset(buff, 0, BUFF_SIZE);
         util_get_file_name(&records[i], buff);
 
-        if (strcmp(buff, name) == 0)
+        if (strcmp((const char *)buff, (const char *)name) == 0)
         {
             /* Found the file with given name! */
             found = true;
@@ -263,7 +278,7 @@ int32_t app_cmd_cat(fat_fs_t *fs, fat_frec_t *cwd, DWORD *cwd_sec_num)
                 break;
             }
 
-            rc = fat_read_file(fs, &records[i], buff);
+            rc = fat_read_file(fs, &records[i], (uint8_t *)buff);
             printf("%s\n", buff);
 
             break;
@@ -293,12 +308,10 @@ int32_t app_cmd_help()
 
 int main(int argc, char *argv[])
 {
-    int8_t buff[BUFF_SIZE] = {0};
-
     int32_t rc = APP_ERROR_NONE;
 
     /* Store command user entered */
-    int8_t cmd[MAX_CMD_LEN] = {0};
+    char cmd[MAX_CMD_LEN] = {0};
 
     /* Use this to work with FAT12/16 file system */
     fat_fs_t fs;
@@ -329,28 +342,28 @@ int main(int argc, char *argv[])
         printf("Command: ");
         scanf("%s", cmd);
 
-        if (strcmp(cmd, "help") == 0)
+        if (strcmp((const char *)cmd, "help") == 0)
         {
             rc = app_cmd_help();
         }
-        else if (strcmp(cmd, "exit") == 0)
+        else if (strcmp((const char *)cmd, "exit") == 0)
         {
             rc = APP_ERROR_NONE;
             break;
         }
-        else if (strcmp(cmd, "fsinfo") == 0)
+        else if (strcmp((const char *)cmd, "fsinfo") == 0)
         {
             rc = app_cmd_fsinfo(&fs);
         }
-        else if (strcmp(cmd, "ls") == 0)
+        else if (strcmp((const char *)cmd, "ls") == 0)
         {
             rc = app_cmd_ls(&fs, cwd_sec_num);
         }
-        else if (strcmp(cmd, "cd") == 0)
+        else if (strcmp((const char *)cmd, "cd") == 0)
         {
             rc = app_cmd_cd(&fs, &cwd, &cwd_sec_num);
         }
-        else if (strcmp(cmd, "cat") == 0)
+        else if (strcmp((const char *)cmd, "cat") == 0)
         {
             rc = app_cmd_cat(&fs, &cwd, &cwd_sec_num);
         }

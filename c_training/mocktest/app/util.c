@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
+#include <wchar.h>
 
 #include "fat/fat.h"
 #include "util.h"
@@ -63,7 +64,7 @@ void util_print_file_sz(fat_frec_t *record);
 void util_print_file_record(fat_frec_t *record)
 {
     /* File name */
-    uint8_t name[13] = {0};
+    int8_t name[13] = {0};
 
     /* Print last modified date */
     printf("%.2uh%.2um%.2us, %.2u-%.2u-%.4u\t", GET_HOUR(record->modified_time),
@@ -88,17 +89,17 @@ void util_print_file_record(fat_frec_t *record)
     }
 
     util_get_file_name(record, name);
-    printf("%s\n", name);
-}
 
-/* Anh Hải comment hàm này ko thực sự cần thiết với Long File Name */
-/* TODO */
-void util_print_file_name(fat_frec_t *record)
-{
-    /* Indexing on record-name */
-    int32_t i = 0;
-    /* Indexing on buff */
-    int32_t j = 0;
+    /* TODO remove when done. */
+    if (record->attrs & ATTR_LONG_NAME)
+    {
+        memcpy(name, record->name, 11);
+        printf("Long File Name: %ls", (wchar_t *)name);
+    }
+    else
+    {
+        printf("%s\n", name);
+    }
 }
 
 void util_get_file_name(fat_frec_t *record, int8_t *name)
