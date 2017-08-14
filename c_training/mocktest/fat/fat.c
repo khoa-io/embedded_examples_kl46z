@@ -290,7 +290,10 @@ int32_t fat_read_folder(fat_fs_t *fs, DWORD sec_num, fat_frec_t *recs,
     /* Indexing variable. */
     int32_t i = 0;
     int32_t j = 0;
+
+    /* Offset (sectors) from sector sec_num. */
     int32_t k = 0;
+
     /* Indexing on lfrec[20]. */
     int32_t l = 0;
 
@@ -306,12 +309,17 @@ int32_t fat_read_folder(fat_fs_t *fs, DWORD sec_num, fat_frec_t *recs,
     BYTE *buff = NULL;
 
     /* Store long file name. */
-    DWORD long_name[256] = {0};
+    /* DWORD ln[256] = {0}; */
 
     if (g_disk == NULL || g_disk->status != HAL_STATUS_OPENED)
     {
         rc = FAT_ERROR_NOT_OPEN;
         return rc;
+    }
+
+    if (fs->fs_type != FS_FAT32 && sec_num == fs->root_dir_sec_num)
+    {
+        return fat_read_root16(fs, recs, max, total);
     }
 
     buff = (BYTE *)malloc(fs->bs.sec_sz);
@@ -342,21 +350,92 @@ int32_t fat_read_folder(fat_fs_t *fs, DWORD sec_num, fat_frec_t *recs,
 
         if (rec.name[0] == FAT_DIR_STAT_FREE)
         {
+            /* Ignore deleted entry. */
             continue;
         }
 
         if (FAT_IS_LONG_FILE(fs, &rec))
         {
             /* Found a long file name entry. */
+            fount_ln = true;
             memcpy(lfrec + l, &rec, sizeof(rec));
-            printf("HERE\n");
-            if (lfrec[l].ord != 1)
+            /* if (lfrec[l++].ord != 1)
             {
                 continue;
-            }
+            } */
+            continue;
+        }
 
+        if (rec.attrs & ATTR_VOLUME_ID)
+        {
+            continue;
+        }
 
-            printf("First entry!\n");
+        recs[j++] = rec;
+    }
+
+    *total = j;
+    free(buff);
+
+    rc = FAT_ERROR_NONE;
+    return rc;
+}
+
+int32_t fat_read_root16(fat_fs_t *fs, fat_frec_t *recs, int32_t max,
+                        int32_t *total)
+{
+    /* Return code */
+    int32_t rc = FAT_ERROR_NONE;
+
+    /* Indexing variable. */
+    int32_t i = 0;
+    int32_t j = 0;
+    int32_t k = 0;
+
+    /* Used in case of Root Directory lies on more than 1 sector. */
+    uint32_t cnt = 0;
+
+    /* Current working record. */
+    fat_frec_t rec;
+
+    /* Stores data read from disk */
+    BYTE *buff = NULL;
+
+    if (g_disk == NULL || g_disk->status != HAL_STATUS_OPENED)
+    {
+        rc = FAT_ERROR_NOT_OPEN;
+        return rc;
+    }
+
+    buff = (BYTE *)malloc(fs->bs.sec_sz);
+
+    for (i = 0; i < fs->bs.root_ent_cnt; ++i)
+    {
+        rc = g_disk->read_sector(g_disk, fs->root_dir_sec_num + k, buff);
+        if (rc < g_disk->sec_sz)
+        {
+            rc = FAT_ERROR_CANNOT_READ;
+            return rc;
+        }
+        memcpy(&rec, buff + (i * sizeof(fat_frec_t)), sizeof(fat_frec_t));
+
+        cnt += sizeof(fat_frec_t);
+        /* Check if need to fetch next sector. */
+        if (cnt >= fs->bs.sec_sz)
+        {
+            cnt = 0;
+            k++;
+        }
+
+        if (rec.name[0] == FAT_DIR_STAT_END)
+        {
+            /* There is no more entries from this entry. */
+            break;
+        }
+
+        if (rec.name[0] == FAT_DIR_STAT_FREE)
+        {
+            continue;
         }
 
         if (rec.attrs & ATTR_VOLUME_ID)
