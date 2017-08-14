@@ -223,6 +223,8 @@ int32_t app_cmd_cat(fat_fs_t *fs, fat_frec_t *cwd, DWORD *cwd_sec_num)
     /* The number of listed files and directories */
     int32_t total = 0;
 
+    bool found = false;
+
     /* Name of new directory. Can be: parent or sub directory name in ONE level
      */
     int8_t name[BUFF_SIZE] = {0};
@@ -252,6 +254,8 @@ int32_t app_cmd_cat(fat_fs_t *fs, fat_frec_t *cwd, DWORD *cwd_sec_num)
 
         if (strcmp(buff, name) == 0)
         {
+            /* Found the file with given name! */
+            found = true;
             if (records[i].attrs & ATTR_DIRECTORY)
             {
                 /* User entered a folder name => abort */
@@ -264,6 +268,11 @@ int32_t app_cmd_cat(fat_fs_t *fs, fat_frec_t *cwd, DWORD *cwd_sec_num)
 
             break;
         }
+    }
+
+    if (!found)
+    {
+        printf("File not found!\n");
     }
 
     return rc;

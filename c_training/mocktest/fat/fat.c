@@ -342,17 +342,22 @@ int32_t fat_read_folder(fat_fs_t *fs, DWORD sec_num, fat_frec_t *records,
             break;
         }
 
-        if (record.name[0] == FAT_DIR_STAT_FREE ||
-            (record.attrs & ATTR_VOLUME_ID))
-        {
-            /* Ignore empty or special entries. */
+        if (record.name[0] == FAT_DIR_STAT_FREE) {
             continue;
         }
 
         if (record.attrs & ATTR_LONG_NAME_MASK)
         {
-            printf("Long file name\n");
-            j++;
+            if (fs->fs_type != FS_FAT32)
+            {
+              continue;
+            }
+        }
+
+        if (record.attrs & ATTR_VOLUME_ID)
+        {
+            /* Ignore empty or special entries. */
+            continue;
         }
 
         records[j++] = record;
