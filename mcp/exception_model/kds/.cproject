@@ -56,33 +56,38 @@
 							</tool>
 							<tool id="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.1397207158" name="Cross ARM C Compiler" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler">
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.include.paths.336878990" name="Include paths (-I)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.include.paths" useByScannerDiscovery="false" valueType="includePath">
-									<listOptionValue builtIn="false" value="../../platform/osa/inc" />
-									<listOptionValue builtIn="false" value="../../platform/utilities/inc" />
 									<listOptionValue builtIn="false" value="../../platform/CMSIS/Include" />
 									<listOptionValue builtIn="false" value="../../platform/devices" />
 									<listOptionValue builtIn="false" value="../../platform/devices/MKL46Z4/include" />
 									<listOptionValue builtIn="false" value="../../platform/devices/MKL46Z4/startup" />
 									<listOptionValue builtIn="false" value="../../platform/hal/inc" />
-									<listOptionValue builtIn="false" value="../../platform/drivers/inc" />
 									<listOptionValue builtIn="false" value="../../platform/system/inc" />
 									<listOptionValue builtIn="false" value="../../" />
-									<listOptionValue builtIn="false" value="../../platform/drivers/src/adc16" />
-									<listOptionValue builtIn="false" value="../../platform/drivers/src/cmp" />
-									<listOptionValue builtIn="false" value="../../platform/drivers/src/dac" />
-									<listOptionValue builtIn="false" value="../../platform/drivers/src/dma" />
-									<listOptionValue builtIn="false" value="../../platform/drivers/src/gpio" />
-									<listOptionValue builtIn="false" value="../../platform/drivers/src/i2c" />
-									<listOptionValue builtIn="false" value="../../platform/drivers/src/lpsci" />
-									<listOptionValue builtIn="false" value="../../platform/drivers/src/lptmr" />
-									<listOptionValue builtIn="false" value="../../platform/drivers/src/pit" />
-									<listOptionValue builtIn="false" value="../../platform/drivers/src/rtc" />
-									<listOptionValue builtIn="false" value="../../platform/drivers/src/sai" />
-									<listOptionValue builtIn="false" value="../../platform/drivers/src/slcd" />
-									<listOptionValue builtIn="false" value="../../platform/drivers/src/spi" />
-									<listOptionValue builtIn="false" value="../../platform/drivers/src/tpm" />
-									<listOptionValue builtIn="false" value="../../platform/drivers/src/tsi" />
-									<listOptionValue builtIn="false" value="../../platform/drivers/src/uart" />
-									<listOptionValue builtIn="false" value="../../platform/drivers/src/cop" />
+									<listOptionValue builtIn="false" value="../../platform/hal/src/adc16" />
+									<listOptionValue builtIn="false" value="../../platform/hal/src/cmp" />
+									<listOptionValue builtIn="false" value="../../platform/hal/src/dac" />
+									<listOptionValue builtIn="false" value="../../platform/hal/src/dma" />
+									<listOptionValue builtIn="false" value="../../platform/hal/src/dmamux" />
+									<listOptionValue builtIn="false" value="../../platform/hal/src/gpio" />
+									<listOptionValue builtIn="false" value="../../platform/hal/src/i2c" />
+									<listOptionValue builtIn="false" value="../../platform/hal/src/llwu" />
+									<listOptionValue builtIn="false" value="../../platform/hal/src/lpsci" />
+									<listOptionValue builtIn="false" value="../../platform/hal/src/lptmr" />
+									<listOptionValue builtIn="false" value="../../platform/hal/src/mcg" />
+									<listOptionValue builtIn="false" value="../../platform/hal/src/osc" />
+									<listOptionValue builtIn="false" value="../../platform/hal/src/pit" />
+									<listOptionValue builtIn="false" value="../../platform/hal/src/port" />
+									<listOptionValue builtIn="false" value="../../platform/hal/src/rcm" />
+									<listOptionValue builtIn="false" value="../../platform/hal/src/rtc" />
+									<listOptionValue builtIn="false" value="../../platform/hal/src/sai" />
+									<listOptionValue builtIn="false" value="../../platform/hal/src/sim/MKL46Z4" />
+									<listOptionValue builtIn="false" value="../../platform/hal/src/slcd" />
+									<listOptionValue builtIn="false" value="../../platform/hal/src/smc" />
+									<listOptionValue builtIn="false" value="../../platform/hal/src/spi" />
+									<listOptionValue builtIn="false" value="../../platform/hal/src/tpm" />
+									<listOptionValue builtIn="false" value="../../platform/hal/src/tsi" />
+									<listOptionValue builtIn="false" value="../../platform/hal/src/uart" />
+									<listOptionValue builtIn="false" value="../../platform/hal/src/cop" />
 								</option>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.std.933718024" name="Language standard" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.std" useByScannerDiscovery="true" value="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.std.gnu99" valueType="enumerated" />
 								<inputType id="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.input.1895544709" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.input" />
@@ -110,7 +115,7 @@
 									<additionalInput kind="additionalinput" paths="$(LIBS)" />
 								</inputType>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.linker.otherobjs.3524946900" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.linker.otherobjs" valueType="userObjs">
-									<listOptionValue builtIn="false" value="../../lib/ksdk_platform_lib/kds/KL46Z4/debug/libksdk_platform.a" />
+									<listOptionValue builtIn="false" value="../../lib/ksdk_hal_lib/kds/KL46Z4/debug/libksdk_hal.a" />
 								</option>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.linker.nostart.6031988652" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.linker.nostart" value="false" valueType="boolean" />
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.linker.nodeflibs.1607275937" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.linker.nodeflibs" value="false" valueType="boolean" />
@@ -210,33 +215,38 @@
 							</tool>
 							<tool id="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.955273220" name="Cross ARM C Compiler" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler">
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.include.paths.767758500" name="Include paths (-I)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.include.paths" useByScannerDiscovery="false" valueType="includePath">
-									<listOptionValue builtIn="false" value="../../platform/osa/inc" />
-									<listOptionValue builtIn="false" value="../../platform/utilities/inc" />
 									<listOptionValue builtIn="false" value="../../platform/CMSIS/Include" />
 									<listOptionValue builtIn="false" value="../../platform/devices" />
 									<listOptionValue builtIn="false" value="../../platform/devices/MKL46Z4/include" />
 									<listOptionValue builtIn="false" value="../../platform/devices/MKL46Z4/startup" />
 									<listOptionValue builtIn="false" value="../../platform/hal/inc" />
-									<listOptionValue builtIn="false" value="../../platform/drivers/inc" />
 									<listOptionValue builtIn="false" value="../../platform/system/inc" />
 									<listOptionValue builtIn="false" value="../../" />
-									<listOptionValue builtIn="false" value="../../platform/drivers/src/adc16" />
-									<listOptionValue builtIn="false" value="../../platform/drivers/src/cmp" />
-									<listOptionValue builtIn="false" value="../../platform/drivers/src/dac" />
-									<listOptionValue builtIn="false" value="../../platform/drivers/src/dma" />
-									<listOptionValue builtIn="false" value="../../platform/drivers/src/gpio" />
-									<listOptionValue builtIn="false" value="../../platform/drivers/src/i2c" />
-									<listOptionValue builtIn="false" value="../../platform/drivers/src/lpsci" />
-									<listOptionValue builtIn="false" value="../../platform/drivers/src/lptmr" />
-									<listOptionValue builtIn="false" value="../../platform/drivers/src/pit" />
-									<listOptionValue builtIn="false" value="../../platform/drivers/src/rtc" />
-									<listOptionValue builtIn="false" value="../../platform/drivers/src/sai" />
-									<listOptionValue builtIn="false" value="../../platform/drivers/src/slcd" />
-									<listOptionValue builtIn="false" value="../../platform/drivers/src/spi" />
-									<listOptionValue builtIn="false" value="../../platform/drivers/src/tpm" />
-									<listOptionValue builtIn="false" value="../../platform/drivers/src/tsi" />
-									<listOptionValue builtIn="false" value="../../platform/drivers/src/uart" />
-									<listOptionValue builtIn="false" value="../../platform/drivers/src/cop" />
+									<listOptionValue builtIn="false" value="../../platform/hal/src/adc16" />
+									<listOptionValue builtIn="false" value="../../platform/hal/src/cmp" />
+									<listOptionValue builtIn="false" value="../../platform/hal/src/dac" />
+									<listOptionValue builtIn="false" value="../../platform/hal/src/dma" />
+									<listOptionValue builtIn="false" value="../../platform/hal/src/dmamux" />
+									<listOptionValue builtIn="false" value="../../platform/hal/src/gpio" />
+									<listOptionValue builtIn="false" value="../../platform/hal/src/i2c" />
+									<listOptionValue builtIn="false" value="../../platform/hal/src/llwu" />
+									<listOptionValue builtIn="false" value="../../platform/hal/src/lpsci" />
+									<listOptionValue builtIn="false" value="../../platform/hal/src/lptmr" />
+									<listOptionValue builtIn="false" value="../../platform/hal/src/mcg" />
+									<listOptionValue builtIn="false" value="../../platform/hal/src/osc" />
+									<listOptionValue builtIn="false" value="../../platform/hal/src/pit" />
+									<listOptionValue builtIn="false" value="../../platform/hal/src/port" />
+									<listOptionValue builtIn="false" value="../../platform/hal/src/rcm" />
+									<listOptionValue builtIn="false" value="../../platform/hal/src/rtc" />
+									<listOptionValue builtIn="false" value="../../platform/hal/src/sai" />
+									<listOptionValue builtIn="false" value="../../platform/hal/src/sim/MKL46Z4" />
+									<listOptionValue builtIn="false" value="../../platform/hal/src/slcd" />
+									<listOptionValue builtIn="false" value="../../platform/hal/src/smc" />
+									<listOptionValue builtIn="false" value="../../platform/hal/src/spi" />
+									<listOptionValue builtIn="false" value="../../platform/hal/src/tpm" />
+									<listOptionValue builtIn="false" value="../../platform/hal/src/tsi" />
+									<listOptionValue builtIn="false" value="../../platform/hal/src/uart" />
+									<listOptionValue builtIn="false" value="../../platform/hal/src/cop" />
 								</option>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.std.997197032" name="Language standard" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.std" useByScannerDiscovery="true" value="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.std.gnu99" valueType="enumerated" />
 								<inputType id="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.input.1711058916" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.input" />
@@ -254,7 +264,7 @@
 									<additionalInput kind="additionalinput" paths="$(LIBS)" />
 								</inputType>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.linker.otherobjs.7937988098" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.linker.otherobjs" valueType="userObjs">
-									<listOptionValue builtIn="false" value="../../lib/ksdk_platform_lib/kds/KL46Z4/release/libksdk_platform.a" />
+									<listOptionValue builtIn="false" value="../../lib/ksdk_hal_lib/kds/KL46Z4/release/libksdk_hal.a" />
 								</option>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.linker.scriptfile.6469517" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.linker.scriptfile" valueType="stringList">
 									<listOptionValue builtIn="false" value="../../platform/devices/MKL46Z4/linker/gcc/MKL46Z256xxx4_flash.ld" />
