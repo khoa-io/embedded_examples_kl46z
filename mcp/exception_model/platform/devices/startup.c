@@ -32,9 +32,9 @@
 #include "fsl_device_registers.h"
 
 #if (defined(__ICCARM__))
-    #pragma section = ".data"
-    #pragma section = ".data_init"
-    #pragma section = ".bss"
+#pragma section = ".data"
+#pragma section = ".data_init"
+#pragma section = ".bss"
 #endif
 
 /*******************************************************************************
@@ -57,59 +57,61 @@
  *END**************************************************************************/
 void init_data_bss(void)
 {
-    uint32_t n; 
-    
+    uint32_t n;
+
     /* Addresses for VECTOR_TABLE and VECTOR_RAM come from the linker file */
 #if defined(__CC_ARM)
     extern uint32_t Image$$VECTOR_ROM$$Base[];
     extern uint32_t Image$$VECTOR_RAM$$Base[];
     extern uint32_t Image$$RW_m_data$$Base[];
 
-    #define __VECTOR_TABLE Image$$VECTOR_ROM$$Base  
-    #define __VECTOR_RAM Image$$VECTOR_RAM$$Base  
-    #define __RAM_VECTOR_TABLE_SIZE (((uint32_t)Image$$RW_m_data$$Base - (uint32_t)Image$$VECTOR_RAM$$Base))
+#define __VECTOR_TABLE Image$$VECTOR_ROM$$Base  
+#define __VECTOR_RAM Image$$VECTOR_RAM$$Base  
+#define __RAM_VECTOR_TABLE_SIZE (((uint32_t)Image$$RW_m_data$$Base - (uint32_t)Image$$VECTOR_RAM$$Base))
 #elif defined(__ICCARM__)
     extern uint32_t __RAM_VECTOR_TABLE_SIZE[];
-    extern uint32_t __VECTOR_TABLE[];  
-    extern uint32_t __VECTOR_RAM[];  
+    extern uint32_t __VECTOR_TABLE[];
+    extern uint32_t __VECTOR_RAM[];
 #elif defined(__GNUC__)
     extern uint32_t __VECTOR_TABLE[];
     extern uint32_t __VECTOR_RAM[];
     extern uint32_t __RAM_VECTOR_TABLE_SIZE_BYTES[];
-    uint32_t __RAM_VECTOR_TABLE_SIZE = (uint32_t)(__RAM_VECTOR_TABLE_SIZE_BYTES);
+    uint32_t __RAM_VECTOR_TABLE_SIZE =
+            (uint32_t) (__RAM_VECTOR_TABLE_SIZE_BYTES);
 #endif
 
     if (__VECTOR_RAM != __VECTOR_TABLE)
-    {   
+    {
         /* Copy the vector table from ROM to RAM */
-        for (n = 0; n < ((uint32_t)__RAM_VECTOR_TABLE_SIZE)/sizeof(uint32_t); n++)
+        for (n = 0; n < ((uint32_t) __RAM_VECTOR_TABLE_SIZE) / sizeof(uint32_t);
+                n++)
         {
             __VECTOR_RAM[n] = __VECTOR_TABLE[n];
         }
         /* Point the VTOR to the position of vector table */
-        SCB->VTOR = (uint32_t)__VECTOR_RAM;
+        SCB->VTOR = (uint32_t) __VECTOR_RAM;
     }
     else
     {
         /* Point the VTOR to the position of vector table */
-        SCB->VTOR = (uint32_t)__VECTOR_TABLE;
+        SCB->VTOR = (uint32_t) __VECTOR_TABLE;
     }
 
 #if !defined(__CC_ARM) && !defined(__ICCARM__)
-    
+
     /* Declare pointers for various data sections. These pointers
      * are initialized using values pulled in from the linker file */
-    uint8_t * data_ram, * data_rom, * data_rom_end;
-    uint8_t * bss_start, * bss_end;
+    uint8_t * data_ram, *data_rom, *data_rom_end;
+    uint8_t * bss_start, *bss_end;
 
     /* Get the addresses for the .data section (initialized data section) */
 #if defined(__GNUC__)
     extern uint32_t __DATA_ROM[];
     extern uint32_t __DATA_RAM[];
     extern char __DATA_END[];
-    data_ram = (uint8_t *)__DATA_RAM;
-    data_rom = (uint8_t *)__DATA_ROM;
-    data_rom_end  = (uint8_t *)__DATA_END;
+    data_ram = (uint8_t *) __DATA_RAM;
+    data_rom = (uint8_t *) __DATA_ROM;
+    data_rom_end = (uint8_t *) __DATA_END;
     n = data_rom_end - data_rom;
 #endif
 
@@ -117,19 +119,19 @@ void init_data_bss(void)
     while (n--)
     {
         *data_ram++ = *data_rom++;
-    }   
-    
+    }
+
     /* Get the addresses for the .bss section (zero-initialized data) */
 #if defined(__GNUC__)
     extern char __START_BSS[];
     extern char __END_BSS[];
-    bss_start = (uint8_t *)__START_BSS;
-    bss_end = (uint8_t *)__END_BSS;
+    bss_start = (uint8_t *) __START_BSS;
+    bss_end = (uint8_t *) __END_BSS;
 #endif
-		
+
     /* Clear the zero-initialized data section */
     n = bss_end - bss_start;
-    while(n--)
+    while (n--)
     {
         *bss_start++ = 0;
     }

@@ -7,8 +7,8 @@
 
 void GPIO_Init(uint8_t port, uint8_t pin, uint8_t dir)
 {
-    PORT_Type *portType[] = {PORTA, PORTB, PORTC, PORTD, PORTE};
-    GPIO_Type *gpioBase[] = {GPIOA, GPIOB, GPIOC, GPIOD, GPIOE};
+    PORT_Type *portType[] = { PORTA, PORTB, PORTC, PORTD, PORTE };
+    GPIO_Type *gpioBase[] = { GPIOA, GPIOB, GPIOC, GPIOD, GPIOE };
 
     /* Enable clock */
     SIM->SCGC5 |= (1 << (port + 9));

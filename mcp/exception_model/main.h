@@ -2,7 +2,7 @@
  * This is template for main module created by KSDK Project Generator. Enjoy!
  */
 
- /*
+/*
  * [File Name]     main.h
  * [Platform]      MKL46Z256VLH4
  * [Project]       exception_model

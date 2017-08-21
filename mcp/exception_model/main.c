@@ -130,10 +130,10 @@ int main(void)
 
     /* Configure SysTick to generate an interrupt every 1ms */
     /* TODO un-comment following line when done */
-    /*rc = SysTick_Config(SystemCoreClock / 1000);*/
-    __disable_irq();
-    NVIC_SetPriority(PORTC_PORTD_IRQn, 0);
-    NVIC_EnableIRQ(PORTC_PORTD_IRQn);
+    rc = SysTick_Config(SystemCoreClock / 1000);
+    /*__disable_irq();
+     NVIC_SetPriority(PORTC_PORTD_IRQn, 0);
+     NVIC_EnableIRQ(PORTC_PORTD_IRQn);*/
 
     if (rc != 0)
     {
