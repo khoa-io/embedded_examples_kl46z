@@ -29,7 +29,7 @@
  *
  * @return Return circular index.
  */
-#define CIRCULAR_INDEX_OF(a, li) ((li) % (sizeof((a)) / sizeof(typeof((a)[0]))))
+#define CIRCULAR_INDEX_OF(a, li) ((li) % (sizeof((a)) / sizeof(a[0])))
 
 /*******************************************************************************
  * Global variables
@@ -41,10 +41,13 @@ uint32_t ms_count = 0;
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
+/* TODO comment here */
+void PORTC_PORTD_IRQHandler(void);
+
 /*!
  * @brief Handle SysTick Interrupt. In this program, SysTick_Handler will be
- * configured to be called every milisecond. This function does blink RED LED
- * at 1Hz, GREEN LED at 2Hz.
+ * configured to be called every 1ms. This function does blink red led at 1Hz,
+ * green led at 2Hz.
  */
 void SysTick_Handler(void);
 
@@ -52,12 +55,17 @@ void SysTick_Handler(void);
  * Code
  ******************************************************************************/
 
+void PORTC_PORTD_IRQHandler(void)
+{
+    ++ms_count;
+}
+
 void SysTick_Handler(void)
 {
     /* Blink frequencies of red led (unit: Hz). */
-    uint32_t red_led_freq[] = { 1, 2, 3, 4 };
+    static uint32_t red_led_freq[] = { 1, 2, 3, 4 };
     /* Blink frequencies of green led (unit: Hz). */
-    uint32_t green_led_freq[] = { 2, 1, 4, 6, 4, 3 };
+    static uint32_t green_led_freq[] = { 6, 5, 4, 3, 2, 1 };
 
     /* Indexing on red_led_freq. */
     static uint8_t i = 0;
@@ -65,7 +73,7 @@ void SysTick_Handler(void)
     static uint8_t j = 0;
 
     /* Increase counter every 1ms. */
-    ms_count++;
+    ++ms_count;
 
     if (GPIO_Read(GPIOC, 3) == 0)
     {
@@ -87,13 +95,13 @@ void SysTick_Handler(void)
 
     if (ms_count % (1000 / (2 * red_led_freq[i])) == 0)
     {
-        /* Blink the red led at rate red_led_freq[i] */
+        /* Blink the red led at red_led_freq[i] Hz */
         GPIO_Toggle(GPIOE, 29);
     }
 
     if (ms_count % (1000 / (2 * green_led_freq[j])) == 0)
     {
-        /* Blink the green led at rate green_led_freq[j] */
+        /* Blink the green led at green_led_freq[j] Hz */
         GPIO_Toggle(GPIOD, 5);
     }
 
@@ -107,7 +115,7 @@ void SysTick_Handler(void)
 int main(void)
 {
     /* Return code of the functions */
-    uint32_t rc;
+    uint32_t rc = 0;
 
     /* Setup GPIO for GREEN LED and RED LED */
     GPIO_Init(PORT_D, 5, OUTPUT);
@@ -116,16 +124,25 @@ int main(void)
     GPIO_Init(PORT_C, 3, INPUT);
     GPIO_Init(PORT_C, 12, INPUT);
 
+    /* Leds are turned off by default. */
+    GPIO_Write(GPIOE, 29, 1);
+    GPIO_Write(GPIOD, 5, 1);
+
     /* Configure SysTick to generate an interrupt every 1ms */
-    rc = SysTick_Config(SystemCoreClock / 1000);
+    /* TODO un-comment following line when done */
+    /*rc = SysTick_Config(SystemCoreClock / 1000);*/
+    __disable_irq();
+    NVIC_SetPriority(PORTC_PORTD_IRQn, 0);
+    NVIC_EnableIRQ(PORTC_PORTD_IRQn);
 
     if (rc != 0)
     {
-        /* Failed to configure SysTick => blink RED and GREEN LED */
-        GPIO_Toggle(GPIOE, 29);
-        GPIO_Toggle(GPIOD, 5);
+        /* Failed to configure SysTick => turn on not blink red and green led */
+        GPIO_Write(GPIOE, 29, 0);
+        GPIO_Write(GPIOD, 5, 0);
     }
 
     while (1)
-        ;
+    {
+    };
 }
