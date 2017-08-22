@@ -15,7 +15,6 @@
  */
 
 #include "gpio.h"
-#include "main.h"
 
 /*******************************************************************************
  * Macros
@@ -31,17 +30,39 @@
  */
 #define CIRCULAR_INDEX_OF(a, li) ((li) % (sizeof((a)) / sizeof(a[0])))
 
+/*!
+ * @brief Calculate period from frequency.
+ *
+ * @param f Frequency.
+ *
+ * @return Return period.
+ */
+#define FREQ_TO_PERIOD(f) (1000 / (f))
+
 /*******************************************************************************
  * Global variables
  ******************************************************************************/
 
 /* Count the miliseconds */
-uint32_t ms_count = 0;
+uint32_t g_ms_count = 0;
+
+/* Blink frequencies of red led (unit: Hz). */
+uint32_t g_red_led_freq[] = { 1, 2, 3, 4 };
+/* Indexing on g_red_led_freq. */
+uint8_t g_ired = 0;
+
+/* Blink frequencies of green led (unit: Hz). */
+uint32_t g_green_led_freq[] = { 4, 3, 2, 1 };
+/* Indexing on g_green_led_freq. */
+uint8_t g_igreen = 0;
 
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
-/* TODO comment here */
+
+/*!
+ * @brief Handle SW1, SW2 pressed.
+ */
 void PORTC_PORTD_IRQHandler(void);
 
 /*!
@@ -57,58 +78,54 @@ void SysTick_Handler(void);
 
 void PORTC_PORTD_IRQHandler(void)
 {
-    ++ms_count;
+    if (PORTC->PCR[3] & PORT_PCR_ISF_MASK)
+    {
+        /* SW1 hit */
+        /* Clear interrupt service flag */
+        PORTC->PCR[3] |= PORT_PCR_ISF_MASK;
+
+        /* Choose next frequency if SW1 is pushed. */
+        ++g_ired;
+        g_ired = CIRCULAR_INDEX_OF(g_red_led_freq, g_ired);
+        ++g_igreen;
+        g_igreen = CIRCULAR_INDEX_OF(g_green_led_freq, g_igreen);
+    }
+
+    if (PORTC->PCR[12] & PORT_PCR_ISF_MASK)
+    {
+        /* SW2 hit */
+        /* Clear interrupt service flag */
+        PORTC->PCR[12] |= PORT_PCR_ISF_MASK;
+
+        /* Choose previous frequency if SW2 is pushed. */
+        --g_ired;
+        g_ired = CIRCULAR_INDEX_OF(g_red_led_freq, g_ired);
+        --g_igreen;
+        g_igreen = CIRCULAR_INDEX_OF(g_green_led_freq, g_igreen);
+    }
 }
 
 void SysTick_Handler(void)
 {
-    /* Blink frequencies of red led (unit: Hz). */
-    static uint32_t red_led_freq[] = { 1, 2, 3, 4 };
-    /* Blink frequencies of green led (unit: Hz). */
-    static uint32_t green_led_freq[] = { 6, 5, 4, 3, 2, 1 };
-
-    /* Indexing on red_led_freq. */
-    static uint8_t i = 0;
-    /* Indexing on green_led_freq. */
-    static uint8_t j = 0;
-
     /* Increase counter every 1ms. */
-    ++ms_count;
+    ++g_ms_count;
 
-    if (GPIO_Read(GPIOC, 3) == 0)
+    if (g_ms_count % FREQ_TO_PERIOD(g_red_led_freq[g_ired]) == 0)
     {
-        /* Choose next frequency if SW1 is pushed. */
-        ++i;
-        i = CIRCULAR_INDEX_OF(red_led_freq, i);
-        ++j;
-        j = CIRCULAR_INDEX_OF(green_led_freq, j);
-    }
-
-    if (GPIO_Read(GPIOC, 12) == 0)
-    {
-        /* Choose previous frequency if SW2 is pushed. */
-        --i;
-        i = CIRCULAR_INDEX_OF(red_led_freq, i);
-        --j;
-        j = CIRCULAR_INDEX_OF(green_led_freq, j);
-    }
-
-    if (ms_count % (1000 / (2 * red_led_freq[i])) == 0)
-    {
-        /* Blink the red led at red_led_freq[i] Hz */
+        /* Blink the red led at g_red_led_freq[i] Hz */
         GPIO_Toggle(GPIOE, 29);
     }
 
-    if (ms_count % (1000 / (2 * green_led_freq[j])) == 0)
+    if (g_ms_count % FREQ_TO_PERIOD(g_green_led_freq[g_igreen]) == 0)
     {
-        /* Blink the green led at green_led_freq[j] Hz */
+        /* Blink the green led at g_green_led_freq[j] Hz */
         GPIO_Toggle(GPIOD, 5);
     }
 
-    if (ms_count >= 1000)
+    if (g_ms_count >= 1000)
     {
         /* Reset counter when it reached max value (1000) */
-        ms_count = 0;
+        g_ms_count = 0;
     }
 }
 
@@ -129,11 +146,14 @@ int main(void)
     GPIO_Write(GPIOD, 5, 1);
 
     /* Configure SysTick to generate an interrupt every 1ms */
-    /* TODO un-comment following line when done */
     rc = SysTick_Config(SystemCoreClock / 1000);
-    /*__disable_irq();
-     NVIC_SetPriority(PORTC_PORTD_IRQn, 0);
-     NVIC_EnableIRQ(PORTC_PORTD_IRQn);*/
+
+    /* Enable interrupt for SW1 and SW2 */
+    PORTC->PCR[3] |= PORT_PCR_IRQC(0x9);
+    PORTC->PCR[12] |= PORT_PCR_IRQC(0x9);
+    NVIC_ClearPendingIRQ(PORTC_PORTD_IRQn);
+    NVIC_EnableIRQ(PORTC_PORTD_IRQn);
+    NVIC_SetPriority(PORTC_PORTD_IRQn, 0);
 
     if (rc != 0)
     {
