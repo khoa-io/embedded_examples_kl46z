@@ -10,7 +10,7 @@
  * @param base  Port base pointer.
  * @param pin   Port pin number.
  */
-void PORT_clear_pin_isf(PORT_Type * base, uint32_t pin);
+void PORT_clear_pin_isf(PORT_Type *base, uint32_t pin);
 
 /*!
  * @brief Reads the individual pin's ISF.
@@ -22,6 +22,6 @@ void PORT_clear_pin_isf(PORT_Type * base, uint32_t pin);
  *         - 0: interrupt is not detected.
  *         - 1: interrupt is detected.
  */
-uint32_t PORT_get_pin_isf(PORT_Type * base, uint32_t pin);
+uint32_t PORT_get_pin_isf(PORT_Type *base, uint32_t pin);
 
 #endif /* _PORT_H_ */
