@@ -15,6 +15,8 @@
  */
 
 #include "gpio.h"
+#include "board.h"
+#include "port.h"
 
 /*******************************************************************************
  * Macros
@@ -78,11 +80,11 @@ void SysTick_Handler(void);
 
 void PORTC_PORTD_IRQHandler(void)
 {
-    if (PORTC->PCR[3] & PORT_PCR_ISF_MASK)
+    if (PORT_get_pin_isf(PORTC, PIN_SW1))
     {
         /* SW1 hit */
         /* Clear interrupt service flag */
-        PORTC->PCR[3] |= PORT_PCR_ISF_MASK;
+        PORT_clear_pin_isf(PORTC, PIN_SW1);
 
         /* Choose next frequency if SW1 is pushed. */
         ++g_ired;
@@ -91,11 +93,11 @@ void PORTC_PORTD_IRQHandler(void)
         g_igreen = CIRCULAR_INDEX_OF(g_green_led_freq, g_igreen);
     }
 
-    if (PORTC->PCR[12] & PORT_PCR_ISF_MASK)
+    if (PORT_get_pin_isf(PORTC, PIN_SW2))
     {
         /* SW2 hit */
         /* Clear interrupt service flag */
-        PORTC->PCR[12] |= PORT_PCR_ISF_MASK;
+        PORT_clear_pin_isf(PORTC, PIN_SW2);
 
         /* Choose previous frequency if SW2 is pushed. */
         --g_ired;
@@ -134,35 +136,35 @@ int main(void)
     /* Return code of the functions */
     uint32_t rc = 0;
 
-    /* Setup GPIO for GREEN LED and RED LED */
-    GPIO_Init(PORT_D, 5, OUTPUT);
-    GPIO_Init(PORT_E, 29, OUTPUT);
-    /* Setup GPIO for SW1 and SW2 */
-    GPIO_Init(PORT_C, 3, INPUT);
-    GPIO_Init(PORT_C, 12, INPUT);
+    /* Setup GPIO for (in order) green led, red led, SW1, SW2 */
+    GPIO_Init(PORT_D, PIN_GREEN_LED, OUTPUT);
+    GPIO_Init(PORT_E, PIN_RED_LED, OUTPUT);
+    GPIO_Init(PORT_C, PIN_SW1, INPUT);
+    GPIO_Init(PORT_C, PIN_SW2, INPUT);
 
     /* Leds are turned off by default. */
-    GPIO_Write(GPIOE, 29, 1);
-    GPIO_Write(GPIOD, 5, 1);
+    GPIO_Write(GPIOE, PIN_RED_LED, 1);
+    GPIO_Write(GPIOD, PIN_GREEN_LED, 1);
 
     /* Configure SysTick to generate an interrupt every 1ms */
     rc = SysTick_Config(SystemCoreClock / 1000);
 
+    if (rc != 0)
+    {
+        /* Failed to configure SysTick => turn on red led */
+        GPIO_Write(GPIOE, PIN_RED_LED, 0);
+        return rc;
+    }
+
     /* Enable interrupt for SW1 and SW2 */
-    PORTC->PCR[3] |= PORT_PCR_IRQC(0x9);
-    PORTC->PCR[12] |= PORT_PCR_IRQC(0x9);
+    PORTC->PCR[PIN_SW1] |= PORT_PCR_IRQC(0x9);
+    PORTC->PCR[PIN_SW2] |= PORT_PCR_IRQC(0x9);
     NVIC_ClearPendingIRQ(PORTC_PORTD_IRQn);
     NVIC_EnableIRQ(PORTC_PORTD_IRQn);
     NVIC_SetPriority(PORTC_PORTD_IRQn, 0);
 
-    if (rc != 0)
-    {
-        /* Failed to configure SysTick => turn on not blink red and green led */
-        GPIO_Write(GPIOE, 29, 0);
-        GPIO_Write(GPIOD, 5, 0);
-    }
-
     while (1)
     {
+        /* Main loop (not used) */
     };
 }
