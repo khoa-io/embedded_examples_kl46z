@@ -117,13 +117,13 @@ void SysTick_Handler(void)
     if (g_ms_count % FREQ_TO_PERIOD(g_red_led_freq[g_ired]) == 0)
     {
         /* Blink the red led at g_red_led_freq[i] Hz */
-        GPIO_Toggle(GPIOE, 29);
+        GPIO_Toggle(GPIOE, PIN_RED_LED);
     }
 
     if (g_ms_count % FREQ_TO_PERIOD(g_green_led_freq[g_igreen]) == 0)
     {
         /* Blink the green led at g_green_led_freq[j] Hz */
-        GPIO_Toggle(GPIOD, 5);
+        GPIO_Toggle(GPIOD, PIN_GREEN_LED);
     }
 }
 
