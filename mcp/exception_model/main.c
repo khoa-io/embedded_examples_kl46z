@@ -49,14 +49,16 @@
 uint32_t g_ms_count = 0;
 
 /* Blink frequencies of red led (unit: Hz). */
-uint32_t g_red_led_freq[] = { 1, 2, 3, 4 };
+uint32_t g_red_led_freq[] = {1, 2, 3, 4};
 /* Indexing on g_red_led_freq. */
 uint8_t g_ired = 0;
 
 /* Blink frequencies of green led (unit: Hz). */
-uint32_t g_green_led_freq[] = { 4, 3, 2, 1 };
+uint32_t g_green_led_freq[] = {4, 3, 2, 1};
 /* Indexing on g_green_led_freq. */
 uint8_t g_igreen = 0;
+
+extern uint32_t SystemCoreClock;
 
 /*******************************************************************************
  * Prototypes
@@ -122,12 +124,6 @@ void SysTick_Handler(void)
     {
         /* Blink the green led at g_green_led_freq[j] Hz */
         GPIO_Toggle(GPIOD, 5);
-    }
-
-    if (g_ms_count >= 1000)
-    {
-        /* Reset counter when it reached max value (1000) */
-        g_ms_count = 0;
     }
 }
 
