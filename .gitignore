@@ -1,6 +1,7 @@
-*.project
 *.zip
 CMakeFiles
 CMakeCache.txt
 *.img
 *.cmake
+com.processorexpert.core.ide.newprojectwizard.prefs
+.settings
