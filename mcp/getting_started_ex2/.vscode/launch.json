@@ -1,0 +1,18 @@
+{
+    "version": "0.2.0",
+    "configurations": [{
+        "type": "gdb",
+        "request": "attach",
+        "gdbpath": "arm-none-eabi-gdb",
+        "name": "Attach to gdbserver",
+        "executable": "${workspaceRoot}/armgcc/debug/exception_model.elf",
+        "target": ":2331",
+        "preLaunchTask": "build_debug",
+        "remote": true,
+        "autorun": [
+            "monitor reset",
+            "load"
+        ],
+        "cwd": "${workspaceRoot}"
+    }]
+}
