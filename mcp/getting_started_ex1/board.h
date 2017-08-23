@@ -8,7 +8,7 @@
 #define PIN_GREEN_LED 5U
 #define PIN_RED_LED 29U
 #define PIN_SW1 3U
-#define PIN_SW2 12U
+#define PIN_SW3 12U
 
 /*******************************************************************************
  * APIs

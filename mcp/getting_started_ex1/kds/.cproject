@@ -93,7 +93,7 @@
 								<inputType id="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.input.1895544709" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.input" />
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs.869311397" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="DEBUG" />
-									<listOptionValue builtIn="false" value="CPU_MKL46Z256VLH4" />
+									<listOptionValue builtIn="false" value="CPU_MKL46Z256VLL4" />
 								</option>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.nostdinc.4671085848" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.nostdinc" value="false" valueType="boolean" />
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.other.2661180054" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.other" value="-fno-common  -ffreestanding  -fno-builtin  -mapcs" valueType="string" />
@@ -251,7 +251,7 @@
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.std.997197032" name="Language standard" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.std" useByScannerDiscovery="true" value="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.std.gnu99" valueType="enumerated" />
 								<inputType id="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.input.1711058916" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.input" />
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs.2881285214" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs" valueType="definedSymbols">
-									<listOptionValue builtIn="false" value="CPU_MKL46Z256VLH4" />
+									<listOptionValue builtIn="false" value="CPU_MKL46Z256VLL4" />
 								</option>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.nostdinc.4475251566" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.nostdinc" value="false" valueType="boolean" />
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.other.4053677756" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.other" value="-fno-common  -ffreestanding  -fno-builtin  -mapcs" valueType="string" />

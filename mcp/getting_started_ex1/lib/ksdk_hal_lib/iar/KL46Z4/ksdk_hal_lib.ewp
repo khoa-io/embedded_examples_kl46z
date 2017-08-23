@@ -172,7 +172,7 @@
         <option>
           <name>CCDefines</name>
           
-        <state>DEBUG</state><state>CPU_MKL46Z256VLH4</state></option>
+        <state>DEBUG</state><state>CPU_MKL46Z256VLL4</state></option>
         <option>
           <name>CCPreprocFile</name>
           <state>0</state>
@@ -1113,7 +1113,7 @@
         <option>
           <name>CCDefines</name>
           
-        <state>NDEBUG</state><state>CPU_MKL46Z256VLH4</state></option>
+        <state>NDEBUG</state><state>CPU_MKL46Z256VLL4</state></option>
         <option>
           <name>CCPreprocFile</name>
           <state>0</state>
