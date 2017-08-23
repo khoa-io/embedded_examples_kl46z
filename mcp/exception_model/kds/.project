@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>exception_model_MKL46Z256VLH4</name>
+	<name>exception_model_MKL46Z256VLL4</name>
 	<comment></comment>
 	<projects>
 	</projects>
@@ -41,9 +41,14 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>utilities</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
+			<name>sources/board.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/board.c</locationURI>
+		</link>
+		<link>
+			<name>sources/board.h</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/board.h</locationURI>
 		</link>
 		<link>
 			<name>sources/gpio.c</name>
@@ -61,9 +66,14 @@
 			<locationURI>PARENT-1-PROJECT_LOC/main.c</locationURI>
 		</link>
 		<link>
-			<name>sources/main.h</name>
+			<name>sources/port.c</name>
 			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/main.h</locationURI>
+			<locationURI>PARENT-1-PROJECT_LOC/port.c</locationURI>
+		</link>
+		<link>
+			<name>sources/port.h</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/port.h</locationURI>
 		</link>
 		<link>
 			<name>startup/startup.c</name>
@@ -89,26 +99,6 @@
 			<name>startup/system_MKL46Z4.h</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/platform/devices/MKL46Z4/startup/system_MKL46Z4.h</locationURI>
-		</link>
-		<link>
-			<name>utilities/fsl_debug_console.c</name>
-			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/platform/utilities/src/fsl_debug_console.c</locationURI>
-		</link>
-		<link>
-			<name>utilities/fsl_debug_console.h</name>
-			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/platform/utilities/inc/fsl_debug_console.h</locationURI>
-		</link>
-		<link>
-			<name>utilities/print_scan.c</name>
-			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/platform/utilities/src/print_scan.c</locationURI>
-		</link>
-		<link>
-			<name>utilities/print_scan.h</name>
-			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/platform/utilities/src/print_scan.h</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>
