@@ -5,3 +5,4 @@ CMakeCache.txt
 *.cmake
 com.processorexpert.core.ide.newprojectwizard.prefs
 .settings
+debug
