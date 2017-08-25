@@ -20,36 +20,15 @@
 #include "gpio.h"
 #include "board.h"
 #include "port.h"
+#include "uart.h"
 
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
 
-/* Red led on in 200ms */
-#define MAX_TIME_RED_ON 200
-/* Red led off in 1000ms */
-#define MAX_TIME_RED_OFF 1000
-/* Green led on in 3000ms */
-#define MAX_TIME_GREEN_ON 3000
-/* Green led on in 500ms and off in 500ms */
-#define TIME_GREEN_BLINK 500
-
 /*******************************************************************************
  * Global variables
  ******************************************************************************/
-
-/* Count the miliseconds for red led.
- * Note: g_ms_red_count = RedOnTime + RedOffTime */
-int32_t g_ms_red_count = 0;
-
-/* Count the miliseconds for green led. Default it doesn't count until it is
- * initialized (g_ms_green_count = 0). */
-int32_t g_ms_green_count = -1;
-
-/* Toggle blink green led feature */
-bool g_blink_green = false;
-
-extern uint32_t SystemCoreClock;
 
 /*******************************************************************************
  * Prototypes
@@ -70,36 +49,31 @@ void SysTick_Handler(void);
 
 int main(void)
 {
-    /* Return code of the functions */
-    uint32_t rc = 0;
+    /* Gợi ý: tạo ra uart_config_struct_t để chứa các config */
+    /* ... */
+    /* Enable clock for UART0 */
+    SIM_SCGC4 |= SIM_SCGC4_UART0_MASK;
+    /* Select clock source */
+    SIM_SOPT2 &= ~SIM_SOPT2_UART0SRC_MASK;
+    /* Enable UART0_RX */
+    PORTA->PCR[1] &= ~PORT_PCR_MUX_MASK;
+    PORTA->PCR[1] |= PORT_PCR_MUX(1);
+    /* Enable UART0_TX*/
+    PORTA->PCR[2] &= ~PORT_PCR_MUX_MASK;
+    PORTA->PCR[2] |= PORT_PCR_MUX(1);
 
-    /* Setup GPIO for (in order) green led, red led, SW1, SW3 */
-    GPIO_Init(PORT_D, PIN_GREEN_LED, OUTPUT);
-    GPIO_Init(PORT_E, PIN_RED_LED, OUTPUT);
-    GPIO_Init(PORT_C, PIN_SW1, INPUT);
-    GPIO_Init(PORT_C, PIN_SW3, INPUT);
+    /* Configure the UART control registers for the desired data format */
+    /*  Number of data bits */
+    /* UART0->C1 */
+    /* Parity and parity type */
 
-    /* Leds are turned off by default. */
-    GPIO_Write(GPIOE, PIN_RED_LED, 1);
-    GPIO_Write(GPIOD, PIN_GREEN_LED, 1);
+    /* MSB or LSB first */
 
-    /* Configure SysTick to generate an interrupt every 1ms */
-    rc = SysTick_Config(SystemCoreClock / 1000);
+    /* Data polarity */
 
-    if (rc != 0)
-    {
-        /* Failed to configure SysTick => turn red led on, green led off */
-        GPIO_Write(GPIOE, PIN_RED_LED, 0);
-        GPIO_Write(GPIOD, PIN_GREEN_LED, 1);
-        return rc;
-    }
+    /* Configure the baud rate */
 
-    /* Enable interrupt for SW1 and SW3 */
-    PORTC->PCR[PIN_SW1] |= PORT_PCR_IRQC(0x9);
-    PORTC->PCR[PIN_SW3] |= PORT_PCR_IRQC(0x9);
-    NVIC_ClearPendingIRQ(PORTC_PORTD_IRQn);
-    NVIC_EnableIRQ(PORTC_PORTD_IRQn);
-    NVIC_SetPriority(PORTC_PORTD_IRQn, 0);
+    /* Enable the receiver and/or transmitter */
 
     while (1)
     {
