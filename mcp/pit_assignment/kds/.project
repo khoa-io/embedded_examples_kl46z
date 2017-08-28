@@ -66,6 +66,16 @@
 			<locationURI>PARENT-1-PROJECT_LOC/main.c</locationURI>
 		</link>
 		<link>
+			<name>sources/pit.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/pit.c</locationURI>
+		</link>
+		<link>
+			<name>sources/pit.h</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/pit.h</locationURI>
+		</link>
+		<link>
 			<name>sources/port.c</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/port.c</locationURI>
@@ -74,6 +84,16 @@
 			<name>sources/port.h</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/port.h</locationURI>
+		</link>
+		<link>
+			<name>sources/uart.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/uart.c</locationURI>
+		</link>
+		<link>
+			<name>sources/uart.h</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/uart.h</locationURI>
 		</link>
 		<link>
 			<name>startup/startup.c</name>

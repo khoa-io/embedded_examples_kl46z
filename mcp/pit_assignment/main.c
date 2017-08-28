@@ -16,9 +16,11 @@
 
 #include <stdint.h>
 
+#include "MKL46Z4.h"
 #include "gpio.h"
 #include "board.h"
 #include "port.h"
+#include "pit.h"
 
 /*******************************************************************************
  * Definitions
@@ -65,20 +67,11 @@ int main(void)
     /* Leds are turned off by default. */
     GPIO_Write(GPIOE, PIN_RED_LED, 1);
     GPIO_Write(GPIOD, PIN_GREEN_LED, 1);
-
-    /* Enable clock */
-    SIM->SCGC6 |= SIM_SCGC6_PIT_MASK;
-
-    /* Enable interrupt */
-    NVIC_ClearPendingIRQ(PIT_IRQn);
-    NVIC_EnableIRQ(PIT_IRQn);
-    NVIC_SetPriority(PIT_IRQn, 0);
-
-    /* Turn on PIT */
-    PIT->MCR = 0x00;
+    
+    PIT_enable();
 
     /* Configure timer 0 */
-    PIT->CHANNEL[0].LDVAL = LDVAL_GET_COUNT(5000);
+    PIT->CHANNEL[0].LDVAL = LDVAL_GET_COUNT(1000);
     PIT->CHANNEL[0].TCTRL = PIT_TCTRL_TIE_MASK;
     PIT->CHANNEL[0].TCTRL |= PIT_TCTRL_TEN_MASK;
 

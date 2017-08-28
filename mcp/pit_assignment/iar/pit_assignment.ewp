@@ -1642,6 +1642,10 @@
         <wantNonLocal>1</wantNonLocal>
         <debug>0</debug>
         <option>
+          <name>IlinkAdditionalLibs</name>
+          <state></state>
+        </option>
+        <option>
           <name>IlinkLibIOConfig</name>
           <state>1</state>
         </option>
@@ -1969,10 +1973,22 @@
       <name>$PROJ_DIR$\..\main.c</name>
     </file>
     <file>
+      <name>$PROJ_DIR$\..\pit.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\pit.h</name>
+    </file>
+    <file>
       <name>$PROJ_DIR$\..\port.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\port.h</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\uart.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\uart.h</name>
     </file>
   </group>
   <group>

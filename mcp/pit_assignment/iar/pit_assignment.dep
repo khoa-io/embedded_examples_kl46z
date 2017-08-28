@@ -1,0 +1,335 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<project>
+  <fileVersion>2</fileVersion>
+  <fileChecksum>1553252257</fileChecksum>
+  <configuration>
+    <name>Debug</name>
+    <outputs>
+      <file>$TOOLKIT_DIR$\inc\c\stdlib.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\ysizet.h</file>
+      <file>$PROJ_DIR$\..\platform\devices\fsl_device_registers.h</file>
+      <file>$PROJ_DIR$\debug\obj\port.__cstat.et</file>
+      <file>$PROJ_DIR$\..\platform\devices\MKL46Z4\include\MKL46Z4_extension.h</file>
+      <file>$PROJ_DIR$\debug\obj\main.__cstat.et</file>
+      <file>$PROJ_DIR$\debug\obj\pit.o</file>
+      <file>$PROJ_DIR$\debug\obj\uart.o</file>
+      <file>$PROJ_DIR$\debug\obj\pit.pbi</file>
+      <file>$PROJ_DIR$\debug\obj\uart.pbi</file>
+      <file>$PROJ_DIR$\debug\obj\gpio.__cstat.et</file>
+      <file>$PROJ_DIR$\debug\obj\board.__cstat.et</file>
+      <file>$PROJ_DIR$\debug\obj\uart.__cstat.et</file>
+      <file>$PROJ_DIR$\debug\obj\pit.__cstat.et</file>
+      <file>$PROJ_DIR$\debug\obj\system_MKL46Z4.__cstat.et</file>
+      <file>$PROJ_DIR$\debug\obj\startup.__cstat.et</file>
+      <file>$PROJ_DIR$\..\platform\devices\MKL46Z4\include\MKL46Z4_features.h</file>
+      <file>$PROJ_DIR$\..\platform\devices\MKL46Z4\linker\iar\MKL46Z256xxx4_flash.icf</file>
+      <file>$TOOLKIT_DIR$\lib\shb_l.a</file>
+      <file>$PROJ_DIR$\..\platform\devices\MKL46Z4\include\fsl_bitaccess.h</file>
+      <file>$PROJ_DIR$\..\board.h</file>
+      <file>$PROJ_DIR$\..\gpio.c</file>
+      <file>$PROJ_DIR$\..\board.c</file>
+      <file>$PROJ_DIR$\..\gpio.h</file>
+      <file>$PROJ_DIR$\..\main.c</file>
+      <file>$PROJ_DIR$\..\pit.c</file>
+      <file>$PROJ_DIR$\..\pit.h</file>
+      <file>$PROJ_DIR$\..\port.c</file>
+      <file>$PROJ_DIR$\..\port.h</file>
+      <file>$PROJ_DIR$\..\uart.c</file>
+      <file>$PROJ_DIR$\..\uart.h</file>
+      <file>$PROJ_DIR$\..\platform\devices\startup.c</file>
+      <file>$PROJ_DIR$\..\platform\devices\startup.h</file>
+      <file>$PROJ_DIR$\debug\obj\board.o</file>
+      <file>$PROJ_DIR$\..\platform\devices\MKL46Z4\startup\iar\startup_MKL46Z4.s</file>
+      <file>$PROJ_DIR$\..\platform\devices\MKL46Z4\startup\system_MKL46Z4.c</file>
+      <file>$PROJ_DIR$\..\platform\devices\MKL46Z4\startup\system_MKL46Z4.h</file>
+      <file>$PROJ_DIR$\debug\obj\main.o</file>
+      <file>$PROJ_DIR$\debug\obj\gpio.o</file>
+      <file>$TOOLKIT_DIR$\inc\c\DLib_Defaults.h</file>
+      <file>$PROJ_DIR$\..\platform\devices\MKL46Z4\include\MKL46Z4.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\DLib_Product.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\xencoding_limits.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\DLib_Threads.h</file>
+      <file>$PROJ_DIR$\..\platform\CMSIS\Include\core_cmFunc.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\intrinsics.h</file>
+      <file>$PROJ_DIR$\..\platform\CMSIS\Include\core_cm0plus.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\cmsis_iar.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\DLib_Config_Normal.h</file>
+      <file>$PROJ_DIR$\..\platform\CMSIS\Include\core_cmInstr.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\yvals.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\ycheck.h</file>
+      <file>$PROJ_DIR$\debug\pit_assignment.out</file>
+      <file>$TOOLKIT_DIR$\inc\c\stdint.h</file>
+      <file>$PROJ_DIR$\debug\obj\port.pbi</file>
+      <file>$PROJ_DIR$\debug\obj\startup.pbi</file>
+      <file>$PROJ_DIR$\debug\obj\main.pbi</file>
+      <file>$PROJ_DIR$\debug\obj\gpio.pbi</file>
+      <file>$PROJ_DIR$\debug\obj\startup_MKL46Z4.o</file>
+      <file>$PROJ_DIR$\debug\obj\board.pbi</file>
+      <file>$PROJ_DIR$\debug\obj\startup.o</file>
+      <file>$PROJ_DIR$\debug\obj\port.o</file>
+      <file>$PROJ_DIR$\debug\obj\system_MKL46Z4.o</file>
+      <file>$PROJ_DIR$\debug\obj\pit_assignment.pbd</file>
+      <file>$PROJ_DIR$\debug\obj\system_MKL46Z4.pbi</file>
+      <file>$TOOLKIT_DIR$\lib\rt6M_tl.a</file>
+      <file>$TOOLKIT_DIR$\lib\dl6M_tln.a</file>
+      <file>$TOOLKIT_DIR$\lib\m6M_tl.a</file>
+      <file>$PROJ_DIR$\debug\list\pit_assignment.map</file>
+    </outputs>
+    <file>
+      <name>[ROOT_NODE]</name>
+      <outputs>
+        <tool>
+          <name>ILINK</name>
+          <file> 52 68</file>
+        </tool>
+      </outputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\gpio.c</name>
+      <outputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 57</file>
+        </tool>
+        <tool>
+          <name>ICCARM</name>
+          <file> 38</file>
+        </tool>
+        <tool>
+          <name>__cstat</name>
+          <file> 10</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 53 51 36 50 48 49 47 46 41 40 39 42 43 44 45 23</file>
+        </tool>
+        <tool>
+          <name>ICCARM</name>
+          <file> 40 53 51 50 39 48 41 42 43 46 49 47 45 44 36 23</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\board.c</name>
+      <outputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 59</file>
+        </tool>
+        <tool>
+          <name>ICCARM</name>
+          <file> 33</file>
+        </tool>
+        <tool>
+          <name>__cstat</name>
+          <file> 11</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 53 51 36 50 48 49 47 46 41 40 39 42 43 44 45 20</file>
+        </tool>
+        <tool>
+          <name>ICCARM</name>
+          <file> 40 53 51 50 39 48 41 42 43 46 49 47 45 44 36 20</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\main.c</name>
+      <outputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 56</file>
+        </tool>
+        <tool>
+          <name>ICCARM</name>
+          <file> 37</file>
+        </tool>
+        <tool>
+          <name>__cstat</name>
+          <file> 5</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 53 51 39 50 46 42 43 49 47 40 48 41 36 23 44 45 20 28 26</file>
+        </tool>
+        <tool>
+          <name>ICCARM</name>
+          <file> 53 51 50 39 48 41 42 43 40 46 49 47 45 44 36 23 20 28 26</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\pit.c</name>
+      <outputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 8</file>
+        </tool>
+        <tool>
+          <name>ICCARM</name>
+          <file> 6</file>
+        </tool>
+        <tool>
+          <name>__cstat</name>
+          <file> 13</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 53 51 36 50 48 49 47 46 41 40 39 42 43 44 45 26</file>
+        </tool>
+        <tool>
+          <name>ICCARM</name>
+          <file> 40 53 51 50 39 48 41 42 43 46 49 47 45 44 36 26</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\port.c</name>
+      <outputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 54</file>
+        </tool>
+        <tool>
+          <name>ICCARM</name>
+          <file> 61</file>
+        </tool>
+        <tool>
+          <name>__cstat</name>
+          <file> 3</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 53 51 36 50 48 49 47 46 41 40 39 42 43 44 45 28</file>
+        </tool>
+        <tool>
+          <name>ICCARM</name>
+          <file> 40 53 51 50 39 48 41 42 43 46 49 47 45 44 36 28</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\uart.c</name>
+      <outputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 9</file>
+        </tool>
+        <tool>
+          <name>ICCARM</name>
+          <file> 7</file>
+        </tool>
+        <tool>
+          <name>__cstat</name>
+          <file> 12</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 53 51 36 50 48 49 47 46 41 40 39 42 43 44 45 30</file>
+        </tool>
+        <tool>
+          <name>ICCARM</name>
+          <file> 40 53 51 50 39 48 41 42 43 46 49 47 45 44 36 30</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\platform\devices\startup.c</name>
+      <outputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 55</file>
+        </tool>
+        <tool>
+          <name>ICCARM</name>
+          <file> 60</file>
+        </tool>
+        <tool>
+          <name>__cstat</name>
+          <file> 15</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 32 2 40 53 51 50 39 48 41 42 43 46 49 47 45 44 36 4 19 0 1 16</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\platform\devices\MKL46Z4\startup\iar\startup_MKL46Z4.s</name>
+      <outputs>
+        <tool>
+          <name>AARM</name>
+          <file> 58</file>
+        </tool>
+      </outputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\platform\devices\MKL46Z4\startup\system_MKL46Z4.c</name>
+      <outputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 64</file>
+        </tool>
+        <tool>
+          <name>ICCARM</name>
+          <file> 62</file>
+        </tool>
+        <tool>
+          <name>__cstat</name>
+          <file> 14</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 53 51 45 42 48 39 41 4 36 44 40 0 1 2 50 43 16 46 49 47 19</file>
+        </tool>
+        <tool>
+          <name>ICCARM</name>
+          <file> 53 51 50 39 48 41 42 43 2 40 46 49 47 45 44 36 4 19 0 1 16</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\debug\pit_assignment.out</name>
+      <outputs>
+        <tool>
+          <name>ILINK</name>
+          <file> 68</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ILINK</name>
+          <file> 17 33 38 37 6 61 60 58 62 7 18 65 67 66</file>
+        </tool>
+      </inputs>
+    </file>
+  </configuration>
+  <configuration>
+    <name>Release</name>
+    <outputs/>
+    <forcedrebuild>
+      <name>[MULTI_TOOL]</name>
+      <tool>ILINK</tool>
+    </forcedrebuild>
+  </configuration>
+</project>
+
+
