@@ -15,6 +15,7 @@
  */
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #include "MKL46Z4.h"
 #include "gpio.h"
@@ -26,36 +27,21 @@
  * Definitions
  ******************************************************************************/
 
-/*!
- * @brief Calculate value for LDVAL register from period (ms).
- *
- * @param T Period (ms).
- *
- * @return Value for LDVAL register.
- */
-#define LDVAL_GET_COUNT(T) (((T) / 1000) * SystemCoreClock / 2 - 1)
-
 /*******************************************************************************
  * Global variables
  ******************************************************************************/
 
-extern uint32_t SystemCoreClock;
-
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
-void PIT_IRQHandler(void);
+void secondTickHandler(void);
 
 /*******************************************************************************
  * Code
  ******************************************************************************/
-void PIT_IRQHandler(void)
+void secondTickHandler(void)
 {
-    if (PIT->CHANNEL[0].TFLG)
-    {
-        PIT->CHANNEL[0].TFLG = 1;
-        GPIO_Toggle(GPIOD, PIN_GREEN_LED);
-    }
+    GPIO_Toggle(GPIOD, PIN_GREEN_LED);
 }
 
 int main(void)
@@ -67,13 +53,17 @@ int main(void)
     /* Leds are turned off by default. */
     GPIO_Write(GPIOE, PIN_RED_LED, 1);
     GPIO_Write(GPIOD, PIN_GREEN_LED, 1);
-    
+
     PIT_enable();
 
     /* Configure timer 0 */
-    PIT->CHANNEL[0].LDVAL = LDVAL_GET_COUNT(1000);
-    PIT->CHANNEL[0].TCTRL = PIT_TCTRL_TIE_MASK;
-    PIT->CHANNEL[0].TCTRL |= PIT_TCTRL_TEN_MASK;
+    pit_chnl_conf_t conf;
+    conf.time = 1000;
+    conf.handler = secondTickHandler;
+    conf.chn = false;
+
+    PIT_configChannel(0, &conf);
+    PIT_startChannel(0);
 
     while (1)
     {

@@ -6,6 +6,8 @@
     "language": "en",
     // words - list of words to be always considered correct
     "words": [
+        "Chnl",
+        "Confs",
         "GPIO",
         "GPIOA",
         "GPIOB",
@@ -29,6 +31,7 @@
         "PSOR",
         "PTOR",
         "SCGC",
+        "TCTRL",
         "igreen"
     ],
     // flagWords - list of words to be always considered incorrect
