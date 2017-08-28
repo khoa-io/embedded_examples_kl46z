@@ -13,7 +13,7 @@
  *
  * @return Value for LDVAL register.
  */
-#define LDVAL_GET_COUNT(T) (((T) / 1000) * SystemCoreClock / 2 - 1)
+#define LDVAL_GET_COUNT(T) ((T) / 1000 * SystemCoreClock / 2 - 1)
 
 /*******************************************************************************
  * Global variables

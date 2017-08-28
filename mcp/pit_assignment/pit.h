@@ -49,6 +49,14 @@ void PIT_IRQHandler(void);
 void PIT_enable();
 
 /*!
+ * @brief Configure a pit channel.
+ *
+ * @param idx  Channel's index.
+ * @param conf Channel's configuration.
+ */
+void PIT_configChannel(uint8_t idx, pit_chnl_conf_t *conf);
+
+/*!
  * @brief Start all timers.
  */
 void PIT_startAll();
@@ -71,13 +79,5 @@ void PIT_stopAll();
  * @param idx Channel's index.
  */
 void PIT_stopChannel(uint8_t idx);
-
-/*!
- * @brief Configure a pit channel.
- *
- * @param idx  Channel's index.
- * @param conf Channel's configuration.
- */
-void PIT_configChannel(uint8_t idx, pit_chnl_conf_t *conf);
 
 #endif /* _PIT_H_ */
