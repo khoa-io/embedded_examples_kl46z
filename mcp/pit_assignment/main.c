@@ -5,14 +5,16 @@
 /*
  * [File Name]     main.c
  * [Platform]      MKL46Z256VLH4
- * [Project]       pit_example
+ * [Project]       pit_assignment
  * [Version]       1.00
  * [Author]        KhoaHV1
- * [Date]          24-08-2017
+ * [Date]          28-08-2017
  * [Language]      'C'
  * [History]       1.00 - Original Release
  *
  */
+
+#include <stdint.h>
 
 #include "gpio.h"
 #include "board.h"
@@ -22,20 +24,20 @@
  * Definitions
  ******************************************************************************/
 
-#define COUNT_VAL 4799999U
 /*!
- * @brief Calculate value for LDVAL register.
+ * @brief Calculate value for LDVAL register from period (ms).
  *
  * @param T Period (ms).
- * @param F Clock frequency (MHz).
  *
  * @return Value for LDVAL register.
  */
-#define GET_COUNT(T, F) ((1000 * (T) * (F)) - 1)
+#define LDVAL_GET_COUNT(T) (((T) / 1000) * SystemCoreClock / 2 - 1)
 
 /*******************************************************************************
  * Global variables
  ******************************************************************************/
+
+extern uint32_t SystemCoreClock;
 
 /*******************************************************************************
  * Prototypes
@@ -76,7 +78,7 @@ int main(void)
     PIT->MCR = 0x00;
 
     /* Configure timer 0 */
-    PIT->CHANNEL[0].LDVAL = GET_COUNT(100, 48);
+    PIT->CHANNEL[0].LDVAL = LDVAL_GET_COUNT(5000);
     PIT->CHANNEL[0].TCTRL = PIT_TCTRL_TIE_MASK;
     PIT->CHANNEL[0].TCTRL |= PIT_TCTRL_TEN_MASK;
 

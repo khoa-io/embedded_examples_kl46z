@@ -31,36 +31,6 @@
 	</natures>
 	<linkedResources>
 		<link>
-			<name>board.c</name>
-			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/board.c</locationURI>
-		</link>
-		<link>
-			<name>board.h</name>
-			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/board.h</locationURI>
-		</link>
-		<link>
-			<name>gpio.c</name>
-			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/gpio.c</locationURI>
-		</link>
-		<link>
-			<name>gpio.h</name>
-			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/gpio.h</locationURI>
-		</link>
-		<link>
-			<name>port.c</name>
-			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/port.c</locationURI>
-		</link>
-		<link>
-			<name>port.h</name>
-			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/port.h</locationURI>
-		</link>
-		<link>
 			<name>sources</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
@@ -71,14 +41,39 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
+			<name>sources/board.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/board.c</locationURI>
+		</link>
+		<link>
+			<name>sources/board.h</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/board.h</locationURI>
+		</link>
+		<link>
+			<name>sources/gpio.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/gpio.c</locationURI>
+		</link>
+		<link>
+			<name>sources/gpio.h</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/gpio.h</locationURI>
+		</link>
+		<link>
 			<name>sources/main.c</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/main.c</locationURI>
 		</link>
 		<link>
-			<name>sources/main.h</name>
+			<name>sources/port.c</name>
 			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/main.h</locationURI>
+			<locationURI>PARENT-1-PROJECT_LOC/port.c</locationURI>
+		</link>
+		<link>
+			<name>sources/port.h</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/port.h</locationURI>
 		</link>
 		<link>
 			<name>startup/startup.c</name>
