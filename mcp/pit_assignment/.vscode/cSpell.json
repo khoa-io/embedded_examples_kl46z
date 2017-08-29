@@ -30,9 +30,13 @@
         "PORTE",
         "PSOR",
         "PTOR",
+        "RXINV",
         "SCGC",
         "TCTRL",
-        "igreen"
+        "TXINV",
+        "igreen",
+        "msbf",
+        "uartx"
     ],
     // flagWords - list of words to be always considered incorrect
     // This is useful for offensive words and common spelling errors.
