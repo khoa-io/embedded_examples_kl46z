@@ -66,8 +66,7 @@ int main(void)
     uint32_t minOsr = 0;
     uint16_t minSbr = 0;
 
-    uint8_t *p = (uint8_t *) &minSbr;
-    uint8_t a[2] = {0};
+    uint32_t i = 0;
 
     /* Setup GPIO for (in order) green led, red led, SW1, SW2 */
     GPIO_Init(PORT_D, PIN_GREEN_LED, OUTPUT);
@@ -105,18 +104,18 @@ int main(void)
     /* Configure the UART control registers for the desired data format */
 
     /*  Number of data bits */
-    UART0->C1 |= UART0_C1_M(0);
-    UART0->C4 |= UART0_C4_M10(0);
+    // UART0->C1 |= UART0_C1_M(0);
+    // UART0->C4 |= UART0_C4_M10(0);
 
     /* Parity and parity type */
-    UART0->C1 |= UART0_C1_PE(0);
+    // UART0->C1 |= UART0_C1_PE(0);
 
-    /* MSB or LSB first */
-    UART0->S2 |= UART0_S2_MSBF(0);
+    // /* MSB or LSB first */
+    // UART0->S2 |= UART0_S2_MSBF(0);
 
-    /* Data polarity */
-    UART0->S2 |= UART0_S2_RXINV(0);
-    UART0->C3 |= UART0_C3_TXINV(0);
+    // /* Data polarity */
+    // UART0->S2 |= UART0_S2_RXINV(0);
+    // UART0->C3 |= UART0_C3_TXINV(0);
 
     /* Configure the baud rate */
     for (osr = 3; osr < 32; ++osr)
@@ -132,21 +131,27 @@ int main(void)
         }
     }
 
-    a[0] = ((uint8_t *) minSbr)[0];
-    a[1] = ((uint8_t *) minSbr)[1];
+    UART0->BDL &= ~UART0_BDL_SBR_MASK;
+    UART0->BDL |= UART0_BDL_SBR(((uint8_t *)&minSbr)[0]);
+    UART0->BDH &= ~UART0_BDH_SBR_MASK;
+    UART0->BDH |= UART0_BDH_SBR(((uint8_t *)&minSbr)[1]);
 
-    UART0->BDL |= UART0_BDL_SBR(((uint8_t *) minSbr)[0]);
-    UART0->BDH |= UART0_BDH_SBR(((uint8_t *) minSbr)[1]);
-
-    UART0->BDL |= UART0_BDL_SBR(a[0]);
-    UART0->BDH |= UART0_BDH_SBR(a[1]);
+    UART0->C4 &= UART0_C4_OSR(minOsr);
 
     /* Enable the receiver and/or transmitter */
     UART0->C2 |= UART0_C2_TE(1);
 
+    for (i = 0; i < 10; ++i)
+    {
+    }
+
     while (1)
     {
         /* Main loop (not used) */
+        while ((UART0->S1 & UART0_S1_TDRE_MASK) == 0)
+        {
+            /* Waiting here */
+        };
         UART0->D = 'A';
     };
 }
