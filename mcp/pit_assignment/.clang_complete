@@ -1,0 +1,4 @@
+-I./platform/CMSIS/Include
+-I./platform/devices
+-I./platform/devices/MKL46Z4/include
+-I./platform/devices/MKL46Z4/startup

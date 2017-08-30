@@ -21,7 +21,7 @@ extern uint32_t SystemCoreClock;
  * Code
  ******************************************************************************/
 
-void UART_enableUart(uint8_t uartx)
+void UART_enable(uint8_t uartx)
 {
     if (uartx != UART_0)
     {
@@ -36,7 +36,7 @@ void UART_enableUart(uint8_t uartx)
     SIM_SOPT2 |= SIM_SOPT2_UART0SRC(1);
 }
 
-void UART_configUart(uint8_t uartx, uart_conf_t *conf)
+void UART_config(uint8_t uartx, uart_conf_t *conf)
 {
     uint8_t osr = 0;
     uint16_t sbr = 0;
@@ -122,13 +122,11 @@ void UART_configUart(uint8_t uartx, uart_conf_t *conf)
     UART0->C4 &= UART0_C4_OSR(minOsr); /* Not exactly */
 
     /* Enable the receiver and/or transmitter */
-    UART0->C2 |= (conf->type & UART_TYPE_TRANSMITTER_MASK)
-                     ? UART0_C2_TE(1)
-                     : UART0_C2_TE(0);
+    UART0->C2 |= (conf->type & UART_TYPE_TRANSMITTER_MASK) ? UART0_C2_TE(1)
+                                                           : UART0_C2_TE(0);
 
-    UART0->C2 |= (conf->type & UART_TYPE_RECEIVER_MASK)
-                     ? UART0_C2_RE(1)
-                     : UART0_C2_RE(0);
+    UART0->C2 |= (conf->type & UART_TYPE_RECEIVER_MASK) ? UART0_C2_RE(1)
+                                                        : UART0_C2_RE(0);
 }
 
 void UART_sendByte(uint8_t uartx, uint8_t b)
