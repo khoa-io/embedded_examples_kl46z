@@ -6,41 +6,8 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <string.h>
 
 #include "queue.h"
-
-/*******************************************************************************
- * Macros
- ******************************************************************************/
-
-/*!
- * @brief Calculate offset of an item has index i in `items` array.
- *
- * @param i Index
- * @param q Pointer to queue
- *
- * @return Return offset.
- */
-#define OFF(i, q) ((i)*QUEUE_MAX_ITEM_SIZE)
-
-/*!
- * @brief Calculate offset of top item in `items` array.
- *
- * @param q Pointer to queue.
- *
- * @return Return offset of top item.
- */
-#define OFF_TOP(q) OFF((q)->top, (q))
-
-/*!
- * @brief Calculate offset of bottom item in `items` array.
- *
- * @param q Pointer to queue.
- *
- * @return Return offset of bottom item.
- */
-#define OFF_BOT(q) OFF((q)->bot, (q))
 
 /*******************************************************************************
  * Global variables

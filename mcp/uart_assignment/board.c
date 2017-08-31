@@ -1,16 +1,9 @@
 #include "MKL46Z4.h"
-#include "pit.h"
 #include "board.h"
 
 /*******************************************************************************
  * Global variables
  ******************************************************************************/
-/*!
- * @brief Number of PIT channels in this board.
- */
-uint8_t g_pitChnlNum = PIT_CHNL_NUM;
-
-void (*g_pitIrqHandler[PIT_CHNL_NUM])(void);
 
 /*******************************************************************************
  * Code

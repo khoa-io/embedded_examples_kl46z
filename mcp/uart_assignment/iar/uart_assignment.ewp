@@ -1973,12 +1973,6 @@
       <name>$PROJ_DIR$\..\main.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\pit.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\pit.h</name>
-    </file>
-    <file>
       <name>$PROJ_DIR$\..\port.c</name>
     </file>
     <file>

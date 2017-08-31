@@ -1,5 +1,14 @@
+#include <stddef.h>
+
 #include "MKL46Z4.h"
+#include "queue.h"
 #include "uart.h"
+
+/*******************************************************************************
+ * Definitions
+ ******************************************************************************/
+#define UART_ERR_MSG "Error"
+#define UART_ERR_MSG_SZ (6U)
 
 /*******************************************************************************
  * Macros
@@ -15,7 +24,18 @@
  * Global variables
  ******************************************************************************/
 
+/* Default system core clock */
 extern uint32_t SystemCoreClock;
+
+void (*uart0OnReceive)(void) = NULL;
+
+/*******************************************************************************
+ * Prototypes
+ ******************************************************************************/
+/*!
+ * @brief Called when receiving data.
+ */
+void UART0_IRQHandler(void);
 
 /*******************************************************************************
  * Code
@@ -65,6 +85,11 @@ void UART_config(uint8_t uartx, uart_conf_t *conf)
         /* Enable UART0_RX */
         PORTA->PCR[1] &= ~PORT_PCR_MUX_MASK;
         PORTA->PCR[1] |= PORT_PCR_MUX(2);
+
+        /* Enable receiver interrupt */
+        NVIC_ClearPendingIRQ(UART0_IRQn);
+        NVIC_EnableIRQ(UART0_IRQn);
+        NVIC_SetPriority(UART0_IRQn, 0);
     }
 
     /*  Number of data bits */
@@ -94,11 +119,11 @@ void UART_config(uint8_t uartx, uart_conf_t *conf)
 
     /* Data polarity */
     UART0->S2 |= (conf->polarity & UART_DATA_POLARITY_RX_MASK)
-                     ? UART0_S2_RXINV(1)
-                     : UART0_S2_RXINV(0);
+        ? UART0_S2_RXINV(1)
+        : UART0_S2_RXINV(0);
     UART0->C3 |= (conf->polarity & UART_DATA_POLARITY_TX_MASK)
-                     ? UART0_C3_TXINV(1)
-                     : UART0_C3_TXINV(0);
+        ? UART0_C3_TXINV(1)
+        : UART0_C3_TXINV(0);
 
     /* Configure the baud rate */
     for (osr = 3; osr < 32; ++osr)
@@ -127,6 +152,9 @@ void UART_config(uint8_t uartx, uart_conf_t *conf)
 
     UART0->C2 |= (conf->type & UART_TYPE_RECEIVER_MASK) ? UART0_C2_RE(1)
                                                         : UART0_C2_RE(0);
+    /* Enable receiver interrupt */
+    UART0->C2 |= (conf->type & UART_TYPE_RECEIVER_MASK) ? UART0_C2_RIE(1)
+                                                        : UART0_C2_RIE(0);
 }
 
 void UART_sendByte(uint8_t uartx, uint8_t b)
@@ -148,5 +176,78 @@ void UART_sendBytes(uint8_t uartx, uint8_t *arr, uint8_t sz)
     for (; i < sz; ++i)
     {
         UART_sendByte(uartx, arr[i]);
+    }
+}
+
+void UART_readByte(uint8_t uartx, uint8_t *b)
+{
+    while ((UART0->S1 & UART0_S1_RDRF_MASK) == 0)
+    {
+        /* Waiting here */
+    }
+    if (uartx == UART_0)
+    {
+        *b = UART0->D;
+    }
+}
+
+void UART_readBytes(uint8_t uartx, uint8_t *buff, uint8_t sz)
+{
+    /* Indexing variable */
+    uint8_t i = 0;
+
+    for (; i < sz; ++i)
+    {
+        UART_readByte(uartx, &buff[i]);
+    }
+}
+
+uint8_t UART_readLine(uint8_t uartx, uint8_t *buff, uint8_t sz)
+{
+    /* Indexing variable */
+    uint8_t i = 0;
+
+    for (; i < sz; ++i)
+    {
+        UART_readByte(uartx, &buff[i]);
+
+        if (buff[i] == '\n')
+        {
+            /* Meet new line character '\n' => stop reading */
+            ++i;
+            break;
+        }
+    }
+
+    /* Return number of read bytes */
+    return i;
+}
+
+void UART0_IRQHandler(void)
+{
+    /* Push to top of queue */
+    static queue_item_t *top = NULL;
+
+    /* Indexing variables */
+    uint8_t i = 0;
+
+    /* Received character */
+    uint8_t c = 0;
+
+    /* Error code */
+    uint32_t rc = 0;
+
+    rc = QUEUE_push(&top);
+    if (rc != QUEUE_ERR_NONE)
+    {
+        return;
+    }
+
+    top->sz = UART_readLine(UART_0, top->dat, QUEUE_MAX_ITEM_SIZE);
+
+    if (uart0OnReceive)
+    {
+        /* Call handler to get data */
+        uart0OnReceive();
     }
 }
