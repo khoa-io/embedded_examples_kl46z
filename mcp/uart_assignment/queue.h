@@ -1,10 +1,12 @@
 /*!
- * @file queue.h Declare queue ADT.
+ * @file queue.h Declare queue ADT used in assignment.
  * @author KhoaHV1
  */
 
 #ifndef _QUEUE_H_
 #define _QUEUE_H_
+
+#include <stdint.h>
 
 /*******************************************************************************
  * Error Code
@@ -19,39 +21,44 @@
 /* Unknown error */
 #define QUEUE_ERR_UNKNOWN 0xffffffff
 
+#define QUEUE_MAX_ITEM_SIZE (128U)
+#define QUEUE_MAX_ITEM_NUM (4)
+
 /*******************************************************************************
  * Structures and Types
  ******************************************************************************/
 
 /*!
+ * @brief Represent Queue's element.
+ */
+struct queue_item
+{
+    /* Item's data */
+    uint8_t dat[QUEUE_MAX_ITEM_SIZE];
+
+    /* Item's size */
+    uint8_t sz;
+};
+
+/*!
  * @brief Represent Queue ADT.
- * Specification of this kind of queue:
- * - There're 2 head: top and bottom.
- * - Push to top and pop from bottom.
- * - Full queue: `top < bot`.
- * - Maximum size: 256.
  */
 struct queue
 {
-    /* Index of the top item of queue in `items` array. */
+    /* Index of top in array `items`. Items are pushed to top */
     uint8_t top;
 
-    /* Index of the bottom item of queue in `items` array. */
+    /* Index of bottom in array `items`. Items are popped from bottom */
     uint8_t bot;
 
-    /* An array store all items of the queue. */
-    void *items;
+    /* Current size */
+    uint8_t sz;
 
-    /* Size of an item */
-    uint32_t itemSz;
+    /* Store all items */
+    struct queue_item items[QUEUE_MAX_ITEM_NUM];
+};
 
-    /* Size of `items` array */
-    uint32_t arrSz;
-
-    /* Current size of queue */
-    uint32_t sz;
-} queue;
-
+typedef struct queue_item queue_item_t;
 typedef struct queue queue_t;
 
 /*******************************************************************************
@@ -65,7 +72,7 @@ typedef struct queue queue_t;
  *
  * @return Return true if queue is empty. Return false if queue is not empty.
  */
-#define QUEUE_isEmpty(q) ((q)->sz == 0)
+#define QUEUE_isEmpty(q) ((q)->sz <= 0)
 
 /*!
  * @brief Check if queue is full or not.
@@ -74,41 +81,28 @@ typedef struct queue queue_t;
  *
  * @return Return true if queue is full. Return false if queue is not full.
  */
-#define QUEUE_isFull(q) ((q)->sz >= (q)->arrSz)
+#define QUEUE_isFull(q) ((q)->sz >= QUEUE_MAX_ITEM_NUM)
 
 /*******************************************************************************
  * APIs
  ******************************************************************************/
 
 /*!
- * @brief Initialize queue.
+ * @brief Get the pointer to the top of queue and increase index of top. Use
+ * the pointer to push data to queue.
  *
- * @param queue    [in,out] Non-null pointer.
- * @param items    [in]     Point to data array.
- * @param arrSz    [in]     Size of items array.
- * @param itemSz   [in]     Size of an item.
- *
+ * @param item [in,out] Point to item at top.
  */
-void QUEUE_init(queue_t *queue, void *items, int32_t arrSz, int32_t itemSz);
+uint32_t QUEUE_push(queue_item_t **item);
 
 /*!
- * @brief Push an item to top of queue.
+ * @brief Pop an item from bottom of queue by get the pointer points to the item
+ * at bottom.
  *
- * @param queue Non-null pointer.
- * @param item  Point to item.
+ * @param item  [in,out] Point to item at bottom.
  *
  * @return Error code. See Error Code section.
  */
-uint32_t QUEUE_push(queue_t *queue, void *item);
-
-/*!
- * @brief Pop an item from bottom of queue.
- *
- * @param queue [in]  Non-null pointer.
- * @param item  [out] Non-null pointer to store item data.
- *
- * @return Error code. See Error Code section.
- */
-uint32_t QUEUE_pop(queue_t *queue, void *item);
+uint32_t QUEUE_pop(queue_item_t **item);
 
 #endif /* _QUEUE_H_ */

@@ -16,6 +16,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <stddef.h>
 
 #include "MKL46Z4.h"
 #include "board.h"
@@ -23,139 +24,87 @@
 #include "pit.h"
 #include "port.h"
 #include "uart.h"
+#include "queue.h"
 
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
 
 #define BAUD_RATE (115200U)
-#define BUFF_SIZE (256U)
 
 /*******************************************************************************
  * Global variables
  ******************************************************************************/
-/* Count the second of clock (from 0-59) */
-uint8_t g_secCnt = -1;
-/* Count the minute of clock (from 0-99) */
-uint8_t g_minCnt = 0;
 
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
-/*!
- * @brief Called every second.
- */
-void secondTickHandler(void);
-
-/*!
- * @brief Copy an integer number to a buffer as a string.
- *
- * @param val  [in]     Integer number.
- * @param buff [in,out] Buffer store string of `val`. `buff` must be wide enough
- * to store the string.
- *
- * @return Return number of numeric character in `val`.
- */
-uint8_t int2str(uint32_t val, uint8_t buff[]);
 
 /*******************************************************************************
  * Code
  ******************************************************************************/
-void secondTickHandler(void)
+
+void f()
 {
-    /* Store bytes to send */
-    uint8_t buff[BUFF_SIZE] = {0};
+    queue_item_t *pushItem = NULL;
+    queue_item_t *popItem = NULL;
 
-    /* Number of bytes will be sent */
-    uint8_t n = 0;
+    uint32_t rc = QUEUE_ERR_NONE;
 
-    /* Increase the second each second */
-    ++g_secCnt;
+    uint8_t dat0[] = "HOANGVANKHOA\r\n";
+    uint8_t dat1[] = "PUSHITEM\r\n";
+    uint8_t err[] = "Error\r\n";
 
-    if (g_secCnt > 59)
-    {
-        /* Increase the minute and reset the second */
-        ++g_minCnt;
-        g_secCnt = 0;
-    }
-
-    if (g_minCnt > 99)
-    {
-        /* Reset the minute if it reached max value */
-        g_minCnt = 0;
-    }
-
-    n = int2str(g_secCnt, buff);
-    buff[n++] = ':';
-    n += int2str(g_minCnt, buff + n);
-    buff[n++] = '\r';
-    buff[n++] = '\n';
-
-    /* Print format: "ss:mm" */
-    UART_sendBytes(UART_0, buff, n);
-}
-
-uint8_t int2str(uint32_t val, uint8_t buff[])
-{
-    /* Indexing variables */
     uint8_t i = 0;
-    uint8_t j = 0;
 
-    /* Number of numeric characters in val */
-    uint8_t n = 0;
-
-    /* Copy `val` to `buff` by reversed-order */
-    for (i = 0; val != 0; ++i)
+    rc = QUEUE_push(&pushItem);
+    if (rc != QUEUE_ERR_NONE)
     {
-        buff[i] = val % 10 + '0';
-        val = val / 10;
-        ++n;
+        UART_sendBytes(UART_0, err, sizeof(err));
+        return;
     }
 
-    /* Reverse buff */
-    for (j = 0; j < i / 2; ++j)
+    for (i = 0; i < sizeof(dat0); ++i)
     {
-        buff[j] ^= buff[i - j - 1];
-        buff[i - j - 1] ^= buff[j];
-        buff[j] ^= buff[i - j - 1];
+        pushItem->dat[i] = dat0[i];
     }
+    pushItem->sz = i;
 
-    if (n < 1)
+    rc = QUEUE_push(&pushItem);
+    if (rc != QUEUE_ERR_NONE)
     {
-        /* If `val == 0` then copy '00' to `buff` */
-        buff[0] = '0';
-        buff[1] = '0';
-        n = 2;
+        UART_sendBytes(UART_0, err, sizeof(err));
+        return;
     }
-
-    if (n < 2)
+    for (i = 0; i < sizeof(dat1); ++i)
     {
-        /* If `val < 10` then copy "0x" to `buff` (x == `val`) */
-        buff[1] = buff[0];
-        buff[0] = '0';
-        n = 2;
+        pushItem->dat[i] = dat1[i];
     }
+    pushItem->sz = i;
 
-    return n;
+    rc = QUEUE_pop(&popItem);
+    if (rc != QUEUE_ERR_NONE)
+    {
+        UART_sendBytes(UART_0, err, sizeof(err));
+        return;
+    }
+    UART_sendBytes(UART_0, popItem->dat, popItem->sz);
+
+    rc = QUEUE_pop(&popItem);
+    if (rc != QUEUE_ERR_NONE)
+    {
+        UART_sendBytes(UART_0, err, sizeof(err));
+        return;
+    }
+    UART_sendBytes(UART_0, popItem->dat, popItem->sz);
 }
 
 int main(void)
 {
-    /* Store configuration of PIT channel 0 */
-    pit_chnl_conf_t pitConf;
-
     /* Store configuration of UART0 */
     uart_conf_t uartConf;
 
-    PIT_enable();
-
-    /* Configure timer 0 */
-    pitConf.time = 1000;
-    pitConf.handler = secondTickHandler;
-    pitConf.chn = false;
-
-    PIT_configChannel(0, &pitConf);
-    PIT_startChannel(0);
+    uint8_t i = 0;
 
     /* Configure UART0 */
     uartConf.type = UART_TYPE_TRANSMITTER_MASK;
@@ -167,6 +116,11 @@ int main(void)
 
     UART_enable(UART_0);
     UART_config(UART_0, &uartConf);
+
+    for (i = 0; i < 4; ++i)
+    {
+        f();
+    }
 
     while (1)
     {

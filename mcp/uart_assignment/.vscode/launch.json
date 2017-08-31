@@ -6,7 +6,7 @@
             "request": "launch",
             "program": "${workspaceRoot}/queue_demo.exe",
             "args": [],
-            "stopAtEntry": false,
+            "stopAtEntry": true,
             "cwd": "${workspaceRoot}",
             "environment": [],
             "externalConsole": true,

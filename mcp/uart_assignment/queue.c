@@ -22,7 +22,7 @@
  *
  * @return Return offset.
  */
-#define OFF(i, q) ((i) * (q)->itemSz)
+#define OFF(i, q) ((i)*QUEUE_MAX_ITEM_SIZE)
 
 /*!
  * @brief Calculate offset of top item in `items` array.
@@ -43,57 +43,59 @@
 #define OFF_BOT(q) OFF((q)->bot, (q))
 
 /*******************************************************************************
+ * Global variables
+ ******************************************************************************/
+
+static queue_t g_queue = {
+    .top = 0,
+    .bot = 0,
+    .sz = 0
+};
+
+/*******************************************************************************
  * Code
  ******************************************************************************/
 
-void QUEUE_init(queue_t *queue, void *items, int32_t arrSz, int32_t itemSz)
-{
-    queue->items = items;
-    queue->arrSz = arrSz;
-    queue->itemSz = itemSz;
-
-    queue->top = 0;
-    queue->bot = 0;
-
-    queue->sz = 0;
-}
-
-uint32_t QUEUE_push(queue_t *queue, void *item)
+uint32_t QUEUE_push(queue_item_t **item)
 {
     /* Return code */
     uint32_t rc = QUEUE_ERR_NONE;
 
-    if (QUEUE_isFull(queue))
+    if (QUEUE_isFull(&g_queue))
     {
         rc = QUEUE_ERR_FULL;
         return rc;
     }
 
-    memcpy(((uint8_t *)queue->items) + OFF_TOP(queue), item, queue->itemSz);
+    *item = &g_queue.items[g_queue.top];
+
     /* Increase top */
-    queue->top = ++(queue->top) % queue->arrSz;
+    ++(g_queue.top);
+    g_queue.top = g_queue.top % QUEUE_MAX_ITEM_NUM;
     /* Increase size */
-    ++(queue->sz);
+    ++(g_queue.sz);
 
     return rc;
 }
 
-uint32_t QUEUE_pop(queue_t *queue, void *item)
+uint32_t QUEUE_pop(queue_item_t **item)
 {
     /* Return code */
     uint32_t rc = QUEUE_ERR_NONE;
 
-    if (QUEUE_isEmpty(queue))
+    if (QUEUE_isEmpty(&g_queue))
     {
         rc = QUEUE_ERR_EMPTY;
         return rc;
     }
 
-    memcpy(item, ((uint8_t *)queue->items) + OFF_BOT(queue), queue->itemSz);
+    *item = &g_queue.items[g_queue.bot];
+
     /* Increase bot */
-    queue->bot = ++(queue->bot) % queue->arrSz;
+    ++(g_queue.bot);
+    g_queue.bot = g_queue.bot % QUEUE_MAX_ITEM_NUM;
     /* Decrease size */
-    --(queue->sz);
+    --(g_queue.sz);
 
     return rc;
 }

@@ -1985,6 +1985,12 @@
       <name>$PROJ_DIR$\..\port.h</name>
     </file>
     <file>
+      <name>$PROJ_DIR$\..\queue.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\queue.h</name>
+    </file>
+    <file>
       <name>$PROJ_DIR$\..\srec_reader.c</name>
     </file>
     <file>
