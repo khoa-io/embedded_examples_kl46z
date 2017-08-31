@@ -88,9 +88,9 @@ void secondTickHandler(void)
     n = int2str(g_secCnt, buff);
     buff[n++] = ':';
     n += int2str(g_minCnt, buff + n);
-    buff[n++] = '\r';
-    buff[n++] = '\n';
 
+    /* Remove previous output */
+    UART_sendBytes(UART_0, "\b\b\b\b\b", n);
     /* Print format: "ss:mm" */
     UART_sendBytes(UART_0, buff, n);
 }
