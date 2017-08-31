@@ -5,4 +5,9 @@ CMakeCache.txt
 *.cmake
 com.processorexpert.core.ide.newprojectwizard.prefs
 .settings
+*.o
 debug
+settings
+*.ewt
+*.ewp
+*.dep
