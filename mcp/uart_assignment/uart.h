@@ -58,8 +58,6 @@ struct uart_conf
 
     /* Enable transmitter or receiver or both */
     uint8_t type;
-
-    void (*onReceive)(void);
 };
 
 typedef struct uart_conf uart_conf_t;
@@ -98,30 +96,6 @@ void UART_sendByte(uint8_t uartx, uint8_t b);
  * @param arr   Byte array to send.
  * @param sz    Size of array `arr`.
  */
-void UART_sendBytes(uint8_t uartx, uint8_t *arr, uint8_t sz);
-
-/*!
- * @brief Read a byte from UARTx.
- *
- * @param uartx [in]     UARTx. One of UART_0, UART_1, UART_2.
- * @param b     [in,out] Store read byte. `b == 0` means UART receive line
- *                       becomes idle.
- *
- * @return Return error code. See Error Code section.
- */
-uint32_t UART_readByte(uint8_t uartx, uint8_t *b);
-
-/*!
- * @brief Read a byte array from UARTx. The operation will stop if `n` character
- * has been read or UART receive line becomes idle.
- *
- * @param uartx [in]     UARTx. One of UART_0, UART_1, UART_2.
- * @param buff  [in,out] Byte array to store read data.
- * @param n     [in]     Max number of bytes to read.
- * @param r     [in,out] Store actual bytes have been read.
- *
- * @return Return error code. See Error Code section.
- */
-uint32_t UART_readBytes(uint8_t uartx, uint8_t *buff, uint8_t n, uint8_t *r);
+void UART_sendArray(uint8_t uartx, uint8_t *arr, uint8_t sz);
 
 #endif /* _UART_H_ */

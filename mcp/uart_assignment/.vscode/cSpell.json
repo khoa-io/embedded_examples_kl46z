@@ -30,7 +30,10 @@
         "PTOR",
         "RDRF",
         "SCGC",
+        "SREC",
+        "TDRE",
         "igreen",
+        "msbf",
         "uartx"
     ],
     // flagWords - list of words to be always considered incorrect

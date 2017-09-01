@@ -6,6 +6,8 @@
 #ifndef _QUEUE_H_
 #define _QUEUE_H_
 
+#include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 
 /*******************************************************************************
@@ -22,7 +24,7 @@
 #define QUEUE_ERR_UNKNOWN 0xffffffff
 
 #define QUEUE_MAX_ITEM_SIZE (128U)
-#define QUEUE_MAX_ITEM_NUM (4)
+#define QUEUE_MAX_ITEM_NUM (8)
 
 /*******************************************************************************
  * Structures and Types
@@ -65,44 +67,48 @@ typedef struct queue queue_t;
  * Macros (Fake Functions)
  ******************************************************************************/
 
-/*!
- * @brief Check if queue is empty or not.
- *
- * @param q Pointer to queue.
- *
- * @return Return true if queue is empty. Return false if queue is not empty.
- */
-#define QUEUE_isEmpty(q) ((q)->sz <= 0)
-
-/*!
- * @brief Check if queue is full or not.
- *
- * @param q Pointer to queue.
- *
- * @return Return true if queue is full. Return false if queue is not full.
- */
-#define QUEUE_isFull(q) ((q)->sz >= QUEUE_MAX_ITEM_NUM)
-
 /*******************************************************************************
  * APIs
  ******************************************************************************/
 
 /*!
- * @brief Get the pointer to the top of queue and increase index of top. Use
- * the pointer to push data to queue.
+ * @brief Check if queue is empty or not.
  *
- * @param item [in,out] Point to item at top.
+ * @return Return true if queue is empty. Return false if queue is not empty.
  */
-uint32_t QUEUE_push(queue_item_t **item);
+bool QUEUE_isEmpty();
 
 /*!
- * @brief Pop an item from bottom of queue by get the pointer points to the item
- * at bottom.
+ * @brief Check if queue is full or not.
  *
- * @param item  [in,out] Point to item at bottom.
- *
- * @return Error code. See Error Code section.
+ * @return Return true if queue is full. Return false if queue is not full.
  */
-uint32_t QUEUE_pop(queue_item_t **item);
+bool QUEUE_isFull();
+
+/*!
+ * @brief Get the pointer to the item at top.
+ *
+ * @param top [in,out] Point to the item at top.
+ */
+uint32_t QUEUE_top(queue_item_t **top);
+
+/*!
+ * @brief Increase the index of top. The actual push operation is combination of
+ * QUEUE_top() and QUEUE_push().
+ */
+void QUEUE_push();
+
+/*!
+ * @brief Get the pointer to the item at bottom.
+ *
+ * @param bot [in,out] Point to the item at bottom.
+ */
+uint32_t QUEUE_bot(queue_item_t **bot);
+
+/*!
+ * @brief Increase the index of bottom. The actual pop operation is combination
+ * of QUEUE_bot() and QUEUE_pop().
+ */
+void QUEUE_pop();
 
 #endif /* _QUEUE_H_ */

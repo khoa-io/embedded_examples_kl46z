@@ -32,8 +32,8 @@
 
 #define BAUD_RATE (115200U)
 
-#define PRINT_SUCCESS UART_sendBytes(UART_0, ">>", 2)
-#define PRINT_ERR UART_sendBytes(UART_0, "Error", 5)
+#define PRINT_SUCCESS UART_sendArray(UART_0, ">>", 2)
+#define PRINT_ERR UART_sendArray(UART_0, "Error", 5)
 
 /*******************************************************************************
  * Global variables
@@ -43,37 +43,78 @@
  * Prototypes
  ******************************************************************************/
 /*!
- * @brief Callback will be called when receive data.
+ * @brief Main loop.
  */
-void onReceive(void);
+void mainLoop(void);
+
+/*!
+ * @brief Initialize environment.
+ */
+void init(void);
 
 /*******************************************************************************
  * Code
  ******************************************************************************/
 
-void onReceive(void)
+void mainLoop(void)
 {
+    /* Buffers and temporary variables */
+    static uint8_t buff[MAX_RECORD_SIZE + 1] = { 0 };
+    /* Indexing on `buff` */
+    static uint16_t i = 0;
+
     /* Pop from bottom of queue */
-    static queue_item_t *bot = NULL;
+    queue_item_t *bot = NULL;
+    /* Indexing on `bot->dat` */
+    uint8_t j = 0;
 
     /* Error code */
     uint32_t rc = QUEUE_ERR_NONE;
 
-    parse_data_struct_t parsedData;
-    parse_status_t status = e_parseStatus_undefined;
+    /*     parse_data_struct_t parsedData;
+    parse_status_t status = e_parseStatus_undefined; */
 
-    if (bot == NULL || bot->sz > QUEUE_MAX_ITEM_SIZE)
+    if (QUEUE_isEmpty())
     {
-        rc = QUEUE_pop(&bot);
+        /* Data is not ready => abort */
+        return;
     }
 
+    /* Get new item from the bottom of the queue */
+    rc = QUEUE_bot(&bot);
     if (rc != QUEUE_ERR_NONE)
     {
+        /* Cannot get new item => abort */
         PRINT_ERR;
         return;
     }
 
-    UART_sendByte(UART_0, bot->dat[bot->sz-1]);
+    /* Copy data from `bot->dat` to `buff` because a SREC line can lie on one
+     * or more item and an item can contain parts of SREC lines. */
+    for (j = 0; bot->dat[j] != '\r'; ++i, ++j)
+    {
+        if (j >= bot->sz)
+        {
+            /* No byte left in this queue's item and we haven't reach "\r\n" yet
+             * => set to next item in queue */
+            QUEUE_pop();
+            bot = NULL;
+
+            --i;
+            return;
+        }
+
+        buff[i] = bot->dat[j];
+    }
+
+    buff[i++] = '\r';
+    buff[i++] = '\n';
+    UART_sendArray(UART_0, buff, i);
+
+    /*     if (bot->sz == QUEUE_MAX_ITEM_SIZE)
+    {
+        UART_sendArray(UART_0, bot->dat, bot->sz);
+    } */
     /*     status = parseData(bot->dat, &parsedData);
 
     if (status == e_parseStatus_error)
@@ -86,9 +127,9 @@ void onReceive(void)
     } */
 }
 
-int main(void)
+void init(void)
 {
-    /* Store configuration of UART0 */
+    /* Store configuration of UART0 for configuring UART0 */
     uart_conf_t uartConf;
 
     /* Configure UART0 */
@@ -98,13 +139,17 @@ int main(void)
     uartConf.msbf = false;
     uartConf.polarity = 0;
     uartConf.baudRate = BAUD_RATE;
-    uartConf.onReceive = onReceive;
 
     UART_enable(UART_0);
     UART_config(UART_0, &uartConf);
+}
+
+int main(void)
+{
+    init();
 
     while (1)
     {
-        /* Main loop (not used) */
+        mainLoop();
     };
 }
