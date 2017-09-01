@@ -23,7 +23,7 @@ static queue_t g_queue = {
  * Code
  ******************************************************************************/
 
-uint32_t QUEUE_push(queue_item_t **item)
+uint32_t QUEUE_push(queue_item_t **top)
 {
     /* Return code */
     uint32_t rc = QUEUE_ERR_NONE;
@@ -34,7 +34,7 @@ uint32_t QUEUE_push(queue_item_t **item)
         return rc;
     }
 
-    *item = &g_queue.items[g_queue.top];
+    *top = &g_queue.items[g_queue.top];
 
     /* Increase top */
     ++(g_queue.top);
@@ -45,7 +45,7 @@ uint32_t QUEUE_push(queue_item_t **item)
     return rc;
 }
 
-uint32_t QUEUE_pop(queue_item_t **item)
+uint32_t QUEUE_pop(queue_item_t **bot)
 {
     /* Return code */
     uint32_t rc = QUEUE_ERR_NONE;
@@ -56,7 +56,7 @@ uint32_t QUEUE_pop(queue_item_t **item)
         return rc;
     }
 
-    *item = &g_queue.items[g_queue.bot];
+    *bot = &g_queue.items[g_queue.bot];
 
     /* Increase bot */
     ++(g_queue.bot);

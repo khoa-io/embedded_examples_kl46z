@@ -4,6 +4,11 @@
 #include "queue.h"
 #include "uart.h"
 
+/*!
+ * @file uart.c Implementation of UART. Only support UART0 module for now.
+ * @author KhoaHV1
+ */
+
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
@@ -27,6 +32,7 @@
 /* Default system core clock */
 extern uint32_t SystemCoreClock;
 
+/* UART0 receive handler */
 void (*uart0OnReceive)(void) = NULL;
 
 /*******************************************************************************
@@ -90,6 +96,8 @@ void UART_config(uint8_t uartx, uart_conf_t *conf)
         NVIC_ClearPendingIRQ(UART0_IRQn);
         NVIC_EnableIRQ(UART0_IRQn);
         NVIC_SetPriority(UART0_IRQn, 0);
+
+        uart0OnReceive = conf->onReceive;
     }
 
     /*  Number of data bits */
@@ -179,60 +187,86 @@ void UART_sendBytes(uint8_t uartx, uint8_t *arr, uint8_t sz)
     }
 }
 
-void UART_readByte(uint8_t uartx, uint8_t *b)
+uint32_t UART_readByte(uint8_t uartx, uint8_t *b)
 {
+    /* Error code */
+    uint32_t rc = UART_ERR_NONE;
+
+    if ((UART0->S1 & UART0_S1_OR_MASK))
+    {
+        /* TODO */
+        rc = UART_ERR_UNKNOWN;
+    }
+
     while ((UART0->S1 & UART0_S1_RDRF_MASK) == 0)
     {
         /* Waiting here */
+//        if ((UART0->S1 & UART0_S1_IDLE_MASK))
+//        {
+//            /* UART receive line becomes idle => abort */
+//            rc = UART_ERR_IDLE;
+//            UART0->S1 |= UART0_S1_IDLE(1);
+//            return rc;
+//        }
     }
-    if (uartx == UART_0)
-    {
-        *b = UART0->D;
-    }
+
+    *b = UART0->D;
+
+    return rc;
 }
 
-void UART_readBytes(uint8_t uartx, uint8_t *buff, uint8_t sz)
+uint32_t UART_readBytes(uint8_t uartx, uint8_t *buff, uint8_t n, uint8_t *r)
 {
+    /* Error code */
+    uint32_t rc = UART_ERR_NONE;
+
     /* Indexing variable */
     uint8_t i = 0;
 
-    for (; i < sz; ++i)
+    /* Read `n` byte, stop when encountered an error */
+    for (i = 0; i < n && rc == UART_ERR_NONE; ++i)
     {
-        UART_readByte(uartx, &buff[i]);
+        rc = UART_readByte(uartx, &buff[i]);
     }
+
+    *r = i;
+    return rc;
 }
 
-uint8_t UART_readLine(uint8_t uartx, uint8_t *buff, uint8_t sz)
+uint32_t UART_readLine(uint8_t uartx, uint8_t *buff, uint8_t n, uint8_t *r)
 {
+    /* Error code */
+    uint32_t rc = UART_ERR_NONE;
+
     /* Indexing variable */
     uint8_t i = 0;
-
-    for (; i < sz; ++i)
+    /* Read `n` byte */
+    for (i = 0; i < n; ++i)
     {
-        UART_readByte(uartx, &buff[i]);
+        rc = UART_readByte(uartx, &buff[i]);
+
+        if (rc != UART_ERR_NONE)
+        {
+            /* Stop when encountered an error */
+            break;
+        }
 
         if (buff[i] == '\n')
         {
-            /* Meet new line character '\n' => stop reading */
+            /* Stop when reached new line */
             ++i;
             break;
         }
     }
 
-    /* Return number of read bytes */
-    return i;
+    *r = i;
+    return rc;
 }
 
 void UART0_IRQHandler(void)
 {
     /* Push to top of queue */
     static queue_item_t *top = NULL;
-
-    /* Indexing variables */
-    uint8_t i = 0;
-
-    /* Received character */
-    uint8_t c = 0;
 
     /* Error code */
     uint32_t rc = 0;
@@ -243,7 +277,12 @@ void UART0_IRQHandler(void)
         return;
     }
 
-    top->sz = UART_readLine(UART_0, top->dat, QUEUE_MAX_ITEM_SIZE);
+    rc = UART_readLine(UART_0, top->dat, QUEUE_MAX_ITEM_SIZE, &top->sz);
+
+    if (rc != UART_ERR_NONE)
+    {
+        return;
+    }
 
     if (uart0OnReceive)
     {

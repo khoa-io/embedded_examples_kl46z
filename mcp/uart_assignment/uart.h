@@ -5,6 +5,17 @@
 #include <stdbool.h>
 
 /*******************************************************************************
+ * Error code
+ ******************************************************************************/
+
+/* No error */
+#define UART_ERR_NONE (0x0U)
+/* UART receive line becomes idle */
+#define UART_ERR_IDLE (0x01U)
+/* Unknown error */
+#define UART_ERR_UNKNOWN (0xffffffffU)
+
+/*******************************************************************************
  * Definitions
  ******************************************************************************/
 
@@ -92,30 +103,38 @@ void UART_sendBytes(uint8_t uartx, uint8_t *arr, uint8_t sz);
 /*!
  * @brief Read a byte from UARTx.
  *
- * @param uartx [in]  UARTx. One of UART_0, UART_1, UART_2.
- * @param b     [in,out] Store read byte.
+ * @param uartx [in]     UARTx. One of UART_0, UART_1, UART_2.
+ * @param b     [in,out] Store read byte. `b == 0` means UART receive line
+ *                       becomes idle.
+ *
+ * @return Return error code. See Error Code section.
  */
-void UART_readByte(uint8_t uartx, uint8_t *b);
+uint32_t UART_readByte(uint8_t uartx, uint8_t *b);
 
 /*!
- * @brief Read a byte array from UARTx.
+ * @brief Read a byte array from UARTx. The operation will stop if `n` character
+ * has been read or UART receive line becomes idle.
  *
- * @param uartx UARTx. One of UART_0, UART_1, UART_2.
- * @param buff  Byte array to store read data.
- * @param sz    Number of bytes to read.
+ * @param uartx [in]     UARTx. One of UART_0, UART_1, UART_2.
+ * @param buff  [in,out] Byte array to store read data.
+ * @param n     [in]     Max number of bytes to read.
+ * @param r     [in,out] Store actual bytes have been read.
+ *
+ * @return Return error code. See Error Code section.
  */
-void UART_readBytes(uint8_t uartx, uint8_t *buff, uint8_t sz);
+uint32_t UART_readBytes(uint8_t uartx, uint8_t *buff, uint8_t n, uint8_t *r);
 
 /*!
  * @brief Read a byte array from UARTx until buffer is full or meet new line
  * ('\n') character.
  *
- * @param uartx UARTx. One of UART_0, UART_1, UART_2.
- * @param buff  Byte array to store read data.
- * @param sz    Number of bytes to read.
+ * @param uartx [in]     UARTx. One of UART_0, UART_1, UART_2.
+ * @param buff  [in,out] Byte array to store read data.
+ * @param n     [in]     Max number of bytes to read.
+ * @param r     [in,out] Store actual bytes have been read.
  *
- * @return Return number of read bytes.
+ * @return Error code. See Error Code section.
  */
-uint8_t UART_readLine(uint8_t uartx, uint8_t *buff, uint8_t sz);
+uint32_t UART_readLine(uint8_t uartx, uint8_t *buff, uint8_t n, uint8_t *r);
 
 #endif /* _UART_H_ */

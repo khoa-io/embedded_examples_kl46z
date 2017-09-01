@@ -32,6 +32,9 @@
 
 #define BAUD_RATE (115200U)
 
+#define PRINT_SUCCESS UART_sendBytes(UART_0, ">>", 2)
+#define PRINT_ERR UART_sendBytes(UART_0, "Error", 5)
+
 /*******************************************************************************
  * Global variables
  ******************************************************************************/
@@ -50,17 +53,8 @@ void onReceive(void);
 
 void onReceive(void)
 {
-    /* Indexing variables */
-    int32_t i = 0;
-    /* Line number */
-    int32_t j = 0;
-
     /* Pop from bottom of queue */
     static queue_item_t *bot = NULL;
-
-    /* Buffers and temporary variables */
-    int8_t buff[MAX_RECORD_SIZE + 1] = { 0 };
-    uint8_t c = 0;
 
     /* Error code */
     uint32_t rc = QUEUE_ERR_NONE;
@@ -71,10 +65,20 @@ void onReceive(void)
     rc = QUEUE_pop(&bot);
     if (rc != QUEUE_ERR_NONE)
     {
+        PRINT_ERR;
         return;
     }
 
-    UART_sendBytes(UART_0, bot->dat, bot->sz);
+    status = parseData(bot->dat, &parsedData);
+
+    if (status == e_parseStatus_error)
+    {
+        PRINT_ERR;
+    }
+    else
+    {
+        PRINT_SUCCESS;
+    }
 }
 
 int main(void)
