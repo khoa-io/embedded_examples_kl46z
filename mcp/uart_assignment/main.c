@@ -62,14 +62,19 @@ void onReceive(void)
     parse_data_struct_t parsedData;
     parse_status_t status = e_parseStatus_undefined;
 
-    rc = QUEUE_pop(&bot);
+    if (bot == NULL || bot->sz > QUEUE_MAX_ITEM_SIZE)
+    {
+        rc = QUEUE_pop(&bot);
+    }
+
     if (rc != QUEUE_ERR_NONE)
     {
         PRINT_ERR;
         return;
     }
 
-    status = parseData(bot->dat, &parsedData);
+    UART_sendByte(UART_0, bot->dat[bot->sz-1]);
+    /*     status = parseData(bot->dat, &parsedData);
 
     if (status == e_parseStatus_error)
     {
@@ -78,7 +83,7 @@ void onReceive(void)
     else
     {
         PRINT_SUCCESS;
-    }
+    } */
 }
 
 int main(void)

@@ -152,7 +152,7 @@ void UART_config(uint8_t uartx, uart_conf_t *conf)
     UART0->BDH &= ~UART0_BDH_SBR_MASK;
     UART0->BDH |= UART0_BDH_SBR(((uint8_t *)&minSbr)[1]);
 
-    UART0->C4 &= UART0_C4_OSR(minOsr); /* Not exactly */
+    UART0->C4 &= (UART0->C4 & (~UART0_C4_OSR_MASK)) | UART0_C4_OSR(minOsr);
 
     /* Enable the receiver and/or transmitter */
     UART0->C2 |= (conf->type & UART_TYPE_TRANSMITTER_MASK) ? UART0_C2_TE(1)
@@ -192,22 +192,9 @@ uint32_t UART_readByte(uint8_t uartx, uint8_t *b)
     /* Error code */
     uint32_t rc = UART_ERR_NONE;
 
-    if ((UART0->S1 & UART0_S1_OR_MASK))
-    {
-        /* TODO */
-        rc = UART_ERR_UNKNOWN;
-    }
-
     while ((UART0->S1 & UART0_S1_RDRF_MASK) == 0)
     {
         /* Waiting here */
-//        if ((UART0->S1 & UART0_S1_IDLE_MASK))
-//        {
-//            /* UART receive line becomes idle => abort */
-//            rc = UART_ERR_IDLE;
-//            UART0->S1 |= UART0_S1_IDLE(1);
-//            return rc;
-//        }
     }
 
     *b = UART0->D;
@@ -233,36 +220,6 @@ uint32_t UART_readBytes(uint8_t uartx, uint8_t *buff, uint8_t n, uint8_t *r)
     return rc;
 }
 
-uint32_t UART_readLine(uint8_t uartx, uint8_t *buff, uint8_t n, uint8_t *r)
-{
-    /* Error code */
-    uint32_t rc = UART_ERR_NONE;
-
-    /* Indexing variable */
-    uint8_t i = 0;
-    /* Read `n` byte */
-    for (i = 0; i < n; ++i)
-    {
-        rc = UART_readByte(uartx, &buff[i]);
-
-        if (rc != UART_ERR_NONE)
-        {
-            /* Stop when encountered an error */
-            break;
-        }
-
-        if (buff[i] == '\n')
-        {
-            /* Stop when reached new line */
-            ++i;
-            break;
-        }
-    }
-
-    *r = i;
-    return rc;
-}
-
 void UART0_IRQHandler(void)
 {
     /* Push to top of queue */
@@ -271,13 +228,17 @@ void UART0_IRQHandler(void)
     /* Error code */
     uint32_t rc = 0;
 
-    rc = QUEUE_push(&top);
+    if (top == NULL || top->sz > QUEUE_MAX_ITEM_SIZE)
+    {
+        rc = QUEUE_push(&top);
+    }
+
     if (rc != QUEUE_ERR_NONE)
     {
         return;
     }
 
-    rc = UART_readLine(UART_0, top->dat, QUEUE_MAX_ITEM_SIZE, &top->sz);
+    rc = UART_readByte(UART_0, &top->dat[top->sz++]);
 
     if (rc != UART_ERR_NONE)
     {

@@ -124,17 +124,4 @@ uint32_t UART_readByte(uint8_t uartx, uint8_t *b);
  */
 uint32_t UART_readBytes(uint8_t uartx, uint8_t *buff, uint8_t n, uint8_t *r);
 
-/*!
- * @brief Read a byte array from UARTx until buffer is full or meet new line
- * ('\n') character.
- *
- * @param uartx [in]     UARTx. One of UART_0, UART_1, UART_2.
- * @param buff  [in,out] Byte array to store read data.
- * @param n     [in]     Max number of bytes to read.
- * @param r     [in,out] Store actual bytes have been read.
- *
- * @return Error code. See Error Code section.
- */
-uint32_t UART_readLine(uint8_t uartx, uint8_t *buff, uint8_t n, uint8_t *r);
-
 #endif /* _UART_H_ */
