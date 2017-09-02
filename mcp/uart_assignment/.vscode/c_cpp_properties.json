@@ -1,0 +1,84 @@
+{
+    "configurations": [{
+            "name": "Mac",
+            "includePath": [
+                "/usr/include",
+                "/usr/local/include",
+                "${workspaceRoot}"
+            ],
+            "defines": [],
+            "intelliSenseMode": "clang-x64",
+            "browse": {
+                "path": [
+                    "/usr/include",
+                    "/usr/local/include",
+                    "${workspaceRoot}"
+                ],
+                "limitSymbolsToIncludedHeaders": true,
+                "databaseFilename": ""
+            }
+        },
+        {
+            "name": "Linux",
+            "includePath": [
+                "/usr/include/c++/7",
+                "/usr/local/include",
+                "/usr/include",
+                "/usr/lib/gcc/x86_64-redhat-linux/7/include",
+                "${workspaceRoot}/platform/CMSIS/Include",
+                "${workspaceRoot}/platform/devices",
+                "${workspaceRoot}/platform/devices/MKL46Z4/include",
+                "${workspaceRoot}/platform/devices/MKL46Z4/startup",
+                "${workspaceRoot}"
+            ],
+            "defines": [],
+            "intelliSenseMode": "clang-x64",
+            "browse": {
+                "path": [
+                    "/usr/include/c++/7",
+                    "/usr/local/include",
+                    "/usr/include",
+                    "/usr/lib/gcc/x86_64-redhat-linux/7/include",
+                    "${workspaceRoot}/platform/CMSIS/Include",
+                    "${workspaceRoot}/platform/devices",
+                    "${workspaceRoot}/platform/devices/MKL46Z4/include",
+                    "${workspaceRoot}/platform/devices/MKL46Z4/startup",
+                    "${workspaceRoot}"
+                ],
+                "limitSymbolsToIncludedHeaders": true,
+                "databaseFilename": ""
+            }
+        },
+        {
+            "name": "Win32",
+            "includePath": [
+                "D:/opt/gcc-arm-none-eabi-6-2017-q2-update-win32/lib/gcc/arm-none-eabi/6.3.1/include",
+                "D:/opt/gcc-arm-none-eabi-6-2017-q2-update-win32/arm-none-eabi/include",
+                "${workspaceRoot}/platform/CMSIS/Include",
+                "${workspaceRoot}/platform/devices",
+                "${workspaceRoot}/platform/devices/MKL46Z4/include",
+                "${workspaceRoot}/platform/devices/MKL46Z4/startup",
+                "${workspaceRoot}"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE"
+            ],
+            "intelliSenseMode": "msvc-x64",
+            "browse": {
+                "path": [
+                    "D:/opt/gcc-arm-none-eabi-6-2017-q2-update-win32/lib/gcc/arm-none-eabi/6.3.1/include/*",
+                    "D:/opt/gcc-arm-none-eabi-6-2017-q2-update-win32/arm-none-eabi/include/*",
+                    "${workspaceRoot}/platform/CMSIS/Include",
+                    "${workspaceRoot}/platform/devices",
+                    "${workspaceRoot}/platform/devices/MKL46Z4/include",
+                    "${workspaceRoot}/platform/devices/MKL46Z4/startup",
+                    "${workspaceRoot}"
+                ],
+                "limitSymbolsToIncludedHeaders": true,
+                "databaseFilename": ""
+            }
+        }
+    ],
+    "version": 2
+}

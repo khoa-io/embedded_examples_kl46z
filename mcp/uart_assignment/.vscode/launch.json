@@ -1,0 +1,37 @@
+{
+    "version": "0.2.0",
+    "configurations": [{
+            "name": "(gdb) Launch",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceRoot}/queue_demo.exe",
+            "args": [],
+            "stopAtEntry": true,
+            "cwd": "${workspaceRoot}",
+            "environment": [],
+            "externalConsole": true,
+            "MIMode": "gdb",
+            "miDebuggerPath": "C:/Program Files (x86)/Dev-Cpp/MinGW64/bin/gdb.exe",
+            "setupCommands": [{
+                "description": "Enable pretty-printing for gdb",
+                "text": "-enable-pretty-printing",
+                "ignoreFailures": true
+            }]
+        },
+        {
+            "type": "gdb",
+            "request": "attach",
+            "gdbpath": "arm-none-eabi-gdb",
+            "name": "Attach to gdbserver",
+            "executable": "${workspaceRoot}/armgcc/debug/exception_model.elf",
+            "target": ":2331",
+            "preLaunchTask": "build_debug",
+            "remote": true,
+            "autorun": [
+                "monitor reset",
+                "load"
+            ],
+            "cwd": "${workspaceRoot}"
+        }
+    ]
+}
