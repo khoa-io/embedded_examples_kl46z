@@ -15,15 +15,20 @@
  ******************************************************************************/
 
 /* No error */
-#define QUEUE_ERR_NONE 0
+#define QUEUE_ERR_NONE 0x0U
 /* Queue is full */
-#define QUEUE_ERR_FULL 0x01
+#define QUEUE_ERR_FULL 0x01U
 /* Queue is empty */
-#define QUEUE_ERR_EMPTY 0x02
+#define QUEUE_ERR_EMPTY 0x02U
 /* Unknown error */
 #define QUEUE_ERR_UNKNOWN 0xffffffff
 
-#define QUEUE_MAX_ITEM_SIZE (128U)
+/* Minimum size of the item's data array queue_item::dat and minimum value of
+ * queue_item::sz */
+#define QUEUE_ITEM_EMPTY_SIZE (0U)
+/* Maximum size of the item's data array queue_item::dat and maximum value of
+ * queue_item::sz */
+#define QUEUE_ITEM_MAX_SIZE (128U)
 #define QUEUE_MAX_ITEM_NUM (8)
 
 /*******************************************************************************
@@ -31,12 +36,12 @@
  ******************************************************************************/
 
 /*!
- * @brief Represent Queue's element.
+ * @brief Represent Queue's item.
  */
 struct queue_item
 {
     /* Item's data */
-    uint8_t dat[QUEUE_MAX_ITEM_SIZE];
+    uint8_t dat[QUEUE_ITEM_MAX_SIZE];
 
     /* Item's size */
     uint8_t sz;
@@ -64,11 +69,47 @@ typedef struct queue_item queue_item_t;
 typedef struct queue queue_t;
 
 /*******************************************************************************
- * Macros (Fake Functions)
+ * Macros On Queue's Item
  ******************************************************************************/
 
+/*!
+ * @brief Add a byte to item's data array. This macro doesn't check if item is
+ * full before the addition.
+ *
+ * @param item [in,out] A queue's item.
+ * @param b    [in]     Byte to add.
+ */
+#define QUEUE_itemAddByte(item, b) ((item).dat[(item).sz++] = (b))
+
+/*!
+ * @brief Check if an item is empty or not.
+ *
+ * @param item A queue's item.
+ *
+ * @param Return true if item is empty. Return false if item is not empty.
+ */
+#define QUEUE_itemIsEmpty(item) ((item).sz == QUEUE_ITEM_EMPTY_SIZE)
+
+/*!
+ * @brief Check if an item is full or not.
+ *
+ * @param item A queue's item.
+ *
+ * @return Return true if item is full. Return false if item is not full yet.
+ */
+#define QUEUE_itemIsFull(item) ((item).sz > QUEUE_ITEM_MAX_SIZE)
+
+/*!
+ * @brief Get the last byte in queue_item::dat array.
+ *
+ * @param item A queue's item.
+ *
+ * @return Return the last byte in queue_item::dat array.
+ */
+#define QUEUE_itemLastByte(item) ((item).dat[(item).sz])
+
 /*******************************************************************************
- * APIs
+ * APIs On Queue
  ******************************************************************************/
 
 /*!

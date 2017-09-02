@@ -13,7 +13,7 @@
  * Definitions
  ******************************************************************************/
 
-#define PRINT_ERR UART_sendArray(UART_0, "Error", 5)
+#define PRINT_ERR UART_sendArray(UART_0, (uint8_t *)"Error", 5)
 
 /*******************************************************************************
  * Macros
@@ -184,7 +184,7 @@ void UART_sendArray(uint8_t uartx, uint8_t *arr, uint8_t sz)
 
 void UART0_IRQHandler(void)
 {
-    /* Push to top of queue */
+    /* The item for pushing to top of queue */
     static queue_item_t *top = NULL;
 
     /* Error code */
@@ -192,19 +192,23 @@ void UART0_IRQHandler(void)
 
     if (top == NULL)
     {
+        /* Get next item if we don't have one */
         rc = QUEUE_top(&top);
     }
 
     if (rc != QUEUE_ERR_NONE)
     {
+        /* Can't get new item => abort */
         PRINT_ERR;
         return;
     }
 
-    top->dat[top->sz++] = UART0->D;
+    /* Add received byte to the item */
+    QUEUE_itemAddByte(*top, UART0->D);
 
-    if (top->sz >= QUEUE_MAX_ITEM_SIZE)
+    if (QUEUE_itemIsFull(*top))
     {
+        /* This item is full => push to queue and release it */
         QUEUE_push();
         top = NULL;
     }

@@ -32,8 +32,8 @@
 
 #define BAUD_RATE (115200U)
 
-#define PRINT_SUCCESS UART_sendArray(UART_0, ">>", 2)
-#define PRINT_ERR UART_sendArray(UART_0, "Error", 5)
+#define PRINT_SUCCESS UART_sendArray(UART_0, (uint8_t *)">>", 2)
+#define PRINT_ERR UART_sendArray(UART_0, (uint8_t *)"Error", 5)
 
 /*******************************************************************************
  * Global variables
@@ -46,6 +46,13 @@
  * @brief Main loop.
  */
 void mainLoop(void);
+
+/*!
+ * @brief Parse SREC line and print checking result.
+ *
+ * @param line Buffer stores SREC line.
+ */
+void checkSrecLine(uint8_t *line);
 
 /*!
  * @brief Initialize environment.
@@ -71,14 +78,13 @@ void mainLoop(void)
     /* Error code */
     uint32_t rc = QUEUE_ERR_NONE;
 
-    /*     parse_data_struct_t parsedData;
-    parse_status_t status = e_parseStatus_undefined; */
-
     if (QUEUE_isEmpty())
     {
         /* Data is not ready => abort */
         return;
     }
+
+    /* Data is ready! */
 
     /* Get new item from the bottom of the queue */
     rc = QUEUE_bot(&bot);
@@ -90,32 +96,30 @@ void mainLoop(void)
     }
 
     /* Copy data from `bot->dat` to `buff` because a SREC line can lie on one
-     * or more item and an item can contain parts of SREC lines. */
-    for (j = 0; bot->dat[j] != '\r'; ++i, ++j)
+     * or more items and/or an item can contain 2 parts of a SREC line. */
+    for (j = 0; j < bot->sz; ++j, ++i)
     {
-        if (j >= bot->sz)
+        if (bot->dat[j] == '\r')
         {
-            /* No byte left in this queue's item and we haven't reach "\r\n" yet
-             * => set to next item in queue */
-            QUEUE_pop();
-            bot = NULL;
-
-            --i;
-            return;
+            continue;
+        }
+        if (bot->dat[j] == '\n')
+        {
+            i = 0;
+            checkSrecLine(buff);
         }
 
         buff[i] = bot->dat[j];
     }
 
-    buff[i++] = '\r';
-    buff[i++] = '\n';
-    UART_sendArray(UART_0, buff, i);
+    QUEUE_pop();
+}
 
-    /*     if (bot->sz == QUEUE_MAX_ITEM_SIZE)
-    {
-        UART_sendArray(UART_0, bot->dat, bot->sz);
-    } */
-    /*     status = parseData(bot->dat, &parsedData);
+void checkSrecLine(uint8_t *line)
+{
+    parse_data_struct_t parsedData;
+    parse_status_t status = e_parseStatus_undefined;
+    status = parseData(line, &parsedData);
 
     if (status == e_parseStatus_error)
     {
@@ -124,7 +128,7 @@ void mainLoop(void)
     else
     {
         PRINT_SUCCESS;
-    } */
+    }
 }
 
 void init(void)

@@ -29,9 +29,11 @@
         "PSOR",
         "PTOR",
         "RDRF",
+        "RXINV",
         "SCGC",
         "SREC",
         "TDRE",
+        "TXINV",
         "igreen",
         "msbf",
         "uartx"

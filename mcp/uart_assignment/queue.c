@@ -45,6 +45,7 @@ uint32_t QUEUE_top(queue_item_t **top)
     }
 
     *top = &g_queue.items[g_queue.top];
+    (*top)->sz = QUEUE_ITEM_EMPTY_SIZE;
 
     return rc;
 }
@@ -70,7 +71,7 @@ uint32_t QUEUE_bot(queue_item_t **bot)
     }
 
     *bot = &g_queue.items[g_queue.bot];
-    
+
     return rc;
 }
 
