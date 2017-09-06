@@ -32,8 +32,9 @@
 
 #define BAUD_RATE (115200U)
 
-#define PRINT_SUCCESS UART_sendArray(UART_0, (uint8_t *)">>", 2)
-#define PRINT_ERR UART_sendArray(UART_0, (uint8_t *)"Error", 5)
+#define PRINT_SUCCESS UART_sendArray(UART_0, (uint8_t *)">>\r\n", 4)
+#define PRINT_ERR UART_sendArray(UART_0, (uint8_t *)"Error\r\n", 7)
+#define PRINT_QUEUE_ERR UART_sendArray(UART_0, (uint8_t *)"QueueError\r\n", 12)
 
 /*******************************************************************************
  * Global variables
@@ -91,7 +92,7 @@ void mainLoop(void)
     if (rc != QUEUE_ERR_NONE)
     {
         /* Cannot get new item => abort */
-        PRINT_ERR;
+        PRINT_QUEUE_ERR;
         return;
     }
 
@@ -105,6 +106,9 @@ void mainLoop(void)
         }
         if (bot->dat[j] == '\n')
         {
+            /* UART_sendArray(UART_0, buff, i);
+            UART_sendByte(UART_0, '\r');
+            UART_sendByte(UART_0, '\n'); */
             i = 0;
             checkSrecLine(buff);
         }
@@ -151,6 +155,9 @@ void init(void)
 int main(void)
 {
     init();
+
+    UART_sendByte(UART_0, '\r');
+    UART_sendByte(UART_0, '\n');
 
     while (1)
     {

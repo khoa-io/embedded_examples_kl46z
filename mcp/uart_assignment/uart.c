@@ -13,7 +13,7 @@
  * Definitions
  ******************************************************************************/
 
-#define PRINT_ERR UART_sendArray(UART_0, (uint8_t *)"Error", 5)
+#define PRINT_QUEUE_ERR UART_sendArray(UART_0, (uint8_t *)"QueueError\r\n", 12)
 
 /*******************************************************************************
  * Macros
@@ -199,13 +199,9 @@ void UART0_IRQHandler(void)
     if (rc != QUEUE_ERR_NONE)
     {
         /* Can't get new item => abort */
-        PRINT_ERR;
+        PRINT_QUEUE_ERR;
         return;
     }
-
-    while ((UART0->S1 & UART0_S1_RDRF_MASK) == 0)
-    {
-    };
 
     /* Add received byte to the item */
     QUEUE_itemAddByte(*top, UART0->D);
