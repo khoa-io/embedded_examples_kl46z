@@ -83,7 +83,7 @@ void UART_config(uint8_t uartx, uart_conf_t *conf)
         PORTA->PCR[2] |= PORT_PCR_MUX(2);
     }
 
-    if (conf->type && UART_TYPE_RECEIVER_MASK)
+    if (conf->type & UART_TYPE_RECEIVER_MASK)
     {
         /* Enable UART0_RX */
         PORTA->PCR[1] &= ~PORT_PCR_MUX_MASK;
@@ -129,7 +129,7 @@ void UART_config(uint8_t uartx, uart_conf_t *conf)
         : UART0_C3_TXINV(0);
 
     /* Configure the baud rate */
-    for (osr = 3; osr < 32; ++osr)
+    for (osr = 4; osr <= 32; ++osr)
     {
         sbr = UART_GET_SBR(SystemCoreClock, conf->baudRate, osr);
         baud = UART_BAUD_RATE_GEN(SystemCoreClock, sbr, osr);
@@ -202,6 +202,10 @@ void UART0_IRQHandler(void)
         PRINT_ERR;
         return;
     }
+
+    while ((UART0->S1 & UART0_S1_RDRF_MASK) == 0)
+    {
+    };
 
     /* Add received byte to the item */
     QUEUE_itemAddByte(*top, UART0->D);
