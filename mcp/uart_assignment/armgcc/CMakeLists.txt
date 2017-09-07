@@ -1,3 +1,8 @@
+get_filename_component(ProjectId ${CMAKE_CURRENT_SOURCE_DIR}/.. ABSOLUTE)
+get_filename_component(ProjectId ${ProjectId} NAME)
+string(REPLACE " " "_" ProjectId ${ProjectId})
+project(${ProjectId})
+
 INCLUDE(CMakeForceCompiler)
 
 # CROSS COMPILER SETTING
@@ -16,7 +21,6 @@ SET(CMAKE_STATIC_LIBRARY_SUFFIX)
 
 SET(CMAKE_EXECUTABLE_LIBRARY_PREFIX)
 SET(CMAKE_EXECUTABLE_LIBRARY_SUFFIX)
-
 
 # CURRENT DIRECTORY
 SET(ProjDirPath ${CMAKE_CURRENT_SOURCE_DIR})
@@ -86,8 +90,7 @@ ELSEIF(CMAKE_BUILD_TYPE MATCHES Release)
 ENDIF()
 
 # ADD_EXECUTABLE
-ADD_EXECUTABLE(exception_model
-    "${ProjDirPath}/../platform/utilities/src/fsl_misc_utilities.c"
+ADD_EXECUTABLE(${PROJECT_NAME}
     "${ProjDirPath}/../platform/devices/MKL46Z4/startup/gcc/startup_MKL46Z4.S"
     "${ProjDirPath}/../main.c"
     "${ProjDirPath}/../board.c"
@@ -96,35 +99,40 @@ ADD_EXECUTABLE(exception_model
     "${ProjDirPath}/../gpio.h"
     "${ProjDirPath}/../port.c"
     "${ProjDirPath}/../port.h"
-    "${ProjDirPath}/../platform/utilities/src/fsl_debug_console.c"
-    "${ProjDirPath}/../platform/utilities/inc/fsl_debug_console.h"
-    "${ProjDirPath}/../platform/utilities/src/print_scan.c"
-    "${ProjDirPath}/../platform/utilities/src/print_scan.h"
+    "${ProjDirPath}/../uart.c"
+    "${ProjDirPath}/../uart.h"
+    "${ProjDirPath}/../queue.c"
+    "${ProjDirPath}/../queue.h"
+    "${ProjDirPath}/../srec_reader.c"
+    "${ProjDirPath}/../srec_reader.h"
     "${ProjDirPath}/../platform/devices/MKL46Z4/startup/system_MKL46Z4.c"
     "${ProjDirPath}/../platform/devices/startup.c"
     "${ProjDirPath}/../platform/devices/startup.h"
 )
-SET_TARGET_PROPERTIES(exception_model PROPERTIES OUTPUT_NAME "exception_model.elf")
+SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "${PROJECT_NAME}.elf")
 
-TARGET_LINK_LIBRARIES(exception_model -Wl,--start-group)
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--start-group)
 # LIBRARIES
 # IF(CMAKE_BUILD_TYPE MATCHES Debug)
-#     TARGET_LINK_LIBRARIES(exception_model ${ProjDirPath}/../lib/ksdk_platform_lib/armgcc/KL46Z4/debug/libksdk_platform.a)
+#     TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${ProjDirPath}/../lib/ksdk_platform_lib/armgcc/KL46Z4/debug/libksdk_platform.a)
 # ELSEIF(CMAKE_BUILD_TYPE MATCHES Release)
-#     TARGET_LINK_LIBRARIES(exception_model ${ProjDirPath}/../lib/ksdk_platform_lib/armgcc/KL46Z4/release/libksdk_platform.a)
+#     TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${ProjDirPath}/../lib/ksdk_platform_lib/armgcc/KL46Z4/release/libksdk_platform.a)
 # ENDIF()
 
 # SYSTEM LIBRARIES
-TARGET_LINK_LIBRARIES(exception_model m)
-TARGET_LINK_LIBRARIES(exception_model c)
-TARGET_LINK_LIBRARIES(exception_model gcc)
-TARGET_LINK_LIBRARIES(exception_model nosys)
-TARGET_LINK_LIBRARIES(exception_model -Wl,--end-group)
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} m)
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} c)
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} gcc)
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} nosys)
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--end-group)
 
 # MAP FILE
-SET(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG}  -Xlinker -Map=debug/exception_model.map")
-SET(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE}  -Xlinker -Map=release/exception_model.map")
+SET(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG}  -Xlinker -Map=debug/${PROJECT_NAME}.map")
+SET(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE}  -Xlinker -Map=release/${PROJECT_NAME}.map")
 
 # BIN AND HEX
-ADD_CUSTOM_COMMAND(TARGET exception_model POST_BUILD COMMAND ${CMAKE_OBJCOPY} -Oihex ${EXECUTABLE_OUTPUT_PATH}/exception_model.elf ${EXECUTABLE_OUTPUT_PATH}/exception_model.hex)
-ADD_CUSTOM_COMMAND(TARGET exception_model POST_BUILD COMMAND ${CMAKE_OBJCOPY} -Obinary ${EXECUTABLE_OUTPUT_PATH}/exception_model.elf ${EXECUTABLE_OUTPUT_PATH}/exception_model.bin)
+ADD_CUSTOM_COMMAND(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_OBJCOPY} -Oihex ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}.elf ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}.hex)
+ADD_CUSTOM_COMMAND(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_OBJCOPY} -Obinary ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}.elf ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}.bin)
+
+# SREC
+ADD_CUSTOM_COMMAND(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_OBJCOPY} -Osrec ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}.elf ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}.srec)
