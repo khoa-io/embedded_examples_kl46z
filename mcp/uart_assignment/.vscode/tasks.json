@@ -88,9 +88,7 @@
                 "-Device",
                 "MKL46Z256XXX4",
                 "-If",
-                "JTAG",
-                "-JTAGConf",
-                "'-1,-1'",
+                "SWD",
                 "-Speed",
                 "auto"
             ],
