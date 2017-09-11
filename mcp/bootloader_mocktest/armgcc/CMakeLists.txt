@@ -105,6 +105,9 @@ ADD_EXECUTABLE(${PROJECT_NAME}
     "${ProjDirPath}/../queue.h"
     "${ProjDirPath}/../srec_reader.c"
     "${ProjDirPath}/../srec_reader.h"
+    "${ProjDirPath}/../queue.h"
+    "${ProjDirPath}/../Flash.c"
+    "${ProjDirPath}/../Flash.h"
     "${ProjDirPath}/../platform/devices/MKL46Z4/startup/system_MKL46Z4.c"
     "${ProjDirPath}/../platform/devices/startup.c"
     "${ProjDirPath}/../platform/devices/startup.h"
@@ -112,12 +115,6 @@ ADD_EXECUTABLE(${PROJECT_NAME}
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "${PROJECT_NAME}.elf")
 
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--start-group)
-# LIBRARIES
-# IF(CMAKE_BUILD_TYPE MATCHES Debug)
-#     TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${ProjDirPath}/../lib/ksdk_platform_lib/armgcc/KL46Z4/debug/libksdk_platform.a)
-# ELSEIF(CMAKE_BUILD_TYPE MATCHES Release)
-#     TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${ProjDirPath}/../lib/ksdk_platform_lib/armgcc/KL46Z4/release/libksdk_platform.a)
-# ENDIF()
 
 # SYSTEM LIBRARIES
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} m)
