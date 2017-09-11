@@ -50,14 +50,14 @@
 define symbol __ram_vector_table_size__ =  isdefinedsymbol(__ram_vector_table__) ? 0x00000100 : 0;
 define symbol __ram_vector_table_offset__ =  isdefinedsymbol(__ram_vector_table__) ? 0x000000FF : 0;
 
-define symbol m_interrupts_start       = 0x00000000;
-define symbol m_interrupts_end         = 0x000000FF;
+define symbol m_interrupts_start       = 0x0000A000;
+define symbol m_interrupts_end         = 0x0000A0FF;
 
-define symbol m_flash_config_start     = 0x00000400;
-define symbol m_flash_config_end       = 0x0000040F;
+define symbol m_flash_config_start     = 0x0000A400;
+define symbol m_flash_config_end       = 0x0000A40F;
 
-define symbol m_text_start             = 0x00000410;
-define symbol m_text_end               = 0x0003FFFF;
+define symbol m_text_start             = 0x0000A410;
+define symbol m_text_end               = 0x00049FFF;
 
 define symbol m_interrupts_ram_start   = 0x1FFFE000;
 define symbol m_interrupts_ram_end     = 0x1FFFE000 + __ram_vector_table_offset__;
