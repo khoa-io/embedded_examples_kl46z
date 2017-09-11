@@ -1,0 +1,108 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [{
+            "taskName": "build_debug",
+            "type": "shell",
+            "command": "${workspaceRoot}/armgcc/build_debug.sh",
+            "windows": {
+                "command": "${workspaceRoot}/armgcc/build_debug.bat"
+            },
+            "options": {
+                "cwd": "${workspaceRoot}/armgcc"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "dedicated"
+            }
+        },
+        {
+            "taskName": "build_release",
+            "type": "shell",
+            "command": "${workspaceRoot}/armgcc/build_release.sh",
+            "windows": {
+                "command": "${workspaceRoot}/armgcc/build_release.bat"
+            },
+            "options": {
+                "cwd": "${workspaceRoot}/armgcc"
+            },
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "dedicated"
+            }
+        },
+        {
+            "taskName": "build_all",
+            "type": "shell",
+            "command": "${workspaceRoot}/armgcc/build_all.sh",
+            "windows": {
+                "command": "${workspaceRoot}/armgcc/build_all.bat"
+            },
+            "options": {
+                "cwd": "${workspaceRoot}/armgcc"
+            },
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "dedicated"
+            }
+        },
+        {
+            "taskName": "clean",
+            "type": "shell",
+            "command": "${workspaceRoot}/armgcc/clean.sh",
+            "windows": {
+                "command": "${workspaceRoot}/armgcc/clean.bat"
+            },
+            "options": {
+                "cwd": "${workspaceRoot}/armgcc"
+            },
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "dedicated"
+            },
+            "problemMatcher": []
+        },
+        {
+            "taskName": "JLinkGDBServer",
+            "type": "shell",
+            "command": "${LINK_HOME}/JLinkGDBServer",
+            "args": [
+                "-select",
+                "usb",
+                "-Device",
+                "MKL46Z256XXX4",
+                "-If",
+                "SWD",
+                "-Speed",
+                "auto"
+            ],
+            "options": {
+                "cwd": "${workspaceRoot}/armgcc"
+            },
+            "group": "none",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "dedicated"
+            },
+            "problemMatcher": []
+        }
+    ]
+}
