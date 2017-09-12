@@ -7,6 +7,9 @@
     // words - list of words to be always considered correct
     "words": [
         "Bootloader",
+        "CCIF",
+        "FCCOB",
+        "FTFA",
         "GPIO",
         "GPIOA",
         "GPIOB",
@@ -35,6 +38,7 @@
         "SREC",
         "TDRE",
         "TXINV",
+        "VTOR",
         "igreen",
         "msbf",
         "uartx"

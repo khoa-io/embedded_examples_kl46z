@@ -1,4 +1,4 @@
-#if !defined (__FLASH_H__)
+#if !defined(__FLASH_H__)
 #define __FLASH_H__
 
 /*******************************************************************************
@@ -9,8 +9,8 @@
 /*******************************************************************************
  * Defines
  ******************************************************************************/
-#define CMD_PROGRAM_LONGWORD     (0x06)
-#define CMD_ERASE_FLASH_SECTOR   (0x09)
+#define CMD_PROGRAM_LONGWORD (0x06)
+#define CMD_ERASE_FLASH_SECTOR (0x09)
 
 /*******************************************************************************
  * API
@@ -32,7 +32,7 @@ uint32_t Read_FlashAddress(uint32_t Addr);
  * @return
  * return 1: if success
  */
-uint8_t Program_LongWord_8B(uint32_t Addr,uint8_t *Data);
+uint8_t Program_LongWord_8B(uint32_t Addr, uint8_t *Data);
 
 /*!
  * @brief
@@ -42,7 +42,7 @@ uint8_t Program_LongWord_8B(uint32_t Addr,uint8_t *Data);
  * @return
  * return 1: if success
  */
-uint8_t Program_LongWord(uint32_t Addr,uint32_t Data);
+uint8_t Program_LongWord(uint32_t Addr, uint32_t Data);
 
 /*!
  * @brief
@@ -57,9 +57,10 @@ uint8_t Erase_Sector(uint32_t Addr);
  * @brief
  * erase multi sectors in flash
  * @param Addr: address to erase
+ * @param Size: number of sectors will be erased
  * @return
  * return 1: if success
  */
-uint8_t Erase_Multi_Sector(uint32_t Addr,uint8_t Size);
+uint8_t Erase_Multi_Sector(uint32_t Addr, uint8_t Size);
 
 #endif

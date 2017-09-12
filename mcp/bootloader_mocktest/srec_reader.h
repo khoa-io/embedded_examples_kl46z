@@ -16,26 +16,34 @@ below */
 
 /* Return code by parsing function */
 typedef enum {
+    /* Parsed termination */
     e_parseStatus_done = 0U,
+    /* Parsed data */
     e_parseStatus_inprogress = 1U,
+    /* Parsed error */
     e_parseStatus_error = 2U,
-    e_parseStatus_undefined = 3U
+    /* Parsed unknown */
+    e_parseStatus_undefined = 3U,
+    /* Parsed header */
+    e_parseStatus_start = 4U,
 } parse_status_t;
 
 /* Parsed data */
-typedef struct
+struct parsed_dat
 {
     uint32_t address;
     uint8_t data[MAX_DATA_SIZE];
     uint8_t dataLength;
-} parse_data_struct_t;
+};
+
+typedef struct parsed_dat parsed_dat_t;
 
 /*******************************************************************************
  * API
  ******************************************************************************/
 
 /*!
- * @brief Parse SREC data and produce parse_data_struct_t.
+ * @brief Parse SREC data and produce parsed_dat_t.
  * See more at https://en.wikipedia.org/wiki/SREC_(file_format) and
  * https://upload.wikimedia.org/wikipedia/commons/f/f1/Motorola_SREC_Chart.png
  *
@@ -49,6 +57,6 @@ typedef struct
  * - e_parseStatus_done – when parsing S7 or 8, 9 line
  * - e_parseStatus_error – When error
  */
-parse_status_t parseData(uint8_t pInput[], parse_data_struct_t *pOutput);
+parse_status_t parseData(uint8_t pInput[], parsed_dat_t *pOutput);
 
 #endif /* _SREC_READER_H_ */

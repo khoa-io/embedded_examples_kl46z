@@ -1,5 +1,7 @@
 {
     "files.associations": {
-        "stddef.h": "c"
+        "*.rs": "rust",
+        "stddef.h": "c",
+        "srec_reader.h": "c"
     }
 }

@@ -25,6 +25,7 @@
 #include "uart.h"
 #include "queue.h"
 #include "srec_reader.h"
+#include "loader.h"
 
 /*******************************************************************************
  * Definitions
@@ -60,104 +61,19 @@ void checkSrecLine(uint8_t *line);
  */
 void init(void);
 
+/* Demo function. TODO remove when done */
+void demo(void);
+
 /*******************************************************************************
  * Code
  ******************************************************************************/
 
-void mainLoop(void)
+/* TODO remove when done */
+void demo(void)
 {
-    /* Buffers and temporary variables */
-    static uint8_t buff[MAX_RECORD_SIZE + 1] = { 0 };
-    /* Indexing on `buff` */
-    static uint16_t i = 0;
+    uint8_t i = 0;
 
-    /* Pop from bottom of queue */
-    queue_item_t *bot = NULL;
-    /* Indexing on `bot->dat` */
-    uint8_t j = 0;
-
-    /* Error code */
-    uint32_t rc = QUEUE_ERR_NONE;
-
-    if (QUEUE_isEmpty())
-    {
-        /* Data is not ready => abort */
-        return;
-    }
-
-    /* Data is ready! */
-
-    /* Get new item from the bottom of the queue */
-    rc = QUEUE_bot(&bot);
-    if (rc != QUEUE_ERR_NONE)
-    {
-        /* Cannot get new item => abort */
-        PRINT_QUEUE_ERR;
-        return;
-    }
-
-    /* Copy data from `bot->dat` to `buff` because a SREC line can lie on one
-     * or more items and/or an item can contain 2 parts of a SREC line. */
-    for (j = 0; j < bot->sz; ++j, ++i)
-    {
-        if (bot->dat[j] == '\r')
-        {
-            continue;
-        }
-        if (bot->dat[j] == '\n')
-        {
-            /* UART_sendArray(UART_0, buff, i);
-            UART_sendByte(UART_0, '\r');
-            UART_sendByte(UART_0, '\n'); */
-            i = 0;
-            checkSrecLine(buff);
-        }
-
-        buff[i] = bot->dat[j];
-    }
-
-    QUEUE_pop();
-}
-
-void checkSrecLine(uint8_t *line)
-{
-    parse_data_struct_t parsedData;
-    parse_status_t status = e_parseStatus_undefined;
-    status = parseData(line, &parsedData);
-
-    if (status == e_parseStatus_error)
-    {
-        PRINT_ERR;
-    }
-    else
-    {
-        PRINT_SUCCESS;
-    }
-}
-
-void init(void)
-{
-    /* Store configuration of UART0 for configuring UART0 */
-    uart_conf_t uartConf;
-
-    /* Configure UART0 */
-    uartConf.type = UART_TYPE_TRANSMITTER_MASK | UART_TYPE_RECEIVER_MASK;
-    uartConf.sz = 8;
-    uartConf.parityEnable = false;
-    uartConf.msbf = false;
-    uartConf.polarity = 0;
-    uartConf.baudRate = BAUD_RATE;
-
-    UART_enable(UART_0);
-    UART_config(UART_0, &uartConf);
-}
-
-int main(void)
-{
-    init();
-
-    uint8_t array[] = { 0, 1, 2, 3 };
-    uint8_t srec[190][95] = {
+    uint8_t srec[185][95] = {
         "S02B0000443A2F73636D2F6B686F616876314066736F66742E636F6D2E766E2F46525F454D425F484E31375F6C\r\n",
         "S113A00000600020E9A40000F9A40000F9A4000005\r\n",
         "S113A010000000000000000000000000000000003C\r\n",
@@ -343,7 +259,109 @@ int main(void)
         "S903A4E96F\r\n"
     };
 
-    UART_sendArray(UART_0, (uint8_t *)srec[0], 100);
+    if (!LOADER_preload())
+    {
+        return;
+    }
+
+    for (i = 0; i < 183; ++i)
+    {
+        checkSrecLine(srec[i]);
+    }
+
+    LOADER_runApp();
+}
+
+void checkSrecLine(uint8_t *line)
+{
+    parsed_dat_t parsedData;
+    parse_status_t status = e_parseStatus_undefined;
+    status = parseData(line, &parsedData);
+
+    if (status == e_parseStatus_inprogress)
+    {
+        LOADER_write(&parsedData);
+    }
+}
+
+void mainLoop(void)
+{
+    /* Buffers and temporary variables */
+    static uint8_t buff[MAX_RECORD_SIZE + 1] = { 0 };
+    /* Indexing on `buff` */
+    static uint16_t i = 0;
+
+    /* Pop from bottom of queue */
+    queue_item_t *bot = NULL;
+    /* Indexing on `bot->dat` */
+    uint8_t j = 0;
+
+    /* Error code */
+    uint32_t rc = QUEUE_ERR_NONE;
+
+    if (QUEUE_isEmpty())
+    {
+        /* Data is not ready => abort */
+        return;
+    }
+
+    /* Data is ready! */
+
+    /* Get new item from the bottom of the queue */
+    rc = QUEUE_bot(&bot);
+    if (rc != QUEUE_ERR_NONE)
+    {
+        /* Cannot get new item => abort */
+        PRINT_QUEUE_ERR;
+        return;
+    }
+
+    /* Copy data from `bot->dat` to `buff` because a SREC line can lie on one
+     * or more items and/or an item can contain 2 parts of a SREC line. */
+    for (j = 0; j < bot->sz; ++j, ++i)
+    {
+        if (bot->dat[j] == '\r')
+        {
+            continue;
+        }
+        if (bot->dat[j] == '\n')
+        {
+            /* UART_sendArray(UART_0, buff, i);
+            UART_sendByte(UART_0, '\r');
+            UART_sendByte(UART_0, '\n'); */
+            i = 0;
+            checkSrecLine(buff);
+        }
+
+        buff[i] = bot->dat[j];
+    }
+
+    QUEUE_pop();
+}
+
+void init(void)
+{
+    /* Store configuration of UART0 for configuring UART0 */
+    uart_conf_t uartConf;
+
+    /* Configure UART0 */
+    uartConf.type = UART_TYPE_TRANSMITTER_MASK | UART_TYPE_RECEIVER_MASK;
+    uartConf.sz = 8;
+    uartConf.parityEnable = false;
+    uartConf.msbf = false;
+    uartConf.polarity = 0;
+    uartConf.baudRate = BAUD_RATE;
+
+    UART_enable(UART_0);
+    UART_config(UART_0, &uartConf);
+}
+
+int main(void)
+{
+    init();
+
+    /* TODO Remove when done */
+    demo();
 
     while (1)
     {

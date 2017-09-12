@@ -47,7 +47,7 @@ static uint8_t hex2val(uint8_t ch)
     return retVal;
 }
 
-parse_status_t parseData(uint8_t pInput[], parse_data_struct_t *pOutput)
+parse_status_t parseData(uint8_t pInput[], parsed_dat_t *pOutput)
 {
     /* Return value */
     parse_status_t status = e_parseStatus_undefined;
@@ -82,7 +82,7 @@ parse_status_t parseData(uint8_t pInput[], parse_data_struct_t *pOutput)
     switch (srecType)
     {
     case 0:
-        status = e_parseStatus_inprogress;
+        status = e_parseStatus_start;
         pOutput->address = 0;
         pOutput->dataLength = count - 3;
 
@@ -155,8 +155,8 @@ parse_status_t parseData(uint8_t pInput[], parse_data_struct_t *pOutput)
     checksum = (hex2val(pInput[i]) << 4) + hex2val(pInput[i + 1]);
 
     /* Check valid checksum */
-    /* Calculate checksum from parse_data_struct_t::address and */
-    /* parse_data_struct_t::data */
+    /* Calculate checksum from parsed_dat_t::address and */
+    /* parsed_dat_t::data */
     for (i = 0; i < pOutput->dataLength + 4; ++i)
     {
         checkvalue += ((uint8_t *)pOutput)[i];
