@@ -2,6 +2,7 @@
     "files.associations": {
         "*.rs": "rust",
         "stddef.h": "c",
-        "srec_reader.h": "c"
+        "srec_reader.h": "c",
+        "mkl46z4.h": "c"
     }
 }
