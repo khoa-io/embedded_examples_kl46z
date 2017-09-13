@@ -124,12 +124,11 @@ void mainLoop(void)
         if (bot->dat[j] == '\n')
         {
             /* TODO */
-            /* UART_sendArray(UART_0, buff, i);
-            UART_sendByte(UART_0, '\r');
-            UART_sendByte(UART_0, '\n'); */
-
+            UART_sendArray(UART_0, buff, i);
+            UART_sendArray(UART_0, (uint8_t *)"\r\n", 2);
+            /* checkSrecLine(buff); */
             i = 0;
-            checkSrecLine(buff);
+            continue;
         }
 
         buff[i] = bot->dat[j];
@@ -151,7 +150,7 @@ void init(void)
     uartConf.polarity = 0;
     uartConf.baudRate = BAUD_RATE;
 
-    UART_enable(UART_0);
+    UART_init(UART_0);
     UART_config(UART_0, &uartConf);
 }
 

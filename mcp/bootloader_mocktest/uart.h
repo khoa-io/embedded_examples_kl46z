@@ -71,7 +71,7 @@ typedef struct uart_conf uart_conf_t;
  *
  * @param uartx UARTx. One of UART_0, UART_1, UART_2.
  */
-void UART_enable(uint8_t uartx);
+void UART_init(uint8_t uartx);
 
 /*!
  * @brief Configure the UART0 control registers for the desired data format.

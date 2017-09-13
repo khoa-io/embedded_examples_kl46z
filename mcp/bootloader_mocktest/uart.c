@@ -1,4 +1,5 @@
 #include <stddef.h>
+#include <stdbool.h>
 
 #include "MKL46Z4.h"
 #include "queue.h"
@@ -13,13 +14,48 @@
  * Definitions
  ******************************************************************************/
 
+/* Bit fields values */
+#define UART0_S1_TDRE_VAL (UART0->S1 & UART0_S1_TDRE_MASK)
+#define UART0_S1_TC_VAL (UART0->S1 & UART0_S1_TC_MASK)
+#define UART0_S1_RDRF_VAL (UART0->S1 & UART0_S1_RDRF_MASK)
+#define UART0_S1_IDLE_VAL (UART0->S1 & UART0_S1_IDLE_MASK)
+#define UART0_S1_OR_VAL (UART0->S1 & UART0_S1_OR_MASK)
+#define UART0_S1_NF_VAL (UART0->S1 & UART0_S1_NF_MASK)
+#define UART0_S1_FE_VAL (UART0->S1 & UART0_S1_FE_MASK)
+#define UART0_S1_PF_VAL (UART0->S1 & UART0_S1_PF_MASK)
+
+/* Debug error */
 #define PRINT_QUEUE_ERR UART_sendArray(UART_0, (uint8_t *)"QueueError\r\n", 12)
+#define PRINT_FE_ERR UART_sendArray(UART_0, (uint8_t *)"FrameError\r\n", 12)
 
 /*******************************************************************************
  * Macros
  ******************************************************************************/
 
+/* Get absolute value */
 #define ABS(v) ((v) >= 0 ? v : -v)
+
+/* Check if transmit data register is full */
+#define UART0_isTDatRegFull() (!UART0_S1_TDRE_VAL)
+/* Check if transmit data register is empty */
+#define UART0_isTDatRegEmpty() (UART0_S1_TDRE_VAL)
+
+/* Check if receive data register is full */
+#define UART0_isRDatRegFull() (UART0_S1_RDRF_VAL)
+/* Check if receive data register is empty */
+#define UART0_isRDatRegEmpty() (!UART0_S1_RDRF_VAL)
+
+/* Check if receive line becomes idle */
+#define UART0_isIdle() (UART0_S1_IDLE_VAL)
+
+/* Check if there is a framing error */
+#define UART0_isFrameErr() (UART0_S1_FE_VAL)
+
+/* Check if there is a receiver overrun error */
+#define UART0_isOverrun() (UART0_S1_OR_VAL)
+
+/* Clear FE register */
+#define UART0_clearFrameErr() (UART0->S1 |= UART0_S1_FE_MASK)
 
 /*******************************************************************************
  * Global variables
@@ -40,7 +76,7 @@ void UART0_IRQHandler(void);
  * Code
  ******************************************************************************/
 
-void UART_enable(uint8_t uartx)
+void UART_init(uint8_t uartx)
 {
     if (uartx != UART_0)
     {
@@ -55,10 +91,15 @@ void UART_enable(uint8_t uartx)
     SIM_SOPT2 |= SIM_SOPT2_UART0SRC(1);
 
     /* Disable UART0 before setting up configuration */
+
     /* Disable UART0_TX*/
     PORTA->PCR[2] &= ~PORT_PCR_MUX_MASK;
     /* Disable UART0_RX */
     PORTA->PCR[1] &= ~PORT_PCR_MUX_MASK;
+
+    /* Disable all features in UART0->C2 register */
+    UART0->C2 = 0;
+
     /* Disable interrupt */
     NVIC_DisableIRQ(UART0_IRQn);
     NVIC_ClearPendingIRQ(UART0_IRQn);
@@ -122,32 +163,33 @@ void UART_config(uint8_t uartx, uart_conf_t *conf)
     UART0->C2 |= (conf->type & UART_TYPE_RECEIVER_MASK) ? UART0_C2_RE(1)
                                                         : UART0_C2_RE(0);
     /* Enable receiver interrupt */
-    /* UART0->C2 |= (conf->type & UART_TYPE_RECEIVER_MASK) ? UART0_C2_RIE(1)
-                                                        : UART0_C2_RIE(0); */
+    UART0->C2 |= (conf->type & UART_TYPE_RECEIVER_MASK) ? UART0_C2_RIE(1)
+                                                        : UART0_C2_RIE(0);
 
     /* Enable UART0 after setting up configuration */
     if (conf->type & UART_TYPE_TRANSMITTER_MASK)
     {
         /* Enable UART0_TX*/
+        PORTA->PCR[2] &= ~PORT_PCR_MUX_MASK;
         PORTA->PCR[2] |= PORT_PCR_MUX(2);
     }
 
     if (conf->type & UART_TYPE_RECEIVER_MASK)
     {
         /* Enable UART0_RX */
+        PORTA->PCR[1] &= ~PORT_PCR_MUX_MASK;
         PORTA->PCR[1] |= PORT_PCR_MUX(2);
 
         /* Enable receiver interrupt */
         NVIC_ClearPendingIRQ(UART0_IRQn);
         NVIC_EnableIRQ(UART0_IRQn);
-        NVIC_ClearPendingIRQ(UART0_IRQn);
         NVIC_SetPriority(UART0_IRQn, 0);
     }
 }
 
 void UART_sendByte(uint8_t uartx, uint8_t b)
 {
-    while ((UART0->S1 & UART0_S1_TDRE_MASK) == 0)
+    while (UART0_isTDatRegFull())
     {
         /* Waiting here */
     };
@@ -175,7 +217,15 @@ void UART0_IRQHandler(void)
     /* Error code */
     uint32_t rc = QUEUE_ERR_NONE;
 
-    if ((UART0->S1 & UART0_S1_RDRF_MASK) == 0)
+    if (UART0_isFrameErr())
+    {
+        /* Framing Error => clear FE and RDRF then abort */
+        UART0_clearFrameErr();
+        rc = UART0->D;
+        return;
+    }
+
+    if (UART0_isRDatRegEmpty())
     {
         /* Not ready to receive => abort */
         return;
@@ -197,10 +247,10 @@ void UART0_IRQHandler(void)
     /* Add received byte to the item */
     QUEUE_itemAddByte(*top, UART0->D);
 
-    if (QUEUE_itemIsFull(*top) || (UART0->S1 & UART0_S1_IDLE_MASK))
+    if (QUEUE_itemIsFull(*top) || UART0_isIdle())
     {
         /* This item is full or receive line becomes idle
-         * => push to queue and release it */
+         * => push to queue and release the top item */
         QUEUE_push();
         top = NULL;
     }

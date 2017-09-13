@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#include "uart.h"
 #include "srec_reader.h"
 
 /*******************************************************************************
@@ -76,6 +77,8 @@ parse_status_t parseData(uint8_t pInput[], parsed_dat_t *pOutput)
     if (pInput[0] != 'S')
     {
         status = e_parseStatus_error;
+        /* TODO */
+        UART_sendArray(UART_0, (uint8_t *)"80\r\n", 4);
         return status;
     }
 
@@ -138,11 +141,15 @@ parse_status_t parseData(uint8_t pInput[], parsed_dat_t *pOutput)
         break;
 
     default:
+        /* TODO */
+        UART_sendArray(UART_0, (uint8_t *)"146\r\n", 5);
         status = e_parseStatus_error;
     }
 
     if (status == e_parseStatus_error)
     {
+        /* TODO */
+        UART_sendArray(UART_0, (uint8_t *)"153\r\n", 5);
         return status;
     }
 
@@ -164,6 +171,8 @@ parse_status_t parseData(uint8_t pInput[], parsed_dat_t *pOutput)
     checkvalue = ((uint8_t)~checkvalue) & 0xFF;
     if (checkvalue != checksum)
     {
+        /* TODO */
+        UART_sendArray(UART_0, (uint8_t *)"176\r\n", 5);
         status = e_parseStatus_error;
     }
 
