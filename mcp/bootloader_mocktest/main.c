@@ -250,7 +250,7 @@ void main(void)
 {
     init();
 
-    UART_sendArray(UART_0, (uint8_t *)"Noobloader v1.0\r\n", 17);
+    UART_sendArray(UART_0, (uint8_t *)"Noobloader v1.0 - A bootloader for FRDM-KL46Z\r\n", 47);
     UART_sendArray(UART_0, (uint8_t *)"Author: KhoaHV1\r\n", 17);
     UART_sendArray(UART_0, (uint8_t *)"Reset while pulling SW1 to run bootloader.\r\n", 44);
     UART_sendArray(UART_0, (uint8_t *)"Reset while pulling SW3 to remove app.\r\n", 40);

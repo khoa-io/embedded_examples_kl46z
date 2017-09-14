@@ -9,6 +9,7 @@
         "Bootloader",
         "CCIF",
         "FCCOB",
+        "FRDM",
         "FTFA",
         "GPIO",
         "GPIOA",
