@@ -82,27 +82,41 @@ void checkAndWrite(uint8_t *line)
         break;
 
     case e_parseStatus_start:
-        /* LOADER_preload(); */
+        UART_sendArray(UART_0, (uint8_t *)"Loading...\r\n", 12);
+        UART_sendArray(UART_0, (uint8_t *)"Be patience!\r\n", 14);
         break;
 
     case e_parseStatus_inprogress:
-        if (LOADER_write(&parsedData) != parsedData.dataLength)
+        if (savedStatus != e_parseStatus_start
+            && savedStatus != e_parseStatus_inprogress)
         {
             err = true;
-            UART_sendArray(UART_0, (uint8_t *)"Cannot write normally to flash!\r\n", 33);
+            UART_sendArray(UART_0, (uint8_t *)"Status error 1!\r\n", 17);
+            break;
         }
-        UART_sendArray(UART_0, (uint8_t *)"Received.\r\n", 11);
+        if (err)
+        {
+            UART_sendArray(UART_0, (uint8_t *)"Cannot load the app!\r\n", 21);
+            break;
+        }
         break;
 
     case e_parseStatus_done:
-        if (err)
+        if (savedStatus != e_parseStatus_inprogress)
         {
-            UART_sendArray(UART_0, (uint8_t *)"Cannot run the app!\r\n", 21);
+            err = true;
+            UART_sendArray(UART_0, (uint8_t *)"Status error 2!\r\n", 17);
             break;
         }
 
-        UART_sendArray(UART_0, (uint8_t *)"Bootloader will stop to run the app!\r\n", 38);
-        LOADER_runApp();
+        if (err)
+        {
+            UART_sendArray(UART_0, (uint8_t *)"Cannot load the app!\r\n", 21);
+            break;
+        }
+
+        UART_sendArray(UART_0, (uint8_t *)"Complete!\r\n", 11);
+        UART_sendArray(UART_0, (uint8_t *)"Push RESET to run the app.\r\n", 28);
         break;
     }
 
@@ -149,8 +163,6 @@ void mainLoop(void)
 
         if (bot->dat[j] == '\n')
         {
-            /* TODO */
-            /* UART_sendArray(UART_0, buff, i); */
             checkAndWrite(buff);
             i = 0;
             continue;
