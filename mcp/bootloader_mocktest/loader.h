@@ -14,7 +14,7 @@
 /* Starting address of the application */
 #define APP_START_ADDR (0x0000A000U)
 
-/* Size of the application in sectors */
+/* (Maximum) Size of the application in sectors */
 #define APP_SIZE (255U)
 
 /*******************************************************************************

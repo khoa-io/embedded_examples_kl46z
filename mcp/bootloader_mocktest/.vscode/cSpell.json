@@ -41,6 +41,7 @@
         "TXINV",
         "VTOR",
         "igreen",
+        "inprogress",
         "msbf",
         "uartx"
     ],

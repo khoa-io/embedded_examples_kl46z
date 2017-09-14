@@ -7,6 +7,7 @@
         "name": "Attach to gdbserver",
         "executable": "${workspaceRoot}/armgcc/debug/${workspaceRootFolderName}.elf",
         "target": ":2331",
+        "preLaunchTask": "build_debug",
         "remote": true,
         "autorun": [
             "monitor reset",

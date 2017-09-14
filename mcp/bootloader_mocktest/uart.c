@@ -25,8 +25,8 @@
 #define UART0_S1_PF_VAL (UART0->S1 & UART0_S1_PF_MASK)
 
 /* Debug error */
-#define PRINT_QUEUE_ERR UART_sendArray(UART_0, (uint8_t *)"QueueError\r\n", 12)
-#define PRINT_FE_ERR UART_sendArray(UART_0, (uint8_t *)"FrameError\r\n", 12)
+#define PRINT_QUEUE_ERR UART_sendArray(UART_0, (uint8_t *)"[uart.c]QueueError\r\n", 20)
+#define PRINT_FE_ERR UART_sendArray(UART_0, (uint8_t *)"[uart.c]FrameError\r\n", 20)
 
 /*******************************************************************************
  * Macros
@@ -165,6 +165,8 @@ void UART_config(uint8_t uartx, uart_conf_t *conf)
     /* Enable receiver interrupt */
     UART0->C2 |= (conf->type & UART_TYPE_RECEIVER_MASK) ? UART0_C2_RIE(1)
                                                         : UART0_C2_RIE(0);
+    /* Enable idle interrupt */
+    UART0->C2 |= UART0_C2_ILIE_MASK;
 
     /* Enable UART0 after setting up configuration */
     if (conf->type & UART_TYPE_TRANSMITTER_MASK)
@@ -216,6 +218,16 @@ void UART0_IRQHandler(void)
 
     /* Error code */
     uint32_t rc = QUEUE_ERR_NONE;
+
+    if (UART0_isIdle())
+    {
+        if (top != NULL)
+        {
+            /* Receive line becomes idle => push to queue and release item */
+            QUEUE_push();
+            top = NULL;
+        }
+    }
 
     if (UART0_isFrameErr())
     {

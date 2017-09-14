@@ -82,6 +82,9 @@
             "taskName": "JLinkGDBServer",
             "type": "shell",
             "command": "${JLINK_HOME}/JLinkGDBServer",
+            "windows": {
+                "command": "%JLINK_HOME%/JLinkGDBServerCL"
+            },
             "args": [
                 "-select",
                 "usb",
