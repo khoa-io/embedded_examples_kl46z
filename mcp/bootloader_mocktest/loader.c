@@ -17,12 +17,14 @@ bool LOADER_preload()
 
 void LOADER_runApp()
 {
+    entry_point_t appResetHandler = NULL;
+
     /* Re-locate vector table for the app */
     SCB->VTOR = APP_START_ADDR;
 
     /* Entry point of the application. The appResetHandler will copy vector
      * table to RAM so we don't have to do it */
-    void (*appResetHandler)(void) = (void (*)(void))(*((uint32_t *)0x0000A004U));
+    appResetHandler = (entry_point_t)(Read_FlashAddress(APP_ENTRY_ADDR));
 
     /* Start the app */
     appResetHandler();

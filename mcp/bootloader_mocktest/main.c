@@ -26,6 +26,7 @@
 #include "queue.h"
 #include "srec_reader.h"
 #include "loader.h"
+#include "Flash.h"
 
 /*******************************************************************************
  * Definitions
@@ -57,9 +58,47 @@ void checkAndWrite(uint8_t *line);
  */
 void init(void);
 
+/*!
+ * @brief Check if there is an application and run it.
+ */
+void checkApp(void);
+
 /*******************************************************************************
  * Code
  ******************************************************************************/
+
+void checkApp(void)
+{
+    uint32_t appResetHandler = 0;
+    uint8_t dat[8] = { 0 };
+
+    if (GPIO_Read(GPIOC, PIN_SW1) == 0)
+    {
+        /* SW1 hit => run bootloader instead of app */
+        /* Return to bootloader */
+        return;
+    }
+
+    if (GPIO_Read(GPIOC, PIN_SW3) == 0)
+    {
+        /* SW3 hit => remove app and return bootloader */
+        LOADER_preload();
+        UART_sendArray(UART_0, (uint8_t *)"App is removed!\r\n", 17);
+    }
+
+    appResetHandler = Read_FlashAddress(APP_ENTRY_ADDR);
+
+    if (appResetHandler == 0 || appResetHandler == 0xFFFFFFFF)
+    {
+        UART_sendArray(UART_0, (uint8_t *)"App is not available!\r\n", 23);
+        UART_sendArray(UART_0, (uint8_t *)"Please send app via UART.\r\n", 27);
+    }
+    else
+    {
+        UART_sendArray(UART_0, (uint8_t *)"Run app!\r\n", 10);
+        LOADER_runApp();
+    }
+}
 
 void checkAndWrite(uint8_t *line)
 {
@@ -68,7 +107,9 @@ void checkAndWrite(uint8_t *line)
     /* `err == true` if there is an error */
     static bool err = false;
 
+    /* Output parsed data */
     parsed_dat_t parsedData;
+    /* Status of current parsing */
     parse_status_t status = e_parseStatus_undefined;
 
     status = parseData(line, &parsedData);
@@ -82,23 +123,33 @@ void checkAndWrite(uint8_t *line)
         break;
 
     case e_parseStatus_start:
-        UART_sendArray(UART_0, (uint8_t *)"Loading...\r\n", 12);
-        UART_sendArray(UART_0, (uint8_t *)"Be patience!\r\n", 14);
+        UART_sendArray(UART_0, (uint8_t *)"Loading ", 9);
+        UART_sendArray(UART_0, parsedData.data, parsedData.dataLength);
+        UART_sendArray(UART_0, (uint8_t *)". Be patience!\r\n", 16);
         break;
 
     case e_parseStatus_inprogress:
-        if (savedStatus != e_parseStatus_start
-            && savedStatus != e_parseStatus_inprogress)
+        if (!(savedStatus == e_parseStatus_start || savedStatus == e_parseStatus_inprogress))
         {
             err = true;
             UART_sendArray(UART_0, (uint8_t *)"Status error 1!\r\n", 17);
             break;
         }
+
         if (err)
         {
-            UART_sendArray(UART_0, (uint8_t *)"Cannot load the app!\r\n", 21);
+            UART_sendArray(UART_0, (uint8_t *)"Cannot load the app!\r\n", 22);
             break;
         }
+
+        __disable_irq();
+        if (LOADER_write(&parsedData) != parsedData.dataLength)
+        {
+            err = true;
+            UART_sendArray(UART_0, (uint8_t *)"Cannot load the app!\r\n", 22);
+        }
+        __enable_irq();
+
         break;
 
     case e_parseStatus_done:
@@ -111,12 +162,13 @@ void checkAndWrite(uint8_t *line)
 
         if (err)
         {
-            UART_sendArray(UART_0, (uint8_t *)"Cannot load the app!\r\n", 21);
+            UART_sendArray(UART_0, (uint8_t *)"Cannot load the app!\r\n", 22);
             break;
         }
 
         UART_sendArray(UART_0, (uint8_t *)"Complete!\r\n", 11);
         UART_sendArray(UART_0, (uint8_t *)"Push RESET to run the app.\r\n", 28);
+
         break;
     }
 
@@ -174,6 +226,7 @@ void mainLoop(void)
 
 void init(void)
 {
+    /* Initialize UART0 */
     /* Store configuration of UART0 for configuring UART0 */
     uart_conf_t uartConf;
 
@@ -187,16 +240,24 @@ void init(void)
 
     UART_init(UART_0);
     UART_config(UART_0, &uartConf);
+
+    /* Initialize SW1 and SW3 */
+    GPIO_Init(PORT_C, PIN_SW1, INPUT);
+    GPIO_Init(PORT_C, PIN_SW3, INPUT);
 }
 
-int main(void)
+void main(void)
 {
     init();
+
+    UART_sendArray(UART_0, (uint8_t *)"Noobloader v1.0\r\n", 17);
+    UART_sendArray(UART_0, (uint8_t *)"Author: KhoaHV1\r\n", 17);
+    UART_sendArray(UART_0, (uint8_t *)"Reset while pulling SW1 to run bootloader.\r\n", 44);
+    UART_sendArray(UART_0, (uint8_t *)"Reset while pulling SW3 to remove app.\r\n", 40);
+    checkApp();
 
     while (1)
     {
         mainLoop();
     };
-
-    return 0;
 }
