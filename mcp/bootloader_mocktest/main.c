@@ -31,7 +31,7 @@
  * Definitions
  ******************************************************************************/
 
-#define BAUD_RATE (115200U)
+#define BAUD_RATE (4800U)
 
 /*******************************************************************************
  * Global variables
@@ -86,11 +86,11 @@ void checkAndWrite(uint8_t *line)
         break;
 
     case e_parseStatus_inprogress:
-        /*         if (LOADER_write(&parsedData) != parsedData.dataLength)
+        if (LOADER_write(&parsedData) != parsedData.dataLength)
         {
             err = true;
             UART_sendArray(UART_0, (uint8_t *)"Cannot write normally to flash!\r\n", 33);
-        } */
+        }
         UART_sendArray(UART_0, (uint8_t *)"Received.\r\n", 11);
         break;
 
@@ -102,7 +102,7 @@ void checkAndWrite(uint8_t *line)
         }
 
         UART_sendArray(UART_0, (uint8_t *)"Bootloader will stop to run the app!\r\n", 38);
-        /* LOADER_runApp(); */
+        LOADER_runApp();
         break;
     }
 

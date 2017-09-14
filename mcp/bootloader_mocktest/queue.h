@@ -29,7 +29,7 @@
 /* Maximum size of the item's data array queue_item::dat and maximum value of
  * queue_item::sz */
 #define QUEUE_ITEM_MAX_SIZE (64)
-#define QUEUE_MAX_ITEM_NUM (128)
+#define QUEUE_MAX_ITEM_NUM (64)
 
 /*******************************************************************************
  * Structures and Types

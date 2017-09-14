@@ -57,7 +57,7 @@ define symbol m_flash_config_start     = 0x00000400;
 define symbol m_flash_config_end       = 0x0000040F;
 
 define symbol m_text_start             = 0x00000410;
-define symbol m_text_end               = 0x0003FFFF;
+define symbol m_text_end               = 0x00009FFF;
 
 define symbol m_interrupts_ram_start   = 0x1FFFE000;
 define symbol m_interrupts_ram_end     = 0x1FFFE000 + __ram_vector_table_offset__;
