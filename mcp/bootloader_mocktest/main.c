@@ -32,7 +32,7 @@
  * Definitions
  ******************************************************************************/
 
-#define BAUD_RATE (4800U)
+#define BAUD_RATE (19200U)
 
 /*******************************************************************************
  * Global variables
@@ -133,22 +133,21 @@ void checkAndWrite(uint8_t *line)
         {
             err = true;
             UART_sendArray(UART_0, (uint8_t *)"Status error 1!\r\n", 17);
-            break;
         }
 
         if (err)
         {
-            UART_sendArray(UART_0, (uint8_t *)"Cannot load the app!\r\n", 22);
+            UART_sendArray(UART_0, (uint8_t *)"Parsed error!\r\n", 15);
+            LOADER_resetState();
             break;
         }
 
-        __disable_irq();
         if (LOADER_write(&parsedData) != parsedData.dataLength)
         {
             err = true;
-            UART_sendArray(UART_0, (uint8_t *)"Cannot load the app!\r\n", 22);
+            UART_sendArray(UART_0, (uint8_t *)"Parsed error!\r\n", 15);
+            LOADER_resetState();
         }
-        __enable_irq();
 
         break;
 
@@ -157,11 +156,11 @@ void checkAndWrite(uint8_t *line)
         {
             err = true;
             UART_sendArray(UART_0, (uint8_t *)"Status error 2!\r\n", 17);
-            break;
         }
 
         if (err)
         {
+            LOADER_preload();
             UART_sendArray(UART_0, (uint8_t *)"Cannot load the app!\r\n", 22);
             break;
         }

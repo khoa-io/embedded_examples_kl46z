@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#include "MKL46Z4.h"
 #include "board.h"
 #include "srec_reader.h"
 #include "Flash.h"
@@ -12,7 +13,20 @@
 
 bool LOADER_preload()
 {
-    return Erase_Multi_Sector(APP_START_ADDR, APP_SIZE);
+    uint8_t rc = 0;
+
+    __disable_irq();
+    rc = Erase_Multi_Sector(APP_START_ADDR, APP_SIZE);
+    __enable_irq();
+
+    return rc;
+}
+
+void LOADER_resetState()
+{
+    __disable_irq();
+    Erase_Multi_Sector(APP_START_ADDR, 1);
+    __enable_irq();
 }
 
 void LOADER_runApp()
@@ -21,6 +35,9 @@ void LOADER_runApp()
 
     /* Re-locate vector table for the app */
     SCB->VTOR = APP_START_ADDR;
+
+    /* Change main SP with value of the app's vector table offset 0 */
+    __set_MSP(APP_SP);
 
     /* Entry point of the application. The appResetHandler will copy vector
      * table to RAM so we don't have to do it */
@@ -40,6 +57,7 @@ uint8_t LOADER_write(parsed_dat_t *dat)
         return i;
     }
 
+    __disable_irq();
     for (; i < dat->dataLength; i += 4)
     {
         if (!Program_LongWord_8B(dat->address + i, dat->data + i))
@@ -47,6 +65,7 @@ uint8_t LOADER_write(parsed_dat_t *dat)
             break;
         }
     }
+    __enable_irq();
 
     /* Return number of wrote bytes */
     return i;
